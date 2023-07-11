@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="images">
+    <file>space1.jpg</file>
+    <file>space.jpg</file>
+  </qresource>
+</RCC>
