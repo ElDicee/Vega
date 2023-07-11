@@ -30,4 +30,3 @@ def installFiles():
 
 if __name__ == "__main__":
     installedFiles = checkVegaRoamingFolder()
-    #CREATE MAIN WINDOW

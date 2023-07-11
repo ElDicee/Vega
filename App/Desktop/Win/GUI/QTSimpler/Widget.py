@@ -24,4 +24,3 @@ def applyLayoutTo(w, layout, id: str = None):
 class LayeredWidget(QWidget):
     def __init__(self):
         super(LayeredWidget, self).__init__()
-        
