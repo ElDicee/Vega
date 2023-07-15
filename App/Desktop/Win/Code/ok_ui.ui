@@ -424,7 +424,7 @@ QPushButton:hover{
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res.qrc">
+                   <iconset>
                     <normaloff>:/icons_w/res/feather (1)/user.svg</normaloff>:/icons_w/res/feather (1)/user.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -462,7 +462,7 @@ QPushButton:hover{
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res.qrc">
+                   <iconset>
                     <normaloff>:/icons_w/res/feather (1)/gitlab.svg</normaloff>:/icons_w/res/feather (1)/gitlab.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -500,7 +500,7 @@ QPushButton:hover{
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset resource="res.qrc">
+                   <iconset>
                     <normaloff>:/icons_w/res/feather (1)/settings.svg</normaloff>:/icons_w/res/feather (1)/settings.svg</iconset>
                   </property>
                   <property name="iconSize">
@@ -561,7 +561,7 @@ QPushButton:hover{
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="canvas" native="true">
+        <widget class="QStackedWidget" name="canvas">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -578,6 +578,7 @@ QPushButton:hover{
           <string notr="true">background-color: rgb(232, 236, 247);
 border-radius: 10px;</string>
          </property>
+         <widget class="QWidget" name="HomePage" native="true"/>
         </widget>
        </item>
       </layout>

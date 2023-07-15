@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
-    <height>557</height>
+    <width>545</width>
+    <height>578</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,12 +21,18 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow{
-border-image: url(:/img/C:/Users/izanp/Downloads/aurora.jpg);
+	border-image: url(:/img/images/aurora.jpg);
 border-radius: 20px;
-border: 5px solid rgb(0, 170, 255);
+border: 2px solid rgb(0, 170, 255);
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="styleSheet">
     <string notr="true">QWidget#centralwidget{
 background-color: rgba(22, 60, 84, 50);
@@ -58,7 +64,7 @@ background-color: rgba(22, 60, 84, 50);
       </property>
       <property name="maximumSize">
        <size>
-        <width>0</width>
+        <width>16777215</width>
         <height>16777215</height>
        </size>
       </property>
@@ -119,7 +125,6 @@ background-color: rgba(61, 61, 61, 100);
                </property>
                <property name="font">
                 <font>
-                 <family>CoffeCake</family>
                  <pointsize>48</pointsize>
                  <bold>false</bold>
                 </font>
@@ -143,7 +148,6 @@ color: rgb(255, 255, 255);</string>
                </property>
                <property name="font">
                 <font>
-                 <family>Simple Kind Of Girl</family>
                  <pointsize>16</pointsize>
                 </font>
                </property>
@@ -187,7 +191,6 @@ background-color: rgba(61, 61, 61, 100);
                </property>
                <property name="font">
                 <font>
-                 <family>Yu Gothic UI</family>
                  <pointsize>11</pointsize>
                  <bold>true</bold>
                 </font>
@@ -288,66 +291,6 @@ QScrollBar::add-line{
                </item>
                <item>
                 <property name="text">
-                 <string>asfasf</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>asfasf</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>asf</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>asf</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>asf</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>asf</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>ads</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>afas</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>sfas</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>fas</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>f</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Nuevo elemento</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
                  <string>Català</string>
                 </property>
                </item>
@@ -374,7 +317,6 @@ QScrollBar::add-line{
                </property>
                <property name="font">
                 <font>
-                 <family>Microsoft YaHei</family>
                  <pointsize>10</pointsize>
                  <bold>true</bold>
                 </font>
@@ -399,6 +341,7 @@ background-color: rgba(255, 255, 255, 0);</string>
                <property name="styleSheet">
                 <string notr="true">QPushButton{
 background-color: transparent;
+border-radius: 10px;
 }
 
 QPushButton:hover{
@@ -409,7 +352,7 @@ background-color: rgba(188, 217, 230, 180)
                 <string/>
                </property>
                <property name="icon">
-                <iconset resource="res.qrc">
+                <iconset>
                  <normaloff>:/icons_w/res/feather (1)/arrow-right-circle.svg</normaloff>:/icons_w/res/feather (1)/arrow-right-circle.svg</iconset>
                </property>
                <property name="iconSize">
@@ -445,7 +388,7 @@ background-color: rgba(188, 217, 230, 180)
       </property>
       <property name="maximumSize">
        <size>
-        <width>16777215</width>
+        <width>0</width>
         <height>16777215</height>
        </size>
       </property>
@@ -469,7 +412,6 @@ background-color: rgba(188, 217, 230, 180)
             </property>
             <property name="font">
              <font>
-              <family>OCR A Extended</family>
               <pointsize>16</pointsize>
              </font>
             </property>
@@ -488,7 +430,6 @@ background-color: rgba(188, 217, 230, 180)
            <widget class="QLabel" name="label_6">
             <property name="font">
              <font>
-              <family>Simple Kind Of Girl</family>
               <pointsize>14</pointsize>
              </font>
             </property>
@@ -565,7 +506,7 @@ background-color: rgba(188, 217, 230, 180)
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="res.qrc">
+             <iconset>
               <normaloff>:/icons_w/res/feather (1)/arrow-left-circle.svg</normaloff>:/icons_w/res/feather (1)/arrow-left-circle.svg</iconset>
             </property>
             <property name="iconSize">
@@ -582,7 +523,7 @@ background-color: rgba(188, 217, 230, 180)
              <string/>
             </property>
             <property name="icon">
-             <iconset resource="res.qrc">
+             <iconset>
               <normaloff>:/icons_w/res/feather (1)/arrow-right-circle.svg</normaloff>:/icons_w/res/feather (1)/arrow-right-circle.svg</iconset>
             </property>
             <property name="iconSize">

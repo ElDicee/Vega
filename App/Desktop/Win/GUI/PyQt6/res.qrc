@@ -576,6 +576,6 @@
     <file>res/feather (1)/zoom-out.svg</file>
   </qresource>
   <qresource prefix="img">
-    <file>C:/Users/izanp/Downloads/aurora.jpg</file>
+    <file>images/aurora.jpg</file>
   </qresource>
 </RCC>

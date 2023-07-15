@@ -9,7 +9,6 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 
-
 class TreeFileExplorer(QtWidgets.QMainWindow):
     
     def __init__(self):
@@ -123,8 +122,8 @@ class TreeFileExplorer(QtWidgets.QMainWindow):
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
         if self.dragging:  #
-            self.mainwin.move(self.mainwin.pos().x().real + (event.pos().x().real - self.moving_offset.x().real),
-                              self.mainwin.pos().y().real + (event.pos().y().real - self.moving_offset.y().real))
+            self.move(self.pos().x().real + (event.pos().x().real - self.moving_offset.x().real),
+                              self.pos().y().real + (event.pos().y().real - self.moving_offset.y().real))
             event.accept()
 
 if __name__ == "__main__":

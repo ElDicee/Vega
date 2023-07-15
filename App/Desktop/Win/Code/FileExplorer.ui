@@ -36,7 +36,6 @@
      </property>
      <property name="font">
       <font>
-       <family>Yu Gothic UI</family>
        <pointsize>10</pointsize>
        <bold>true</bold>
       </font>
@@ -75,7 +74,6 @@ padding: 2px;
      </property>
      <property name="font">
       <font>
-       <family>Yu Gothic UI</family>
        <pointsize>10</pointsize>
        <bold>true</bold>
       </font>

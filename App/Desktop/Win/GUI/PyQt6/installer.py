@@ -12,18 +12,23 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(441, 557)
+        MainWindow.resize(545, 578)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setStyleSheet("QMainWindow{\n"
-"border-image: url(:/img/C:/Users/izanp/Downloads/aurora.jpg);\n"
+"    border-image: url(:/img/images/aurora.jpg);\n"
 "border-radius: 20px;\n"
-"border: 5px solid rgb(0, 170, 255);\n"
+"border: 2px solid rgb(0, 170, 255);\n"
 "}")
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.centralwidget.sizePolicy().hasHeightForWidth())
+        self.centralwidget.setSizePolicy(sizePolicy)
         self.centralwidget.setStyleSheet("QWidget#centralwidget{\n"
 "background-color: rgba(22, 60, 84, 50);\n"
 "}")
@@ -38,7 +43,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.langContainer.sizePolicy().hasHeightForWidth())
         self.langContainer.setSizePolicy(sizePolicy)
-        self.langContainer.setMaximumSize(QtCore.QSize(0, 16777215))
+        self.langContainer.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.langContainer.setStyleSheet("QWidget#langContainer{\n"
 "    background-color: rgba(61, 61, 61, 0);\n"
 "}")
@@ -72,7 +77,6 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("CoffeCake")
         font.setPointSize(48)
         font.setBold(False)
         self.label.setFont(font)
@@ -87,7 +91,6 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
         self.label_2.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("Simple Kind Of Girl")
         font.setPointSize(16)
         self.label_2.setFont(font)
         self.label_2.setStyleSheet("background-color: rgba(255, 255, 255, 0);\n"
@@ -116,7 +119,6 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
         self.label_3.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("Yu Gothic UI")
         font.setPointSize(11)
         font.setBold(True)
         self.label_3.setFont(font)
@@ -194,18 +196,6 @@ class Ui_MainWindow(object):
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
         self.verticalLayout_5.addWidget(self.comboBox)
         self.verticalLayout_3.addWidget(self.widget_8, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
         self.widget_7 = QtWidgets.QWidget(parent=self.widget_4)
@@ -219,7 +209,6 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
         self.label_4.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("Microsoft YaHei")
         font.setPointSize(10)
         font.setBold(True)
         self.label_4.setFont(font)
@@ -257,7 +246,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.pathcontainer.sizePolicy().hasHeightForWidth())
         self.pathcontainer.setSizePolicy(sizePolicy)
         self.pathcontainer.setMinimumSize(QtCore.QSize(0, 0))
-        self.pathcontainer.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.pathcontainer.setMaximumSize(QtCore.QSize(0, 16777215))
         self.pathcontainer.setStyleSheet("QWidget#pathcontainer{\n"
 "    background-color: rgba(61, 61, 61, 80);\n"
 "    border-radius: 10px;\n"
@@ -276,7 +265,6 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.label_5.sizePolicy().hasHeightForWidth())
         self.label_5.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("OCR A Extended")
         font.setPointSize(16)
         self.label_5.setFont(font)
         self.label_5.setStyleSheet("color: rgb(255, 255, 255);")
@@ -285,7 +273,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addWidget(self.label_5)
         self.label_6 = QtWidgets.QLabel(parent=self.widget)
         font = QtGui.QFont()
-        font.setFamily("Simple Kind Of Girl")
         font.setPointSize(14)
         self.label_6.setFont(font)
         self.label_6.setAcceptDrops(False)
@@ -363,20 +350,8 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "Language"))
         self.comboBox.setPlaceholderText(_translate("MainWindow", "Choose your language"))
         self.comboBox.setItemText(0, _translate("MainWindow", "English"))
-        self.comboBox.setItemText(1, _translate("MainWindow", "asfasf"))
-        self.comboBox.setItemText(2, _translate("MainWindow", "asfasf"))
-        self.comboBox.setItemText(3, _translate("MainWindow", "asf"))
-        self.comboBox.setItemText(4, _translate("MainWindow", "asf"))
-        self.comboBox.setItemText(5, _translate("MainWindow", "asf"))
-        self.comboBox.setItemText(6, _translate("MainWindow", "asf"))
-        self.comboBox.setItemText(7, _translate("MainWindow", "ads"))
-        self.comboBox.setItemText(8, _translate("MainWindow", "afas"))
-        self.comboBox.setItemText(9, _translate("MainWindow", "sfas"))
-        self.comboBox.setItemText(10, _translate("MainWindow", "fas"))
-        self.comboBox.setItemText(11, _translate("MainWindow", "f"))
-        self.comboBox.setItemText(12, _translate("MainWindow", "Nuevo elemento"))
-        self.comboBox.setItemText(13, _translate("MainWindow", "Català"))
-        self.comboBox.setItemText(14, _translate("MainWindow", "Español"))
+        self.comboBox.setItemText(1, _translate("MainWindow", "Català"))
+        self.comboBox.setItemText(2, _translate("MainWindow", "Español"))
         self.label_4.setText(_translate("MainWindow", "Can you now understand me? Well, let\'s jump right in!"))
         self.label_5.setText(_translate("MainWindow", "Where should we install Vega?"))
         self.label_6.setText(_translate("MainWindow", "Please, select a valid path to the folder you want us to install Vega"))
