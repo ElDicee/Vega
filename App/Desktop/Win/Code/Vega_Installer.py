@@ -1,8 +1,7 @@
 import os
 import sys
 
-import pyside.installer as installer
-import pyside.ok_ui as vega
+import App.Desktop.Win.Code.installer as installer
 from PySide6.QtWidgets import QApplication
 
 ORIGIN_VEGA_FOLDER_NAME = ".vega"

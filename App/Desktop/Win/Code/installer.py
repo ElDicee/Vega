@@ -30,7 +30,9 @@ class Installer(QMainWindow):
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
         self.setStyleSheet(u"QMainWindow{\n"
-                                 "	border-image: url(:/img/images/aurora.jpg);\n"
+                                 "	border-image: url(./res/images/galaxy.jpg);\n"
+                                "	background-size: 10% 10%;\n"
+                                "filter: blur(120px);\n"
                                  "border-radius: 20px;\n"
                                  "border: 2px solid rgb(0, 170, 255);\n"
                                  "}")
