@@ -167,7 +167,7 @@ class Ui_MainWindow(object):
 "    padding: 5px;\n"
 "    border-bottom-right-radius: 10px;\n"
 "    border-top-right-radius: 10px;\n"
-"    image: url(:/icons_w/res/feather (1)/arrow-down-circle.svg);\n"
+"    image: url(:/icons_w/res/Feather_white/arrow-down-circle.svg);\n"
 "}\n"
 "QComboBox::hover {\n"
 "    background-color: rgba(194, 212, 229, 130);\n"
@@ -186,10 +186,10 @@ class Ui_MainWindow(object):
 "    border-radius: 5px;\n"
 "}\n"
 "QScrollBar::sub-line{\n"
-"    image: url(:/icons_w/res/feather (1)/arrow-up.svg);\n"
+"    image: url(:/icons_w/res/Feather_white/arrow-up.svg);\n"
 "}\n"
 "QScrollBar::add-line{\n"
-"    image: url(:/icons_w/res/feather (1)/arrow-down.svg);\n"
+"    image: url(:/icons_w/res/Feather_white/arrow-down.svg);\n"
 "}")
         self.comboBox.setCurrentText("")
         self.comboBox.setObjectName("comboBox")
@@ -231,7 +231,7 @@ class Ui_MainWindow(object):
 "}")
         self.pushButton.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons_w/res/feather (1)/arrow-right-circle.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap(":/icons_w/res/Feather_white/arrow-right-circle.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton.setIcon(icon)
         self.pushButton.setIconSize(QtCore.QSize(32, 32))
         self.pushButton.setObjectName("pushButton")
@@ -315,7 +315,7 @@ class Ui_MainWindow(object):
         self.pushButton_2 = QtWidgets.QPushButton(parent=self.widget_2)
         self.pushButton_2.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons_w/res/feather (1)/arrow-left-circle.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/icons_w/res/Feather_white/arrow-left-circle.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QtCore.QSize(32, 32))
         self.pushButton_2.setObjectName("pushButton_2")

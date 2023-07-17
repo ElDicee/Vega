@@ -83,7 +83,7 @@ class Ui_Form(object):
 "padding: 2px;\n"
 "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/feather (1)/folder.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons_w/res/Feather_white/folder.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.browsebtn.setIcon(icon)
         self.browsebtn.setIconSize(QSize(20, 20))
 

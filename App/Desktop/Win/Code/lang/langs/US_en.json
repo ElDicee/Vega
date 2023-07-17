@@ -1,0 +1,25 @@
+{
+  "Installer": {
+    "lang_choosing": {
+      "welcome": "Welcome to Vega",
+      "lang_selection": "- Please, select your language! -",
+      "selector_title": "Language",
+      "button_text": "Can you understand me? Well, let's jump right in!"
+    },
+    "path_selector": {
+      "title": "Where should we install Vega?",
+      "instruction": "Please, select a valid path to the folder you want us to install Vega"
+    }
+  },
+  "CustomWidgets": {
+    "FileExplorer": {
+      "browse_button": "Browse",
+      "TreeBrowser": {
+        "WindowTitle": "Browsing...",
+        "cancel_btn": "Cancel",
+        "disks_btn": "Move to Disks",
+        "select_btn": "Select"
+      }
+    }
+  }
+}

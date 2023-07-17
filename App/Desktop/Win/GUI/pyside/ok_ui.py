@@ -138,7 +138,7 @@ class Ui_MainWindow(object):
         self.label.setSizePolicy(sizePolicy5)
         self.label.setMinimumSize(QSize(25, 25))
         self.label.setMaximumSize(QSize(25, 25))
-        self.label.setStyleSheet(u"image: url(:/icons_w/res/feather (1)/user.svg);")
+        self.label.setStyleSheet(u"image: url(:/icons_w/res/Feather_white/user.svg);")
         self.label.setTextFormat(Qt.PlainText)
         self.label.setScaledContents(True)
 
@@ -235,7 +235,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(126, 135, 162);\n"
 "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/feather (1)/user.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons_w/res/Feather_white/user.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton.setIcon(icon)
         self.pushButton.setIconSize(QSize(32, 32))
 
@@ -253,7 +253,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(126, 135, 162);\n"
 "}")
         icon1 = QIcon()
-        icon1.addFile(u":/icons_w/res/feather (1)/gitlab.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/icons_w/res/Feather_white/gitlab.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QSize(32, 32))
 
@@ -271,7 +271,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(126, 135, 162);\n"
 "}")
         icon2 = QIcon()
-        icon2.addFile(u":/icons_w/res/feather (1)/settings.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/icons_w/res/Feather_white/settings.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_3.setIcon(icon2)
         self.pushButton_3.setIconSize(QSize(32, 32))
 

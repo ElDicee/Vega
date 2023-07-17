@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from os import environ
+
 from PySide6 import QtGui, QtCore
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
                             QMetaObject, QObject, QPoint, QRect,
@@ -10,7 +12,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QSizePolicy, QVBoxLayout,
                                QWidget)
+import FileExplorer
 
+def usefont(id, size, num=0):
+    return QFont(QFontDatabase.applicationFontFamilies(id)[num], size)
 
 class Installer(QMainWindow):
 
@@ -29,10 +34,12 @@ class Installer(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setStyleSheet(u"QMainWindow{\n"
-                                 "	border-image: url(./res/images/galaxy.jpg);\n"
-                                "	background-size: 10% 10%;\n"
-                                "filter: blur(120px);\n"
+                                "background-color: rgba(255,255,255, 255);"
+                                 "border-image: url(./res/images/galaxy.jpg);\n"
+                                "filter: blur(10px);\n"
                                  "border-radius: 20px;\n"
                                  "border: 2px solid rgb(0, 170, 255);\n"
                                  "}")
@@ -44,7 +51,8 @@ class Installer(QMainWindow):
         sizePolicy1.setHeightForWidth(self.centralwidget.sizePolicy().hasHeightForWidth())
         self.centralwidget.setSizePolicy(sizePolicy1)
         self.centralwidget.setStyleSheet(u"QWidget#centralwidget{\n"
-                                         "background-color: rgba(22, 60, 84, 50);\n"
+                                         "background-color: rgba(22, 60, 84, 190);\n"
+                                         "border-radius: 10px;"
                                          "}")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setSpacing(0)
@@ -62,6 +70,45 @@ class Installer(QMainWindow):
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.widget_10 = QWidget(self.langContainer)
+        self.widget_10.setObjectName(u"widget_10")
+        self.widget_10.setMinimumSize(QSize(0, 60))
+        self.widget_10.setMaximumSize(QSize(16777215, 60))
+        self.horizontalLayout_5 = QHBoxLayout(self.widget_10)
+        self.horizontalLayout_5.setSpacing(0)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.widget_11 = QWidget(self.widget_10)
+        self.widget_11.setObjectName(u"widget_11")
+        self.horizontalLayout_6 = QHBoxLayout(self.widget_11)
+        self.horizontalLayout_6.setSpacing(0)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalLayout_6.setContentsMargins(0, 0, 10, 0)
+        self.exitBtn = QPushButton(self.widget_11)
+        self.exitBtn.setObjectName(u"exitBtn")
+        sizePolicy.setHeightForWidth(self.exitBtn.sizePolicy().hasHeightForWidth())
+        self.exitBtn.setSizePolicy(sizePolicy)
+        self.exitBtn.setMinimumSize(QSize(40, 40))
+        self.exitBtn.setMaximumSize(QSize(40, 40))
+        self.exitBtn.setStyleSheet(u"QPushButton{\n"
+                                   "border-radius: 18px;\n"
+                                   "}\n"
+                                   "\n"
+                                   "QPushButton:hover{\n"
+                                   "	background-color: rgb(211, 222, 253);\n"
+                                   "}")
+        icon = QIcon()
+        icon.addFile(u"./res/icons/Feather_white/x-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.exitBtn.setIcon(icon)
+        self.exitBtn.setIconSize(QSize(32, 32))
+
+        self.horizontalLayout_6.addWidget(self.exitBtn)
+
+        self.horizontalLayout_5.addWidget(self.widget_11, 0, Qt.AlignRight)
+
+        self.verticalLayout.addWidget(self.widget_10)
+
         self.widget_4 = QWidget(self.langContainer)
         self.widget_4.setObjectName(u"widget_4")
         sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
@@ -180,7 +227,7 @@ class Installer(QMainWindow):
                                     "	border-bottom-right-radius: 10px;\n"
                                     "	border-top-right-radius: 10px;\n"
                                     ""
-                                    "	image: url(:/icons_w/res/feather (1)/arrow-down-circle.svg);\n"
+                                    "	image: url(./res/icons/Feather_white/arrow-down-circle.svg);\n"
                                     "}\n"
                                     "QComboBox::hover {\n"
                                     "    background-color: rgba(194, 212, 229, 130);\n"
@@ -199,10 +246,10 @@ class Installer(QMainWindow):
                                     "	border-radius: 5px;\n"
                                     "}\n"
                                     "QScrollBar::sub-line{\n"
-                                    "	image: url(:/icons_w/res/feather (1)/arrow-up.svg);\n"
+                                    "	image: url(./res/icons/Feather_white/arrow-up.svg);\n"
                                     "}\n"
                                     "QScrollBar::add-line{\n"
-                                    "	image: url(:/icons_w/res/feather (1)/arrow-down.svg);\n"
+                                    "	image: url(./res/icons/Feather_white/arrow-down.svg);\n"
                                     "}")
 
         self.verticalLayout_5.addWidget(self.comboBox)
@@ -231,17 +278,19 @@ class Installer(QMainWindow):
 
         self.pushButton = QPushButton(self.widget_7)
         self.pushButton.setObjectName(u"pushButton")
-        sizePolicy.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(self.exitBtn.sizePolicy().hasHeightForWidth())
         self.pushButton.setSizePolicy(sizePolicy)
+        self.pushButton.setMinimumSize(QSize(40, 40))
+        self.pushButton.setMaximumSize(QSize(40, 40))
         self.pushButton.setStyleSheet(u"QPushButton{\n"
-                                      "background-color: transparent;\n"
-                                      "}\n"
-                                      "\n"
-                                      "QPushButton:hover{\n"
-                                      "background-color: rgba(188, 217, 230, 180)\n"
-                                      "}")
+                                   "border-radius: 18px;\n"
+                                   "}\n"
+                                   "\n"
+                                   "QPushButton:hover{\n"
+                                   "	background-color: rgb(211, 222, 253);\n"
+                                   "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/feather (1)/arrow-right-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"./res/icons/Feather_white/arrow-right-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton.setIcon(icon)
         self.pushButton.setIconSize(QSize(32, 32))
 
@@ -303,8 +352,8 @@ class Installer(QMainWindow):
         self.widget_3.setObjectName(u"widget_3")
         self.horizontalLayout_4 = QHBoxLayout(self.widget_3)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.widget_9 = QWidget(self.widget_3)
-        self.widget_9.setObjectName(u"widget_9")
+        self.widget_9 = FileExplorer.FileExplorerWidget(environ.get('ProgramFiles'))
+        self.widget_9.setObjectName(u"explorer")
         sizePolicy4.setHeightForWidth(self.widget_9.sizePolicy().hasHeightForWidth())
         self.widget_9.setSizePolicy(sizePolicy4)
         self.widget_9.setMinimumSize(QSize(30, 50))
@@ -329,7 +378,7 @@ class Installer(QMainWindow):
         self.pushButton_2 = QPushButton(self.widget_2)
         self.pushButton_2.setObjectName(u"pushButton_2")
         icon1 = QIcon()
-        icon1.addFile(u":/icons_w/res/feather (1)/arrow-left-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u"./res/icons/Feather_white/arrow-left-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QSize(32, 32))
 
@@ -361,13 +410,26 @@ class Installer(QMainWindow):
         QMetaObject.connectSlotsByName(self)
 
         self.pushButton.clicked.connect(lambda: self.switchWindow(self.langContainer, self.pathcontainer))
+        self.pushButton_2.clicked.connect(lambda: self.switchWindow(self.pathcontainer, self.langContainer))
+        self.pushButton_3.clicked.connect(lambda: self.switchWindow(self.pathcontainer, self.widget_3))
+        self.exitBtn.clicked.connect(self.close)
+        self.comboBox.currentIndexChanged.connect(self.change_language)
 
     # setupUi
 
+
     def retranslateUi(self):
-        self.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+
+        PLANET_COMIC = QFontDatabase.addApplicationFont("./res/Fonts/PlanetComic.ttf")
+        STAR_CARTOON = QFontDatabase.addApplicationFont("./res/Fonts/StarCartoon.ttf")
+        WELCOME_HOME = QFontDatabase.addApplicationFont("./res/Fonts/WelcomeHome.otf")
+
+        self.setWindowTitle(QCoreApplication.translate("MainWindow", u"Vega Installer", None))
+        self.label.setFont(usefont(PLANET_COMIC, 32))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Welcome to Vega", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Please, select your language!", None))
+        #self.label_2.setFont(usefont(WELCOME_HOME, 26))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"- Please, select your language! -", None))
+        self.label_3.setFont(usefont(STAR_CARTOON, 10))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Language", None))
         self.comboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"English", None))
         self.comboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Catal\u00e0", None))
@@ -401,6 +463,9 @@ class Installer(QMainWindow):
             self.move(self.pos().x().real + (event.pos().x().real - self.moving_offset.x().real),
                       self.pos().y().real + (event.pos().y().real - self.moving_offset.y().real))
             event.accept()
+
+    def change_language(self, index):
+        self.comboBox.itemText(index)
 
     @classmethod
     def switchWindow(cls, current:QWidget, new:QWidget):

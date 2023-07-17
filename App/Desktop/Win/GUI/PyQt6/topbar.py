@@ -38,7 +38,7 @@ class Ui_Topbar(object):
         self.ToggleSlideMenuBtn.setMaximumSize(QtCore.QSize(25, 25))
         self.ToggleSlideMenuBtn.setStyleSheet("QPushButton#ToggleSlideMenuBtn{\n"
 "border-radius: 10px;\n"
-"    image: url(:/icons_w/C:/Users/izanp/Downloads/feather (1)/menu.svg);\n"
+"    image: url(:/icons_w/C:/Users/izanp/Downloads/Feather_white/menu.svg);\n"
 "background-color: rgb(34, 37, 44);\n"
 "}\n"
 "\n"
@@ -49,7 +49,7 @@ class Ui_Topbar(object):
 "}")
         self.ToggleSlideMenuBtn.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons_w/res/feather (1)/menu.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap(":/icons_w/res/Feather_white/menu.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.ToggleSlideMenuBtn.setIcon(icon)
         self.ToggleSlideMenuBtn.setObjectName("ToggleSlideMenuBtn")
         self.horizontalLayout_3.addWidget(self.ToggleSlideMenuBtn)

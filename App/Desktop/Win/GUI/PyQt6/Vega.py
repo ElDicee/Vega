@@ -52,7 +52,7 @@ class Topbar(QtWidgets.QWidget):
                                               "}")
         self.ToggleSlideMenuBtn.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("./res/feather (1)/corner-up-left.svg"), QtGui.QIcon.Mode.Normal,
+        icon.addPixmap(QtGui.QPixmap("./res/Feather_white/corner-up-left.svg"), QtGui.QIcon.Mode.Normal,
                        QtGui.QIcon.State.Off)
         self.ToggleSlideMenuBtn.setIcon(icon)
         self.ToggleSlideMenuBtn.setObjectName("ToggleSlideMenuBtn")
@@ -166,11 +166,11 @@ class Topbar(QtWidgets.QWidget):
         icon = QtGui.QIcon()
         if self.slidebar.width() <= 0:
             nw = 240
-            icon.addPixmap(QtGui.QPixmap("./res/feather (1)/corner-up-left.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+            icon.addPixmap(QtGui.QPixmap("./res/Feather_white/corner-up-left.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
             self.ToggleSlideMenuBtn.setIcon(icon)
         else:
             nw = 0
-            icon.addPixmap(QtGui.QPixmap("./res/feather (1)/menu.svg"), QtGui.QIcon.Mode.Normal,
+            icon.addPixmap(QtGui.QPixmap("./res/Feather_white/menu.svg"), QtGui.QIcon.Mode.Normal,
                            QtGui.QIcon.State.Off)
             self.ToggleSlideMenuBtn.setIcon(icon)
 
@@ -394,7 +394,7 @@ class Vega_UI(QtWidgets.QMainWindow):
         self.label.setSizePolicy(sizePolicy)
         self.label.setMinimumSize(QtCore.QSize(25, 25))
         self.label.setMaximumSize(QtCore.QSize(25, 25))
-        self.label.setStyleSheet("image: url(./res/feather (1)/user.svg);")
+        self.label.setStyleSheet("image: url(./res/Feather_white/user.svg);")
         self.label.setText("")
         self.label.setTextFormat(QtCore.Qt.TextFormat.PlainText)
         self.label.setScaledContents(True)
@@ -489,7 +489,7 @@ class Vega_UI(QtWidgets.QMainWindow):
                                       "}")
         self.pushButton.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("./res/feather (1)/user.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("./res/Feather_white/user.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton.setIcon(icon)
         self.pushButton.setIconSize(QtCore.QSize(32, 32))
         self.pushButton.setObjectName("pushButton")
@@ -506,7 +506,7 @@ class Vega_UI(QtWidgets.QMainWindow):
                                         "}")
         self.pushButton_2.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("./res/feather (1)/gitlab.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon1.addPixmap(QtGui.QPixmap("./res/Feather_white/gitlab.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QtCore.QSize(32, 32))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -523,7 +523,7 @@ class Vega_UI(QtWidgets.QMainWindow):
                                         "}")
         self.pushButton_3.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("./res/feather (1)/tool.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon2.addPixmap(QtGui.QPixmap("./res/Feather_white/tool.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton_3.setIcon(icon2)
         self.pushButton_3.setIconSize(QtCore.QSize(32, 32))
         self.pushButton_3.setObjectName("pushButton_3")

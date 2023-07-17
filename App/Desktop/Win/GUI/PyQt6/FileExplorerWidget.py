@@ -82,7 +82,7 @@ class FileBrowserWidget(QtWidgets.QWidget):
                                      "padding: 2px;\n"
                                      "}")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("/res/feather (1)/folder.svg"), QtGui.QIcon.Mode.Normal,
+        icon.addPixmap(QtGui.QPixmap("/res/Feather_white/folder.svg"), QtGui.QIcon.Mode.Normal,
                        QtGui.QIcon.State.Off)
         self.browsebtn.setIcon(icon)
         self.browsebtn.setIconSize(QtCore.QSize(20, 20))

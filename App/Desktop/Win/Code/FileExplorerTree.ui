@@ -10,6 +10,12 @@
     <height>800</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -74,7 +80,7 @@ padding: 0px;
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="desktopBtn">
+       <widget class="QPushButton" name="topButton">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -82,7 +88,7 @@ padding: 0px;
          </size>
         </property>
         <property name="text">
-         <string>Move To Desktop</string>
+         <string>Move to Disks</string>
         </property>
        </widget>
       </item>
@@ -125,7 +131,9 @@ background: transparent;
       <item>
        <widget class="QTreeView" name="treeView">
         <property name="styleSheet">
-         <string notr="true">border: 2px solid rgb(19, 148, 207);</string>
+         <string notr="true">QTreeView{
+border: 2px solid rgb(19, 148, 207);
+}</string>
         </property>
        </widget>
       </item>

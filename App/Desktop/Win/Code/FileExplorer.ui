@@ -99,8 +99,8 @@ padding: 2px;
       <string>Buscar</string>
      </property>
      <property name="icon">
-      <iconset resource="res.qrc">
-       <normaloff>:/icons_w/res/feather (1)/folder.svg</normaloff>:/icons_w/res/feather (1)/folder.svg</iconset>
+      <iconset resource="reso.qrc">
+       <normaloff>:/icon/res/icons/Feather_white/folder.svg</normaloff>:/icon/res/icons/Feather_white/folder.svg</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -113,7 +113,7 @@ padding: 2px;
   </layout>
  </widget>
  <resources>
-  <include location="res.qrc"/>
+  <include location="reso.qrc"/>
  </resources>
  <connections/>
 </ui>

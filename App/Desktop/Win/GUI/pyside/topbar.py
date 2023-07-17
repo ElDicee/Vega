@@ -58,7 +58,7 @@ class Ui_Topbar(object):
 "	background-color: rgb(102, 111, 132);\n"
 "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/feather (1)/menu.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons_w/res/Feather_white/menu.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.ToggleSlideMenuBtn.setIcon(icon)
 
         self.horizontalLayout_3.addWidget(self.ToggleSlideMenuBtn)

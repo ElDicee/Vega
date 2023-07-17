@@ -179,7 +179,7 @@ class Ui_MainWindow(object):
 "	border-bottom-right-radius: 10px;\n"
 "	border-top-right-radius: 10px;\n"
 ""
-                        "	image: url(:/icons_w/res/feather (1)/arrow-down-circle.svg);\n"
+                        "	image: url(:/icons_w/res/Feather_white/arrow-down-circle.svg);\n"
 "}\n"
 "QComboBox::hover {\n"
 "    background-color: rgba(194, 212, 229, 130);\n"
@@ -198,10 +198,10 @@ class Ui_MainWindow(object):
 "	border-radius: 5px;\n"
 "}\n"
 "QScrollBar::sub-line{\n"
-"	image: url(:/icons_w/res/feather (1)/arrow-up.svg);\n"
+"	image: url(:/icons_w/res/Feather_white/arrow-up.svg);\n"
 "}\n"
 "QScrollBar::add-line{\n"
-"	image: url(:/icons_w/res/feather (1)/arrow-down.svg);\n"
+"	image: url(:/icons_w/res/Feather_white/arrow-down.svg);\n"
 "}")
 
         self.verticalLayout_5.addWidget(self.comboBox)
@@ -241,7 +241,7 @@ class Ui_MainWindow(object):
 "background-color: rgba(188, 217, 230, 180)\n"
 "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/feather (1)/arrow-right-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons_w/res/Feather_white/arrow-right-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton.setIcon(icon)
         self.pushButton.setIconSize(QSize(32, 32))
 
@@ -334,7 +334,7 @@ class Ui_MainWindow(object):
         self.pushButton_2 = QPushButton(self.widget_2)
         self.pushButton_2.setObjectName(u"pushButton_2")
         icon1 = QIcon()
-        icon1.addFile(u":/icons_w/res/feather (1)/arrow-left-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/icons_w/res/Feather_white/arrow-left-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QSize(32, 32))
 
