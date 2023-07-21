@@ -10,13 +10,21 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
                                QSizePolicy, QWidget)
 
+from enum import Enum
+
+
+class PinType(Enum):
+    INPUT_PIN = "in"
+    OUTPUT_PIN = "out"
+    EXEC_FLOW_PIN = "exec"
+
 
 class Pin(QWidget):
 
-    def __init__(self, outpin: bool = False, valuename: str = "Value", **kwargs):
+    def __init__(self, type: PinType = PinType.INPUT_PIN, valuename: str = "Value", **kwargs):
         super(Pin, self).__init__(**kwargs)
         self.valuename = valuename
-        self.outpin = outpin
+        self.type = type
         self.setupUi()
 
     def setupUi(self):
@@ -56,30 +64,30 @@ class Pin(QWidget):
         icon.addFile(u"./res/icons/Feather_white/chevrons-right.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.contactPin.setIcon(icon)
 
-        self.pinlabel = QLabel(self)
-        self.pinlabel.setObjectName(u"pinlabel")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.pinlabel.sizePolicy().hasHeightForWidth())
-        self.pinlabel.setSizePolicy(sizePolicy2)
-        font = QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        self.pinlabel.setFont(font)
-        self.pinlabel.setScaledContents(True)
-        self.pinlabel.setWordWrap(False)
-        self.pinlabel.setIndent(-1)
+        if not self.type == PinType.EXEC_FLOW_PIN:
+            self.pinlabel = QLabel(self)
+            self.pinlabel.setObjectName(u"pinlabel")
+            sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+            sizePolicy2.setHorizontalStretch(0)
+            sizePolicy2.setVerticalStretch(0)
+            sizePolicy2.setHeightForWidth(self.pinlabel.sizePolicy().hasHeightForWidth())
+            self.pinlabel.setSizePolicy(sizePolicy2)
+            font = QFont()
+            font.setPointSize(10)
+            font.setBold(True)
+            self.pinlabel.setFont(font)
+            self.pinlabel.setScaledContents(True)
+            self.pinlabel.setWordWrap(False)
+            self.pinlabel.setIndent(-1)
 
-        if self.outpin:
-            self.horizontalLayout.addWidget(self.pinlabel, 0, Qt.AlignRight)
-
-            self.horizontalLayout.addWidget(self.contactPin)
+            if self.type == PinType.OUTPUT_PIN:
+                self.horizontalLayout.addWidget(self.pinlabel, 0, Qt.AlignRight)
+                self.horizontalLayout.addWidget(self.contactPin)
+            elif self.type == PinType.INPUT_PIN:
+                self.horizontalLayout.addWidget(self.contactPin)
+                self.horizontalLayout.addWidget(self.pinlabel)
         else:
-
             self.horizontalLayout.addWidget(self.contactPin)
-
-            self.horizontalLayout.addWidget(self.pinlabel)
 
         self.retranslateUi()
 
@@ -90,7 +98,8 @@ class Pin(QWidget):
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.contactPin.setText("")
-        self.pinlabel.setText(QCoreApplication.translate("Form", self.valuename, None))
+        if not self.type == PinType.EXEC_FLOW_PIN:
+            self.pinlabel.setText(QCoreApplication.translate("Form", self.valuename, None))
 
     # retranslateUi
 

@@ -10,7 +10,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
                            QPalette, QPixmap, QRadialGradient, QTransform, QEnterEvent)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QSizePolicy,
                                QVBoxLayout, QWidget)
-from NodePin import Pin as np
+from NodePin import Pin, PinType
 import enum
 
 
@@ -28,6 +28,7 @@ class Node(QWidget):
         self.function = None
         self.name = name
         self.node_type = node_type
+        self.border_color = [232, 236, 247]
 
         self.setupUi()
 
@@ -37,7 +38,7 @@ class Node(QWidget):
         self.resize(313, 384)
         self.setStyleSheet(u"QWidget#Node{\n"
                            "border-radius: 20px;\n"
-                           "background-color: rgb(232, 236, 247);\n"
+                           f"background-color: rgb({self.border_color[0]},{self.border_color[1]},{self.border_color[2]});\n"
                            "border - color: rgb(0, 170, 255);\n"
                            "border-width: 3px;\n"
                            "}")
@@ -71,6 +72,30 @@ class Node(QWidget):
         self.horizontalLayout.addWidget(self.titlecont2)
 
         self.verticalLayout.addWidget(self.titlecont)
+
+        if self.node_type == NodeType.EXECUTION:
+            self.exec_spacepin = QWidget(self)
+            self.exec_spacepin.setObjectName(u"exec_spacepin")
+            sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(self.exec_spacepin.sizePolicy().hasHeightForWidth())
+            self.exec_spacepin.setSizePolicy(sizePolicy)
+            self.exec_spacepin.setMinimumSize(QSize(0, 40))
+            self.exec_spacepin.setMaximumSize(QSize(16777215, 40))
+            self.horizontalLayout_4 = QHBoxLayout(self.exec_spacepin)
+            self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+            self.exec_in_pin = Pin(type=PinType.EXEC_FLOW_PIN, valuename="exec_in", parent=self.exec_spacepin)
+            self.exec_in_pin.setObjectName(u"exec_in")
+
+            self.horizontalLayout_4.addWidget(self.exec_in_pin, 0, Qt.AlignLeft)
+
+            self.exec_out_pin = Pin(type=PinType.EXEC_FLOW_PIN, valuename="exec_out", parent=self.exec_spacepin)
+            self.exec_out_pin.setObjectName(u"exec_out")
+
+            self.horizontalLayout_4.addWidget(self.exec_out_pin, 0, Qt.AlignRight)
+
+            self.verticalLayout.addWidget(self.exec_spacepin)
 
         self.customzone = QWidget(self)
         self.customzone.setObjectName(u"customzone")
@@ -139,22 +164,21 @@ class Node(QWidget):
 
     def addInputPin(self, name):
         self.input_pins.update({name: None})
-        self.verticalLayout_2.addWidget(np(valuename=name, parent=self.widget_4))
+        self.verticalLayout_2.addWidget(Pin(valuename=name, parent=self.widget_4))
 
     def addOutputPin(self, name):
         self.output_pins.update({name: None})
-        self.verticalLayout_3.addWidget(np(outpin=True, valuename=name, parent=self.widget_5))
+        self.verticalLayout_3.addWidget(Pin(type=PinType.OUTPUT_PIN, valuename=name, parent=self.widget_5))
 
     def setFunction(self, func):
         self.function = func
 
     def run(self):
-        self.output_pins = self.function(self.input_pins, self.output_pins)
+        self.function(self.input_pins, self.output_pins)
 
 
 def suma(inp, outp):
     outp.update({"Result": {inp["Num1"] + inp["Num2"]}})
-    return outp
 
 
 if __name__ == "__main__":
