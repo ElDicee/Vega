@@ -12,31 +12,37 @@ from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+                           QFont, QFontDatabase, QGradient, QIcon,
+                           QImage, QKeySequence, QLinearGradient, QPainter,
+                           QPalette, QPixmap, QRadialGradient, QTransform, QMouseEvent)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
     QSizePolicy, QWidget)
 
-class Ui_Topbar(object):
-    def setupUi(self, Topbar):
-        if not Topbar.objectName():
-            Topbar.setObjectName(u"Topbar")
-        Topbar.resize(744, 43)
+class Topbar_Widget(QWidget):
+
+    def __init__(self, father):
+        super(Topbar_Widget, self).__init__()
+        self.dragging = False
+        self.moving_offset = QPoint()
+        self.father = father
+        self.setupUi()
+
+    def setupUi(self):
+        self.setObjectName(u"Topbar")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Topbar.sizePolicy().hasHeightForWidth())
-        Topbar.setSizePolicy(sizePolicy)
-        Topbar.setMinimumSize(QSize(300, 43))
-        Topbar.setMaximumSize(QSize(16777215, 43))
-        Topbar.setStyleSheet(u"QWidget#Topbar{\n"
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.setMinimumSize(QSize(947, 43))
+        self.setMaximumSize(QSize(16777215, 43))
+        self.setStyleSheet(u"QWidget#Topbar{\n"
 "background-color: rgb(34, 37, 44);\n"
 "border-radius: 10px;\n"
 "}")
-        self.horizontalLayout = QHBoxLayout(Topbar)
+        self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.widget = QWidget(Topbar)
+        self.widget = QWidget(self)
         self.widget.setObjectName(u"widget")
         self.widget.setStyleSheet(u"")
         self.horizontalLayout_3 = QHBoxLayout(self.widget)
@@ -58,7 +64,7 @@ class Ui_Topbar(object):
 "	background-color: rgb(102, 111, 132);\n"
 "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/Feather_white/menu.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"./res/icons/Feather_white/menu.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.ToggleSlideMenuBtn.setIcon(icon)
 
         self.horizontalLayout_3.addWidget(self.ToggleSlideMenuBtn)
@@ -80,7 +86,7 @@ class Ui_Topbar(object):
 
         self.horizontalLayout.addWidget(self.widget, 0, Qt.AlignLeft)
 
-        self.widget_2 = QWidget(Topbar)
+        self.widget_2 = QWidget(self)
         self.widget_2.setObjectName(u"widget_2")
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
@@ -157,13 +163,19 @@ class Ui_Topbar(object):
         self.horizontalLayout.addWidget(self.widget_2, 0, Qt.AlignRight)
 
 
-        self.retranslateUi(Topbar)
+        self.retranslateUi()
 
-        QMetaObject.connectSlotsByName(Topbar)
+        QMetaObject.connectSlotsByName(self)
+
+        self.closeBtn.clicked.connect(self.father.close)
+        self.expandBtn.clicked.connect(self.maximization)
+        self.minBtn.clicked.connect(self.father.showMinimized)
+        self.ToggleSlideMenuBtn.clicked.connect(self.toggleSlideMenu)
+
     # setupUi
 
-    def retranslateUi(self, Topbar):
-        Topbar.setWindowTitle(QCoreApplication.translate("Topbar", u"Form", None))
+    def retranslateUi(self):
+        self.setWindowTitle(QCoreApplication.translate("Topbar", u"Form", None))
         self.ToggleSlideMenuBtn.setText("")
         self.user_person_img.setText("")
         self.user_name.setText(QCoreApplication.translate("Topbar", u"PERSON NAME", None))
@@ -172,3 +184,34 @@ class Ui_Topbar(object):
         self.closeBtn.setText("")
     # retranslateUi
 
+    def maximization(self):
+        if self.father.isMaximized():
+            self.father.showNormal()
+        else:
+            self.father.showMaximized()
+
+    def toggleSlideMenu(self):
+        if self.father.slideWidg.maximumWidth() > 0:
+            self.father.slideWidg.setMaximumWidth(0)
+        else:
+            self.father.slideWidg.setMaximumWidth(240)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragging = True
+            self.moving_offset = event.pos().toPointF().toPoint()
+            event.accept()
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.dragging = False
+            event.accept()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self.dragging:  #
+            self.father.move(self.father.pos().x().real + (event.pos().x().real - self.moving_offset.x().real),
+                      self.father.pos().y().real + (event.pos().y().real - self.moving_offset.y().real))
+            event.accept()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        self.maximization()

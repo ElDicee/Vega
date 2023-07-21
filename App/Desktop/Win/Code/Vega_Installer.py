@@ -1,7 +1,7 @@
 import os
 import sys
 
-import App.Desktop.Win.Code.installer as installer
+import installer
 from PySide6.QtWidgets import QApplication
 
 ORIGIN_VEGA_FOLDER_NAME = ".vega"

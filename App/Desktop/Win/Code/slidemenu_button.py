@@ -17,21 +17,24 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QSizePolicy,
     QWidget)
-import res_rc
 
-class Ui_Button(object):
-    def setupUi(self, Button):
-        if not Button.objectName():
-            Button.setObjectName(u"Button")
-        Button.resize(240, 50)
+class Ui_Button(QWidget):
+    
+    def __init__(self):
+        super(Ui_Button, self).__init__()
+    
+    def setupUi(self):
+        if not self.objectName():
+            self.setObjectName(u"Button")
+        self.resize(240, 50)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Button.sizePolicy().hasHeightForWidth())
-        Button.setSizePolicy(sizePolicy)
-        Button.setMinimumSize(QSize(240, 50))
-        Button.setMaximumSize(QSize(240, 50))
-        Button.setStyleSheet(u"QWidget{\n"
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.setMinimumSize(QSize(240, 50))
+        self.setMaximumSize(QSize(240, 50))
+        self.setStyleSheet(u"QWidget{\n"
 "background-color: rgb(56, 60, 72);\n"
 "border-radius: 10px;\n"
 "}\n"
@@ -39,9 +42,9 @@ class Ui_Button(object):
 "QWidget:hover{\n"
 "	background-color: rgb(144, 155, 186);\n"
 "}")
-        self.horizontalLayout = QHBoxLayout(Button)
+        self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.itgstatusindicator = QWidget(Button)
+        self.itgstatusindicator = QWidget(self)
         self.itgstatusindicator.setObjectName(u"itgstatusindicator")
         sizePolicy.setHeightForWidth(self.itgstatusindicator.sizePolicy().hasHeightForWidth())
         self.itgstatusindicator.setSizePolicy(sizePolicy)
@@ -52,7 +55,7 @@ class Ui_Button(object):
 
         self.horizontalLayout.addWidget(self.itgstatusindicator)
 
-        self.label = QLabel(Button)
+        self.label = QLabel(self)
         self.label.setObjectName(u"label")
         font = QFont()
         font.setPointSize(10)
@@ -64,13 +67,13 @@ class Ui_Button(object):
         self.horizontalLayout.addWidget(self.label)
 
 
-        self.retranslateUi(Button)
+        self.retranslateUi()
 
-        QMetaObject.connectSlotsByName(Button)
+        QMetaObject.connectSlotsByName(self)
     # setupUi
 
-    def retranslateUi(self, Button):
-        Button.setWindowTitle(QCoreApplication.translate("Button", u"Form", None))
+    def retranslateUi(self):
+        self.setWindowTitle(QCoreApplication.translate("Button", u"Form", None))
         self.label.setText(QCoreApplication.translate("Button", u"ITG NAME", None))
     # retranslateUi
 

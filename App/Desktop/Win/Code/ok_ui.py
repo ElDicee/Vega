@@ -9,50 +9,55 @@
 ################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+                            QMetaObject, QObject, QPoint, QRect,
+                            QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+                           QFont, QFontDatabase, QGradient, QIcon,
+                           QImage, QKeySequence, QLinearGradient, QPainter,
+                           QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-    QMainWindow, QPushButton, QScrollArea, QSizePolicy,
-    QVBoxLayout, QWidget)
+                               QMainWindow, QPushButton, QScrollArea, QSizePolicy,
+                               QVBoxLayout, QWidget)
+import sys
+import topbar
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        if not MainWindow.objectName():
-            MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1112, 836)
+
+class MainFrame(QMainWindow):
+    def __init__(self):
+        super(MainFrame, self).__init__()
+        self.setupUi()
+
+    def setupUi(self):
+        if not self.objectName():
+            self.setObjectName(u"MainWindow")
+        self.resize(1112, 836)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(sizePolicy)
-        self.centralwidget = QWidget(MainWindow)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.centralwidget = QWidget(self)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy.setHeightForWidth(self.centralwidget.sizePolicy().hasHeightForWidth())
         self.centralwidget.setSizePolicy(sizePolicy)
         self.centralwidget.setStyleSheet(u"QWidget#centralwidget{\n"
-"border-radius:10px;\n"
-"background-color: rgba(255, 255, 255, 190);\n"
-"}")
+                                         "border-radius:10px;\n"
+                                         "background-color: rgba(255, 255, 255, 90);\n"
+                                         "}")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setSpacing(10)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self.topbar = QWidget(self.centralwidget)
-        self.topbar.setObjectName(u"topbar")
+        self.topbar = topbar.Topbar_Widget(self)  # TOPBAR
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.topbar.sizePolicy().hasHeightForWidth())
         self.topbar.setSizePolicy(sizePolicy1)
-        self.topbar.setMinimumSize(QSize(947, 43))
-        self.topbar.setMaximumSize(QSize(16777215, 43))
-        self.topbar.setStyleSheet(u"background-color: rgb(34, 37, 44);\n"
-"border-radius: 10px;\n"
-"")
+        """self.topbar.setMinimumSize(QSize(947, 43))
+        self.topbar.setMaximumSize(QSize(16777215, 43))"""
 
         self.verticalLayout.addWidget(self.topbar)
 
@@ -87,8 +92,8 @@ class Ui_MainWindow(object):
         self.widget_5.setMinimumSize(QSize(0, 120))
         self.widget_5.setMaximumSize(QSize(240, 120))
         self.widget_5.setStyleSheet(u"background-color: rgb(34, 37, 44);\n"
-"border-top-left-radius: 10px;\n"
-"border-top-right-radius: 10px;")
+                                    "border-top-left-radius: 10px;\n"
+                                    "border-top-right-radius: 10px;")
         self.verticalLayout_3 = QVBoxLayout(self.widget_5)
         self.verticalLayout_3.setSpacing(0)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -104,12 +109,11 @@ class Ui_MainWindow(object):
         font.setBold(False)
         self.VegaImg.setFont(font)
         self.VegaImg.setStyleSheet(u"color: rgb(255, 255, 255);\n"
-"")
+                                   "")
         self.VegaImg.setScaledContents(True)
         self.VegaImg.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_6.addWidget(self.VegaImg)
-
 
         self.verticalLayout_3.addWidget(self.widget_4)
 
@@ -138,7 +142,7 @@ class Ui_MainWindow(object):
         self.label.setSizePolicy(sizePolicy5)
         self.label.setMinimumSize(QSize(25, 25))
         self.label.setMaximumSize(QSize(25, 25))
-        self.label.setStyleSheet(u"image: url(:/icons_w/res/Feather_white/user.svg);")
+        self.label.setStyleSheet(u"image: url(./res/icons/Feather_white/user.svg);")
         self.label.setTextFormat(Qt.PlainText)
         self.label.setScaledContents(True)
 
@@ -156,43 +160,40 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.UI_usernameLabel)
 
-
-        self.horizontalLayout_3.addWidget(self.widget, 0, Qt.AlignHCenter|Qt.AlignVCenter)
-
+        self.horizontalLayout_3.addWidget(self.widget, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
         self.verticalLayout_3.addWidget(self.name_container, 0, Qt.AlignHCenter)
-
 
         self.verticalLayout_2.addWidget(self.widget_5)
 
         self.scrollArea = QScrollArea(self.slideWidg)
         self.scrollArea.setObjectName(u"scrollArea")
         self.scrollArea.setStyleSheet(u"QScrollArea {\n"
-"    background-color: rgb(56, 60, 72);\n"
-"}\n"
-"\n"
-"QScrollBar:vertical {\n"
-"    width: 12px;\n"
-"	background-color: rgb(56, 60, 72);\n"
-"}\n"
-"\n"
-"QScrollBar::handle:vertical {\n"
-"    background: #AAAAAA;\n"
-"	background-color: rgb(230, 230, 230);\n"
-"	border-radius: 5px;\n"
-"}\n"
-"\n"
-"QScrollBar::add-line:vertical,\n"
-"QScrollBar::sub-line:vertical {\n"
-"    height: 12px;\n"
-"    background: none;\n"
-"}\n"
-"\n"
-"QScrollBar::add-page:vertical,\n"
-"QScrollBar::sub-page:vertical {\n"
-"    background: none;\n"
-"}\n"
-"")
+                                      "    background-color: rgb(56, 60, 72);\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar:vertical {\n"
+                                      "    width: 12px;\n"
+                                      "	background-color: rgb(56, 60, 72);\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar::handle:vertical {\n"
+                                      "    background: #AAAAAA;\n"
+                                      "	background-color: rgb(230, 230, 230);\n"
+                                      "	border-radius: 5px;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar::add-line:vertical,\n"
+                                      "QScrollBar::sub-line:vertical {\n"
+                                      "    height: 12px;\n"
+                                      "    background: none;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar::add-page:vertical,\n"
+                                      "QScrollBar::sub-page:vertical {\n"
+                                      "    background: none;\n"
+                                      "}\n"
+                                      "")
         self.scrollArea.setFrameShape(QFrame.NoFrame)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
@@ -212,9 +213,9 @@ class Ui_MainWindow(object):
         self.widget_7.setMinimumSize(QSize(0, 120))
         self.widget_7.setMaximumSize(QSize(240, 120))
         self.widget_7.setStyleSheet(u"background-color: rgb(34, 37, 44);\n"
-"border-bottom-left-radius: 10px;\n"
-"border-bottom-right-radius: 10px;\n"
-"")
+                                    "border-bottom-left-radius: 10px;\n"
+                                    "border-bottom-right-radius: 10px;\n"
+                                    "")
         self.verticalLayout_5 = QVBoxLayout(self.widget_7)
         self.verticalLayout_5.setSpacing(0)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
@@ -228,14 +229,14 @@ class Ui_MainWindow(object):
         self.pushButton.setMinimumSize(QSize(0, 50))
         self.pushButton.setMaximumSize(QSize(50, 50))
         self.pushButton.setStyleSheet(u"QPushButton{\n"
-"border-radius: 12px;\n"
-"}\n"
-"\n"
-"QPushButton:hover{\n"
-"	background-color: rgb(126, 135, 162);\n"
-"}")
+                                      "border-radius: 12px;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QPushButton:hover{\n"
+                                      "	background-color: rgb(126, 135, 162);\n"
+                                      "}")
         icon = QIcon()
-        icon.addFile(u":/icons_w/res/Feather_white/user.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"./res/icons/Feather_white/user.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton.setIcon(icon)
         self.pushButton.setIconSize(QSize(32, 32))
 
@@ -246,14 +247,14 @@ class Ui_MainWindow(object):
         self.pushButton_2.setMinimumSize(QSize(0, 50))
         self.pushButton_2.setMaximumSize(QSize(50, 50))
         self.pushButton_2.setStyleSheet(u"QPushButton{\n"
-"border-radius: 12px;\n"
-"}\n"
-"\n"
-"QPushButton:hover{\n"
-"	background-color: rgb(126, 135, 162);\n"
-"}")
+                                        "border-radius: 12px;\n"
+                                        "}\n"
+                                        "\n"
+                                        "QPushButton:hover{\n"
+                                        "	background-color: rgb(126, 135, 162);\n"
+                                        "}")
         icon1 = QIcon()
-        icon1.addFile(u":/icons_w/res/Feather_white/gitlab.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u"./res/icons/Feather_white/gitlab.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QSize(32, 32))
 
@@ -264,19 +265,18 @@ class Ui_MainWindow(object):
         self.pushButton_3.setMinimumSize(QSize(0, 50))
         self.pushButton_3.setMaximumSize(QSize(50, 50))
         self.pushButton_3.setStyleSheet(u"QPushButton{\n"
-"border-radius: 12px;\n"
-"}\n"
-"\n"
-"QPushButton:hover{\n"
-"	background-color: rgb(126, 135, 162);\n"
-"}")
+                                        "border-radius: 12px;\n"
+                                        "}\n"
+                                        "\n"
+                                        "QPushButton:hover{\n"
+                                        "	background-color: rgb(126, 135, 162);\n"
+                                        "}")
         icon2 = QIcon()
-        icon2.addFile(u":/icons_w/res/Feather_white/settings.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u"./res/icons/Feather_white/settings.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_3.setIcon(icon2)
         self.pushButton_3.setIconSize(QSize(32, 32))
 
         self.horizontalLayout_5.addWidget(self.pushButton_3)
-
 
         self.verticalLayout_5.addWidget(self.widget_3)
 
@@ -293,14 +293,11 @@ class Ui_MainWindow(object):
         self.label_2.setMinimumSize(QSize(0, 20))
         self.label_2.setStyleSheet(u"color: rgb(87, 95, 113);")
 
-        self.horizontalLayout_2.addWidget(self.label_2, 0, Qt.AlignHCenter|Qt.AlignVCenter)
-
+        self.horizontalLayout_2.addWidget(self.label_2, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
         self.verticalLayout_5.addWidget(self.widget_2)
 
-
         self.verticalLayout_2.addWidget(self.widget_7)
-
 
         self.horizontalLayout.addWidget(self.slideWidg)
 
@@ -310,22 +307,22 @@ class Ui_MainWindow(object):
         self.canvas.setSizePolicy(sizePolicy)
         self.canvas.setMinimumSize(QSize(300, 300))
         self.canvas.setStyleSheet(u"background-color: rgb(232, 236, 247);\n"
-"border-radius: 10px;")
+                                  "border-radius: 10px;")
 
         self.horizontalLayout.addWidget(self.canvas)
 
-
         self.verticalLayout.addWidget(self.contentWidg)
 
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
+        self.retranslateUi()
 
-        QMetaObject.connectSlotsByName(MainWindow)
+        QMetaObject.connectSlotsByName(self)
+
     # setupUi
 
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+    def retranslateUi(self):
+        self.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.VegaImg.setText(QCoreApplication.translate("MainWindow", u"VEGA", None))
         self.label.setText("")
         self.UI_usernameLabel.setText(QCoreApplication.translate("MainWindow", u"User Name", None))
@@ -333,5 +330,15 @@ class Ui_MainWindow(object):
         self.pushButton_2.setText("")
         self.pushButton_3.setText("")
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"GitHub: https://github.com/ElDicee", None))
+
     # retranslateUi
 
+    def changeCanvasView(self):
+        pass
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    Form = MainFrame()
+    Form.show()
+    sys.exit(app.exec())

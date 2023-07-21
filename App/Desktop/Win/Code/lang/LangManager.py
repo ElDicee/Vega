@@ -1,7 +1,4 @@
 import json
-import os
-import enum
-
 
 ENGLISH = "US_en"
 SPANISH = "SP_es"
@@ -12,7 +9,7 @@ class Lang():
         self.language: str = language
         self.load(self.language)
 
-    def get(self, s:str):
+    def get(self, s:str):    #FORMAT: Item.subitem.subsubitem and so on
         a = self.content
         for arg in s.split("."):
             a = a[arg]
