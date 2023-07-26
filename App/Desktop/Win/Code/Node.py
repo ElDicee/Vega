@@ -180,7 +180,6 @@ class Node(QWidget):
 def suma(inp, outp):
     outp.update({"Result": {inp["Num1"] + inp["Num2"]}})
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     n = Node("Suma", NodeType.OPERATOR)

@@ -65,7 +65,7 @@ background-color: rgba(22, 60, 84, 50);
       </property>
       <property name="maximumSize">
        <size>
-        <width>0</width>
+        <width>16777215</width>
         <height>16777215</height>
        </size>
       </property>
@@ -398,6 +398,161 @@ QScrollBar::add-line{
                  <string>Español</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Nuevo elemento</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>
@@ -494,7 +649,7 @@ border-radius: 10px;
       </property>
       <property name="maximumSize">
        <size>
-        <width>9999999</width>
+        <width>0</width>
         <height>16777215</height>
        </size>
       </property>
@@ -518,7 +673,6 @@ border-radius: 10px;
             </property>
             <property name="font">
              <font>
-              <family>Planet Comic</family>
               <pointsize>20</pointsize>
               <bold>false</bold>
              </font>
@@ -538,7 +692,6 @@ border-radius: 10px;
            <widget class="QLabel" name="label_6">
             <property name="font">
              <font>
-              <family>Tahoma</family>
               <pointsize>14</pointsize>
              </font>
             </property>

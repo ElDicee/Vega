@@ -167,7 +167,7 @@ class Topbar_Widget(QWidget):
 
         QMetaObject.connectSlotsByName(self)
 
-        self.closeBtn.clicked.connect(self.father.close)
+        self.closeBtn.clicked.connect(self.father.exitApp)
         self.expandBtn.clicked.connect(self.maximization)
         self.minBtn.clicked.connect(self.father.showMinimized)
         self.ToggleSlideMenuBtn.clicked.connect(self.toggleSlideMenu)

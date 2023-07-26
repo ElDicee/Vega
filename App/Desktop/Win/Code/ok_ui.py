@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
-
-################################################################################
-## Form generated from reading UI file 'ok_ui.ui'
-##
-## Created by: Qt User Interface Compiler version 6.5.1
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
+import random
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
                             QMetaObject, QObject, QPoint, QRect,
@@ -14,17 +7,22 @@ from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
                            QFont, QFontDatabase, QGradient, QIcon,
                            QImage, QKeySequence, QLinearGradient, QPainter,
-                           QPalette, QPixmap, QRadialGradient, QTransform)
+                           QPalette, QPixmap, QRadialGradient, QTransform, QMouseEvent)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QScrollArea, QSizePolicy,
-                               QVBoxLayout, QWidget)
+                               QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QStackedWidget, QDialog, QGroupBox,
+                               QLineEdit, QGraphicsBlurEffect)
 import sys
 import topbar
+import socket
+from random import randint
 
 
 class MainFrame(QMainWindow):
     def __init__(self):
         super(MainFrame, self).__init__()
+        self.connection_portal = ConnectionPortal(6969)
+        self.canvaspanels = {}
         self.setupUi()
 
     def setupUi(self):
@@ -44,6 +42,9 @@ class MainFrame(QMainWindow):
                                          "border-radius:10px;\n"
                                          "background-color: rgba(255, 255, 255, 90);\n"
                                          "}")
+        blur_effect = QGraphicsBlurEffect()
+        blur_effect.setBlurRadius(10)
+        self.setGraphicsEffect(blur_effect)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -69,6 +70,7 @@ class MainFrame(QMainWindow):
         self.horizontalLayout.setSpacing(4)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+
         self.slideWidg = QWidget(self.contentWidg)
         self.slideWidg.setObjectName(u"slideWidg")
         sizePolicy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
@@ -301,13 +303,28 @@ class MainFrame(QMainWindow):
 
         self.horizontalLayout.addWidget(self.slideWidg)
 
-        self.canvas = QWidget(self.contentWidg)
+        self.canvas = QStackedWidget(self.contentWidg)
         self.canvas.setObjectName(u"canvas")
         sizePolicy.setHeightForWidth(self.canvas.sizePolicy().hasHeightForWidth())
         self.canvas.setSizePolicy(sizePolicy)
         self.canvas.setMinimumSize(QSize(300, 300))
         self.canvas.setStyleSheet(u"background-color: rgb(232, 236, 247);\n"
                                   "border-radius: 10px;")
+        self.HomePage = QWidget()
+        self.HomePage.setObjectName(u"HomePage")
+        self.canvas.addWidget(self.HomePage)
+        self.Blueprint = QWidget()
+        self.Blueprint.setObjectName(u"Blueprint")
+        self.horizontalLayout_7 = QHBoxLayout(self.Blueprint)
+        self.horizontalLayout_7.setSpacing(0)
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.graphicsView = BlueprintView()
+        self.graphicsView.setObjectName(u"graphicsView")
+
+        self.horizontalLayout_7.addWidget(self.graphicsView)
+
+        self.canvas.addWidget(self.Blueprint)
 
         self.horizontalLayout.addWidget(self.canvas)
 
@@ -315,7 +332,11 @@ class MainFrame(QMainWindow):
 
         self.setCentralWidget(self.centralwidget)
 
+        self.addCanvasPanel("BP", BlueprintView())
+
         self.retranslateUi()
+
+        self.pushButton_2.clicked.connect(lambda: self.canvas.setCurrentWidget(self.canvaspanels["BP"]))
 
         QMetaObject.connectSlotsByName(self)
 
@@ -333,8 +354,240 @@ class MainFrame(QMainWindow):
 
     # retranslateUi
 
-    def changeCanvasView(self):
-        pass
+    def changeCanvasView(self, w):
+        self.canvas.setCurrentWidget()
+
+    def addCanvasPanel(self, name, widget):
+        self.canvas.addWidget(widget)
+        self.canvaspanels.update({name: widget})
+
+    def exitApp(self):
+        self.connection_portal.close_connection()
+        self.close()
+
+
+class BlueprintView(QGraphicsView):
+    def __init__(self, **kwargs):
+        self.scene = QGraphicsScene()
+        super(BlueprintView, self).__init__()
+        self.setStyleSheet("background-image: url(./res/icons/images/")
+        self.filter = Filter(parent=self)
+        self.filter.hide()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if self.filter.isHidden():
+            self.filter.move(event.pos())
+            self.filter.show()
+        else:
+            self.filter.move(event.pos())
+        event.accept()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if not self.filter.isHidden():
+            self.filter.hide()
+
+
+class Filter(QWidget):
+
+    def __init__(self, **kwargs):
+        super(Filter, self).__init__(**kwargs)
+        self.elements = []
+        self.setupUi()
+
+    def setupUi(self):
+        if not self.objectName():
+            self.setObjectName(u"Form")
+        self.resize(341, 412)
+        self.setStyleSheet(u"QWidget{\n"
+                           "background-color: rgba(232, 236, 247, 100);\n"
+                           "border-radius: 10px;\n"
+                           "}\n"
+                           "")
+        blur_effect = QGraphicsBlurEffect()
+        blur_effect.setBlurRadius(10)
+        self.setGraphicsEffect(blur_effect)
+        self.verticalLayout = QVBoxLayout(self)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
+        self.widget = QWidget(self)
+        self.widget.setObjectName(u"widget")
+        self.widget.setMinimumSize(QSize(0, 200))
+        self.widget.setStyleSheet(u"background-color: rgba(232, 236, 247, 100);")
+        self.verticalLayout_4 = QVBoxLayout(self.widget)
+        self.verticalLayout_4.setSpacing(0)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.lineEdit = QLineEdit(self.widget)
+        self.lineEdit.setObjectName(u"lineEdit")
+        self.lineEdit.setStyleSheet(u"QLineEdit{\n"
+                                    "border-radius: 0px;\n"
+                                    "border-top-right-radius: 8px;\n"
+                                    "border-top-left-radius: 8px;\n"
+                                    "background-color: rgb(255, 255, 255);\n"
+                                    "border-bottom: 3px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(140, 0, 255), stop:1 rgb(0, 221, 255));\n"
+                                    "}\n"
+                                    "")
+
+        self.verticalLayout_4.addWidget(self.lineEdit)
+
+        self.scrollArea = QScrollArea(self.widget)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setStyleSheet(u"QScrollBar:vertical {\n"
+                                      "    background-color: rgb(56, 60, 72);\n"
+                                      "    width: 12px;\n"
+                                      "    border: 0.5px solid rgb(56, 60, 72);\n"
+                                      "    border-radius: 5px;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar::handle:vertical {\n"
+                                      "    background-color: rgb(56, 60, 72);\n"
+                                      "    border: 2px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgb(255, 0, 221), stop:1 rgb(255, 115, 0));\n"
+                                      "    border-radius: 5px;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
+                                      "    background-color: transparent;\n"
+                                      "    border: none;\n"
+                                      "    width: 0;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+                                      "    background-color: transparent;\n"
+                                      "}")
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 319, 381))
+        self.scrollAreaWidgetContents.setStyleSheet(u"QGroupBox{\n"
+                                                    "	color: rgb(56, 60, 72);\n"
+                                                    "	font-size: 12px;\n"
+                                                    "	font-weight: bold;\n"
+                                                    "	background-color: rgba(239, 243, 254, 150);\n"
+                                                    "	border-radius: 10px;\n"
+                                                    "	box-shadow: 30px 30px 50px rgb(0, 0, 0);\n"
+                                                    "}\n"
+                                                    "\n"
+                                                    "QGroupBox::title {\n"
+                                                    "    subcontrol-origin: margin;\n"
+                                                    "    subcontrol-position: top left;\n"
+                                                    "    padding: 3px 5px;\n"
+                                                    "	color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.5, y2:0, x3:1, y3:0, stop:0 rgb(255, 8, 169), stop:1 rgb(255, 68, 6), stop:2 rgb(255, 213, 1));\n"
+                                                    "    font-size: 16px; \n"
+                                                    "    font-weight: bold; \n"
+                                                    "	border-radius: 3px;\n"
+                                                    "	font-family: Microsoft-YaHei;\n"
+                                                    "	border-radius: 10px;\n"
+                                                    "}\n"
+                                                    "QLabel{\n"
+                                                    "background-color: rgb(239, 243, 254);\n"
+                                                    "border-radius: 8px;\n"
+                                                    "}\n"
+                                                    "QLabel:hover{\n"
+                                                    "	color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 85, 255, 255), stop:1 rgba(1, 204, 187, 255));\n"
+                                                    "	border-width: 5px;\n"
+                                                    "	border-bottom-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 85, 255, 255), stop:1 rgba(0, 85, 255, 0"
+                                                    "));\n"
+                                                    "}")
+        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+
+        # ADD ALL MODULES
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.verticalLayout_4.addWidget(self.scrollArea)
+
+        self.verticalLayout.addWidget(self.widget)
+
+
+        self.retranslateUi()
+        self.add_section("TEST")
+        self.add_element("title", section="TEST")
+
+
+
+        QMetaObject.connectSlotsByName(self)
+
+    # setupUi
+
+    def retranslateUi(self):
+        self.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
+        self.lineEdit.setPlaceholderText(QCoreApplication.translate("Form", u"Filter", None))
+
+    def add_section(self, name):
+        section = FilterSection(self.scrollAreaWidgetContents, name)
+        self.verticalLayout_2.addWidget(section.groupBox)
+        self.elements.append(section)
+
+    def add_element(self, element, section=None):
+        if section:
+            sec = self.get_section(section)
+            sec.add_item(element)
+        else:
+            label = QLabel(self.scrollAreaWidgetContents)
+            label.setText(element)
+            self.verticalLayout_2.addWidget(label)
+            self.elements.append(label)
+
+    def get_section(self, name):
+        sec = None
+        for x in self.elements:
+            if isinstance(x, FilterSection) and x.groupBox.title() == name:
+                sec = x
+                break
+        return sec
+
+
+class FilterSection:
+    def __init__(self, parent, name):
+        self.groupBox = QGroupBox(parent)
+        self.groupBox.setObjectName(u"{}".format(name))
+        self.groupBox.setTitle(name)
+        self.verticalLayout = QVBoxLayout(self.groupBox)
+        self.verticalLayout.setSpacing(3)
+        self.verticalLayout.setContentsMargins(-1, 25, -1, -1)
+        self.items = []
+    def __str__(self):
+        return self.groupBox.title().title()
+
+    def add_item(self, name):
+        label = QLabel(self.groupBox)
+        label.setText(name)
+        self.verticalLayout.addWidget(label, 0, Qt.AlignTop)
+        self.items.append(label)
+
+
+class ConnectionPortal:
+    def __init__(self, port):
+        print("creating socket")
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.port = port
+        try:
+            print("starting connection")
+            self.start_connection()
+        except OSError:
+            self.port = randint(49152, 65535)
+            self.start_connection()
+        self.buffer = 1024
+        self.command_query = []
+
+    def go_listen(self):
+        self.socket.listen(1)
+
+    def start_connection(self):
+        self.socket.bind(("127.0.0.1", self.port))
+
+    def receive_data(self):
+        client, addr = self.socket.accept()
+        return client.recv(self.buffer)
+
+    def close_connection(self):
+        self.socket.close()
+
+    def change_data_buffer(self, buf: int):
+        self.buffer = buf
 
 
 if __name__ == "__main__":
