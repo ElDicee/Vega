@@ -42,7 +42,10 @@ border-radius: 10px;
       </size>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgba(232, 236, 247, 100);</string>
+      <string notr="true">QWidget{
+background-color: rgba(232, 236, 247, 100);
+}
+</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <property name="spacing">

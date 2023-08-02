@@ -1,27 +1,20 @@
 # -*- coding: utf-8 -*-
-import random
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-                            QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-                           QFont, QFontDatabase, QGradient, QIcon,
-                           QImage, QKeySequence, QLinearGradient, QPainter,
-                           QPalette, QPixmap, QRadialGradient, QTransform, QMouseEvent)
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
+                            QSize, Qt)
+from PySide6.QtGui import (QFont, QIcon,
+                           QMouseEvent)
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QScrollArea, QSizePolicy,
-                               QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QStackedWidget, QDialog, QGroupBox,
+                               QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QStackedWidget, QGroupBox,
                                QLineEdit, QGraphicsBlurEffect)
-import sys
 import topbar
-import socket
-from random import randint
 
 
 class MainFrame(QMainWindow):
-    def __init__(self):
+    def __init__(self, vega):
         super(MainFrame, self).__init__()
-        self.connection_portal = ConnectionPortal(6969)
+        self.vega = vega
         self.canvaspanels = {}
         self.setupUi()
 
@@ -319,8 +312,7 @@ class MainFrame(QMainWindow):
         self.horizontalLayout_7.setSpacing(0)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
-        self.graphicsView = BlueprintView()
-        self.graphicsView.setObjectName(u"graphicsView")
+        self.graphicsView = BlueprintView(self.vega)
 
         self.horizontalLayout_7.addWidget(self.graphicsView)
 
@@ -332,7 +324,7 @@ class MainFrame(QMainWindow):
 
         self.setCentralWidget(self.centralwidget)
 
-        self.addCanvasPanel("BP", BlueprintView())
+        self.addCanvasPanel("BP", self.Blueprint)
 
         self.retranslateUi()
 
@@ -362,17 +354,17 @@ class MainFrame(QMainWindow):
         self.canvaspanels.update({name: widget})
 
     def exitApp(self):
-        self.connection_portal.close_connection()
         self.close()
 
 
 class BlueprintView(QGraphicsView):
-    def __init__(self, **kwargs):
+    def __init__(self, vega, **kwargs):
         self.scene = QGraphicsScene()
         super(BlueprintView, self).__init__()
-        self.setStyleSheet("background-image: url(./res/icons/images/")
-        self.filter = Filter(parent=self)
-        self.filter.hide()
+        self.setObjectName("BP_bg")
+        self.setStyleSheet("QWidget#BP_bg{background-image: url(./res/images/bpbg.jpg)}")
+        self.filter = Filter(vega, parent=self)
+        self.filter.do_hide()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         if self.filter.isHidden():
@@ -384,13 +376,14 @@ class BlueprintView(QGraphicsView):
 
     def mousePressEvent(self, event: QMouseEvent):
         if not self.filter.isHidden():
-            self.filter.hide()
+            self.filter.do_hide()
 
 
 class Filter(QWidget):
 
-    def __init__(self, **kwargs):
+    def __init__(self, vega, **kwargs):
         super(Filter, self).__init__(**kwargs)
+        self.vega = vega
         self.elements = []
         self.setupUi()
 
@@ -412,7 +405,10 @@ class Filter(QWidget):
         self.widget = QWidget(self)
         self.widget.setObjectName(u"widget")
         self.widget.setMinimumSize(QSize(0, 200))
-        self.widget.setStyleSheet(u"background-color: rgba(232, 236, 247, 100);")
+        self.widget.setStyleSheet(u"QWidget{\n"
+                                  "background-color: rgba(232, 236, 247, 100);\n"
+                                  "}\n"
+                                  "")
         self.verticalLayout_4 = QVBoxLayout(self.widget)
         self.verticalLayout_4.setSpacing(0)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
@@ -501,14 +497,15 @@ class Filter(QWidget):
 
         self.verticalLayout.addWidget(self.widget)
 
-
         self.retranslateUi()
         self.add_section("TEST")
         self.add_element("title", section="TEST")
 
-
+        for itg in self.vega.integrations:
+            print(itg)
 
         QMetaObject.connectSlotsByName(self)
+        self.lineEdit.textEdited.connect(self.start_filter)
 
     # setupUi
 
@@ -531,13 +528,25 @@ class Filter(QWidget):
             self.verticalLayout_2.addWidget(label)
             self.elements.append(label)
 
+    def do_hide(self):
+        self.hide()
+        self.lineEdit.setText("")
+
     def get_section(self, name):
         sec = None
         for x in self.elements:
             if isinstance(x, FilterSection) and x.groupBox.title() == name:
                 sec = x
                 break
+        if sec is None: raise "Section not Found"
         return sec
+
+    def start_filter(self, text):
+        for element in self.elements:
+            if isinstance(element, FilterSection):
+                element.showFiltered(text)
+            else:
+                element.show() if text in element.text() else element.hide()
 
 
 class FilterSection:
@@ -549,6 +558,7 @@ class FilterSection:
         self.verticalLayout.setSpacing(3)
         self.verticalLayout.setContentsMargins(-1, 25, -1, -1)
         self.items = []
+
     def __str__(self):
         return self.groupBox.title().title()
 
@@ -558,40 +568,23 @@ class FilterSection:
         self.verticalLayout.addWidget(label, 0, Qt.AlignTop)
         self.items.append(label)
 
+    def hide_elements(self):
+        for item in self.items:
+            item.hide()
 
-class ConnectionPortal:
-    def __init__(self, port):
-        print("creating socket")
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.port = port
-        try:
-            print("starting connection")
-            self.start_connection()
-        except OSError:
-            self.port = randint(49152, 65535)
-            self.start_connection()
-        self.buffer = 1024
-        self.command_query = []
+    def show_elements(self):
+        for item in self.items:
+            item.show()
 
-    def go_listen(self):
-        self.socket.listen(1)
-
-    def start_connection(self):
-        self.socket.bind(("127.0.0.1", self.port))
-
-    def receive_data(self):
-        client, addr = self.socket.accept()
-        return client.recv(self.buffer)
-
-    def close_connection(self):
-        self.socket.close()
-
-    def change_data_buffer(self, buf: int):
-        self.buffer = buf
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    Form = MainFrame()
-    Form.show()
-    sys.exit(app.exec())
+    def showFiltered(self, s):
+        b = False
+        for item in self.items:
+            if s in item.text():
+                item.show()
+            else:
+                if not b: b = True
+                item.hide()
+        if not b:  # SI NO HI HA CAP ELEMENT DE LA SECCIÓ QUE NO CUMPLEIXI EL FILTRE
+            self.groupBox.show()
+        else:
+            self.groupBox.hide()

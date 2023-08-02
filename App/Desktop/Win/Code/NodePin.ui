@@ -84,6 +84,101 @@ QPushButton:hover{
      </property>
     </widget>
    </item>
+   <item alignment="Qt::AlignLeft">
+    <widget class="QCheckBox" name="param_boolean">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item alignment="Qt::AlignLeft">
+    <widget class="QComboBox" name="param_options">
+     <property name="styleSheet">
+      <string notr="true">QWidget{
+    background-color: rgba(194, 212, 229, 90);
+    border: 2px solid rgb(0, 117, 171);
+    border-radius: 8px;
+	color: rgb(255, 255, 255);
+}
+QComboBox {
+    background-color: rgba(194, 212, 229, 90);
+    border: 2px solid rgb(0, 85, 255);
+    border-radius: 10px;
+	color: rgb(0, 170, 255);
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+	background-color: rgba(255, 255, 255, 30);
+    border-left-width: 1px;
+    border-left-color: rgba(255, 255, 255, 40);
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 10px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 10px;
+}
+QComboBox::down-arrow {
+	border: none;
+	padding: 5px;
+	border-bottom-right-radius: 10px;
+	border-top-right-radius: 10px;
+	image: url(:/icons_w/res/feather (1)/arrow-down-circle.svg);
+}
+QComboBox::hover {
+    background-color: rgba(194, 212, 229, 130);
+	border: 2px solid rgb(40, 133, 195);
+}
+QComboBox::on {
+    background-color: rgba(255, 255, 255, 190)
+}
+QScrollBar{
+	border-radius: 8px;
+	border: 1px solid rgb(0, 85, 127);
+	background-color: rgba(255, 255, 255,30);
+}
+QScrollBar::handle{
+	background-color: rgb(0, 170, 255);
+	border-radius: 5px;
+}
+QScrollBar::sub-line{
+	image: url(:/icons_w/res/feather (1)/arrow-up.svg);
+}
+QScrollBar::add-line{
+	image: url(:/icons_w/res/feather (1)/arrow-down.svg);
+}</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Nuevo elemento</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Nuevo elemento</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+    <widget class="QLineEdit" name="param_string">
+     <property name="styleSheet">
+      <string notr="true">QLineEdit{
+border: 2px solid rgb(0, 85, 255);
+border-radius: 8px;
+background-color: qradialgradient(spread:pad, cx:1, cy:0.5, radius:1.2, fx:1, fy:0.5, stop:0 rgba(56, 60, 72, 50), stop:1 rgba(255, 255, 255, 0));
+}
+QLineEdit::hover{
+border: 3px solid rgb(255, 85, 127);
+}
+QLineEdit::focus{
+border: 2.5px solid rgb(170, 0, 127);
+}</string>
+     </property>
+    </widget>
+   </item>
    <item alignment="Qt::AlignRight">
     <widget class="QLabel" name="pinlabel">
      <property name="sizePolicy">
