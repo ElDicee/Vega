@@ -3,20 +3,25 @@
 from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
                             QSize, Qt)
 from PySide6.QtGui import (QFont, QIcon,
-                           QMouseEvent)
+                           QMouseEvent, QPainter)
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QScrollArea, QSizePolicy,
                                QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QStackedWidget, QGroupBox,
-                               QLineEdit, QGraphicsBlurEffect)
-import topbar
+                               QLineEdit, QGraphicsBlurEffect, QDialog, QProgressBar, QGraphicsWidget, QGraphicsItem,
+                               QGraphicsProxyWidget)
+
+from App.Desktop.Win.Code.TEST.a import NodeGraphicsItem
+from App.Desktop.Win.Code.ui.Elements import Node, topbar, Node1
 
 
 class MainFrame(QMainWindow):
-    def __init__(self, vega):
+    def __init__(self, vega, **kwargs):
         super(MainFrame, self).__init__()
         self.vega = vega
         self.canvaspanels = {}
         self.setupUi()
+        if kwargs.get("show"):
+            self.show()
 
     def setupUi(self):
         if not self.objectName():
@@ -332,6 +337,11 @@ class MainFrame(QMainWindow):
 
         QMetaObject.connectSlotsByName(self)
 
+        for itg in self.vega.integrations.values():
+            if itg.display is not None:
+                s = SlideButton(itg, parent=self.scrollAreaWidgetContents)
+                self.verticalLayout_4.addWidget(s, 0, Qt.AlignmentFlag.AlignTop)
+
     # setupUi
 
     def retranslateUi(self):
@@ -357,13 +367,87 @@ class MainFrame(QMainWindow):
         self.close()
 
 
+class SlideButton(QWidget):
+
+    def __init__(self, integration, **kwargs):
+        super(SlideButton, self).__init__(**kwargs)
+        self.integration = integration
+        self.setupUi()
+        self.label.setText(self.integration.name.upper())
+
+    def setupUi(self):
+        if not self.objectName():
+            self.setObjectName(u"Button")
+        self.resize(240, 50)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.setMinimumSize(QSize(240, 50))
+        self.setMaximumSize(QSize(240, 50))
+        self.setStyleSheet(u"QWidget{\n"
+                           "background-color: rgb(56, 60, 72);\n"
+                           "border-radius: 10px;\n"
+                           "}\n"
+                           "\n"
+                           "QWidget:hover{\n"
+                           "	background-color: rgb(144, 155, 186);\n"
+                           "}")
+        self.horizontalLayout = QHBoxLayout(self)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.itgstatusindicator = QWidget(self)
+        self.itgstatusindicator.setObjectName(u"itgstatusindicator")
+        sizePolicy.setHeightForWidth(self.itgstatusindicator.sizePolicy().hasHeightForWidth())
+        self.itgstatusindicator.setSizePolicy(sizePolicy)
+        self.itgstatusindicator.setMinimumSize(QSize(15, 15))
+        self.itgstatusindicator.setMaximumSize(QSize(15, 15))
+        self.itgstatusindicator.setStyleSheet(u"border-radius: 5px;\n"
+                                              "background-color: rgb(38, 225, 54);")
+
+        self.horizontalLayout.addWidget(self.itgstatusindicator)
+
+        self.label = QLabel(self)
+        self.label.setObjectName(u"label")
+        font = QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        self.label.setFont(font)
+        self.label.setStyleSheet(u"color: rgb(255, 255, 255);\n"
+                                 "background-color: rgba(255, 255, 255, 0);")
+
+        self.horizontalLayout.addWidget(self.label)
+
+        QMetaObject.connectSlotsByName(self)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        print("hello")
+
+
+def parse_type_from_str(s):
+    s = str(s).lstrip().rstrip().lower()
+    t = object
+    if s == "int":
+        t = int
+    elif s == "str":
+        t = str
+    elif s == "float":
+        t = float
+    elif s == "bool":
+        t = bool
+    return t
+
+
 class BlueprintView(QGraphicsView):
     def __init__(self, vega, **kwargs):
-        self.scene = QGraphicsScene()
+        self.vega = vega
         super(BlueprintView, self).__init__()
+        self.setScene(QGraphicsScene())
         self.setObjectName("BP_bg")
-        self.setStyleSheet("QWidget#BP_bg{background-image: url(./res/images/bpbg.jpg)}")
-        self.filter = Filter(vega, parent=self)
+        #self.setStyleSheet("QWidget#BP_bg{background-image: url(./res/images/bpbg.jpg)}")
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setWindowTitle("Node in QGraphicsItem")
+        self.filter = Filter(self.vega, self, parent=self)
         self.filter.do_hide()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
@@ -378,12 +462,37 @@ class BlueprintView(QGraphicsView):
         if not self.filter.isHidden():
             self.filter.do_hide()
 
+    def spawn_node(self, method, section):
+        data = self.vega.integrations.get(section)
+        meth = data.methods.get(method)
+        node = Node.Node(method.title(), Node.NodeType.valueOf(meth.get("node")), formal_name=meth.get("formal_name"))
+        print(meth.get("inputs"))
+        for inp_name, datatype in meth.get("inputs").items():
+            node.addInputPin(inp_name, parse_type_from_str(datatype))
+        if meth.get("extend")[0]:  # ARGS
+            pass
+        if meth.get("extend")[1]:  # KW
+            pass
+        for name, type in meth.get("outs").items():
+            node.addOutputPin(name, parse_type_from_str(type))
+        n = QGraphicsProxyWidget()
+        n.setWidget(node)
+        n.setPos(self.filter.pos())
+        n.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
+        n.setFlag(QGraphicsItem.ItemIsSelectable)
+        n.setFlag(QGraphicsItem.ItemIsMovable)
+        n.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges)
+        n.setFlag(QGraphicsItem.GraphicsItemFlag.ItemAcceptsInputMethod)
+        self.scene().addItem(NodeGraphicsItem(node))
+        self.filter.do_hide()
+
 
 class Filter(QWidget):
 
-    def __init__(self, vega, **kwargs):
+    def __init__(self, vega, view, **kwargs):
         super(Filter, self).__init__(**kwargs)
         self.vega = vega
+        self.view = view
         self.elements = []
         self.setupUi()
 
@@ -498,11 +607,10 @@ class Filter(QWidget):
         self.verticalLayout.addWidget(self.widget)
 
         self.retranslateUi()
-        self.add_section("TEST")
-        self.add_element("title", section="TEST")
-
-        for itg in self.vega.integrations:
-            print(itg)
+        for itg in self.vega.integrations.values():
+            self.add_section(itg.name)
+            for m in itg.methods.keys():
+                self.add_element(m, section=itg.name)
 
         QMetaObject.connectSlotsByName(self)
         self.lineEdit.textEdited.connect(self.start_filter)
@@ -514,7 +622,7 @@ class Filter(QWidget):
         self.lineEdit.setPlaceholderText(QCoreApplication.translate("Form", u"Filter", None))
 
     def add_section(self, name):
-        section = FilterSection(self.scrollAreaWidgetContents, name)
+        section = FilterSection(self.scrollAreaWidgetContents, name, self.view)
         self.verticalLayout_2.addWidget(section.groupBox)
         self.elements.append(section)
 
@@ -550,8 +658,11 @@ class Filter(QWidget):
 
 
 class FilterSection:
-    def __init__(self, parent, name):
-        self.groupBox = QGroupBox(parent)
+    def __init__(self, parent, name, view):
+        self.parent = parent
+        self.BP_view = view
+        self.name = name
+        self.groupBox = QGroupBox(self.parent)
         self.groupBox.setObjectName(u"{}".format(name))
         self.groupBox.setTitle(name)
         self.verticalLayout = QVBoxLayout(self.groupBox)
@@ -563,9 +674,10 @@ class FilterSection:
         return self.groupBox.title().title()
 
     def add_item(self, name):
-        label = QLabel(self.groupBox)
+        label = QPushButton(self.groupBox)
         label.setText(name)
-        self.verticalLayout.addWidget(label, 0, Qt.AlignTop)
+        label.clicked.connect(lambda: self.BP_view.spawn_node(name, self.name))
+        self.verticalLayout.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft)
         self.items.append(label)
 
     def hide_elements(self):
@@ -588,3 +700,70 @@ class FilterSection:
             self.groupBox.show()
         else:
             self.groupBox.hide()
+
+
+class LoadBar(QDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.setupUi()
+
+    def setupUi(self):
+        if not self.objectName():
+            self.setObjectName(u"Form")
+        self.resize(740, 208)
+        self.setStyleSheet(u"background-color: rgb(232, 236, 247);\n"
+                           "border-radius: 20px;")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.verticalLayout = QVBoxLayout(self)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.label = QLabel(self)
+        self.label.setObjectName(u"label")
+        font = QFont()
+        font.setFamilies([u"Super Mario 256"])
+        font.setPointSize(18)
+        font.setBold(True)
+        self.label.setFont(font)
+        self.label.setStyleSheet(
+            u"color: qlineargradient(spread:pad, x1:1, y1:0.5, x2:0, y2:0.5, stop:0 rgba(0, 0, 0, 184), stop:1 rgba(255, 255, 255, 0));")
+
+        self.verticalLayout.addWidget(self.label, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setObjectName(u"progressBar")
+        self.progressBar.setMaximumSize(QSize(16777215, 20))
+        self.progressBar.setStyleSheet(u"QProgressBar {\n"
+                                       "                border: 2px solid grey;\n"
+                                       "                border-radius: 8px;\n"
+                                       "                background: rgba(56, 60, 72, 20);\n"
+                                       "            }\n"
+                                       "\n"
+                                       "            QProgressBar::chunk {\n"
+                                       "                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 "
+                                       "rgb(0, 200, 255), stop:1 rgb(140, 0, 255));\n"
+                                       "                border-radius: 6px;\n"
+                                       "            }")
+        self.progressBar.setValue(50)
+
+        self.verticalLayout.addWidget(self.progressBar)
+
+        self.label_2 = QLabel(self)
+        self.label_2.setObjectName(u"label_2")
+        font1 = QFont()
+        font1.setFamilies([u"Yu Gothic UI"])
+        font1.setPointSize(9)
+        self.label_2.setFont(font1)
+
+        self.verticalLayout.addWidget(self.label_2, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+
+        self.retranslateUi()
+
+        QMetaObject.connectSlotsByName(self)
+
+    # setupUi
+
+    def retranslateUi(self):
+        self.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
+        self.label.setText(QCoreApplication.translate("Form", u"The integrations are loading!", None))
+        self.progressBar.setFormat("")
+        self.label_2.setText(QCoreApplication.translate("Form", u"Please, wait until the process is finished.", None))

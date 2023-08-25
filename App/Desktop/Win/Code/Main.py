@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QApplication
 import sys
 import os
 import socket
-import ok_ui as ui_m
+import ui.ok_ui as ui_m
 from random import randint
 
 
@@ -12,13 +12,15 @@ class Integration:
     def __init__(self, name, path):
         self.name = name
         self.enabled = True
+        self.display = None
         self.methods = {}
         self.load_class(path)
 
     def method_loader(self, e):
+        print(e.inputs)
         inp = {}
-        kw, args = False
-        for i in e[2]:
+        kw, args = False, False
+        for i in e.inputs:
             i = str(i)
             if i.startswith("**"):
                 kw = True
@@ -29,18 +31,19 @@ class Integration:
                     inp.update({i.split(":")[0]: i.split(":")[1]})
                 else:
                     inp.update({i: "object"})
-            self.methods.update({e[0]: {"func": e[1], "inputs": inp, "extend": [kw, args]}})
+            self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
+                                          "outs": e.output_types, "formal_name": e.formal_name}})
 
     def load_class(self, path):
         spec = importlib.util.spec_from_file_location(self.name, path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        methods = mod.vega_main().methods
+        veg = mod.vega_main()
+        methods = veg.methods
         for m in methods:
             self.method_loader(m)
-            print("loaded", m[0])
-        del sys.modules[spec.name]
-
+            print("loaded", m.name)
+        self.display = veg.display
 
 class Vega:
     def __init__(self):
@@ -48,26 +51,28 @@ class Vega:
         self.app = QApplication(sys.argv)
         self.integrations = {}
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
-        self.connection_portal = ConnectionPortal(6969)
+        # self.connection_portal = ConnectionPortal(6969)
+        self.load_bar = ui_m.LoadBar()
 
     def load_integrations(self):
+        self.load_bar.show()
         self.integrations.clear()
         with os.scandir(self.itg_folder_path) as scan:
             for entry in scan:
-                if not entry.is_file():
+                if entry.is_dir():
                     with os.scandir(os.path.abspath(entry)) as foldscan:
                         for file in foldscan:
                             if file.name == "main.py":
                                 itg = Integration(entry.name, f"{os.path.abspath(entry)}\main.py")
                                 self.integrations.update({itg.name: itg})
                                 break
+        self.load_bar.destroy(True)
 
-    def get_integrations(self):
-        return self.integrations
+    def add_loading(self):
+        pass
 
     def start_main_ui(self):
-        self.main_frame = ui_m.MainFrame(self)
-        self.main_frame.show()
+        self.main_frame = ui_m.MainFrame(self, show=True)
         sys.exit(self.app.exec())
 
 
@@ -84,6 +89,7 @@ class ConnectionPortal:
             self.start_connection()
         self.buffer = 1024
         self.command_query = []
+        Node()
 
     def start_connection(self):
         self.socket.bind(("127.0.0.1", self.port))
@@ -102,5 +108,5 @@ class ConnectionPortal:
 
 if __name__ == "__main__":
     vega = Vega()
-    vega.start_main_ui()
     vega.load_integrations()
+    vega.start_main_ui()

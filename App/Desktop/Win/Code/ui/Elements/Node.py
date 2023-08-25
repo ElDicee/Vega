@@ -7,10 +7,10 @@ from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
                            QFont, QFontDatabase, QGradient, QIcon,
                            QImage, QKeySequence, QLinearGradient, QPainter,
-                           QPalette, QPixmap, QRadialGradient, QTransform, QEnterEvent)
+                           QPalette, QPixmap, QRadialGradient, QTransform, QEnterEvent, QDragMoveEvent, QMouseEvent)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QSizePolicy,
                                QVBoxLayout, QWidget)
-from NodePin import Pin, PinType
+from App.Desktop.Win.Code.ui.Elements.NodePin import Pin, PinType
 import enum
 
 
@@ -18,10 +18,13 @@ class NodeType(enum.Enum):
     EXECUTION = "exec"
     OPERATOR = "oper"
 
+    def valueOf(name):
+        return NodeType.EXECUTION if name == "exec" else NodeType.OPERATOR
+
 
 class Node(QWidget):
 
-    def __init__(self, name:str, node_type:NodeType):
+    def __init__(self, name:str, node_type:NodeType, **kwargs):
         super(Node, self).__init__()
         self.input_pins = {}
         self.output_pins = {}
@@ -29,23 +32,32 @@ class Node(QWidget):
         self.name = name
         self.node_type = node_type
         self.border_color = [232, 236, 247]
+        self.selected = False
+        self.moving = False
+        self.offset_point = QPoint(0,0)
+        self.formal_name = self.name
+        if kwargs.get("formal_name"):
+            self.formal_name = kwargs.get("formal_name")
 
         self.setupUi()
 
     def setupUi(self):
         if not self.objectName():
             self.setObjectName(u"Node")
-        self.resize(313, 384)
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
         self.setStyleSheet(u"QWidget#Node{\n"
-                           "border-radius: 20px;\n"
-                           f"background-color: rgb({self.border_color[0]},{self.border_color[1]},{self.border_color[2]});\n"
-                           "border - color: rgb(0, 170, 255);\n"
-                           "border-width: 3px;\n"
+                           "background-color: rgb(232, 236, 247);\n"
+                           "border: 3px solid rgb(0, 170, 255);\n"
+                           "border-radius: 10px;"
                            "}")
         self.verticalLayout = QVBoxLayout(self)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(4, 2, 4, 2)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.titlecont = QWidget(self)
         self.titlecont.setObjectName(u"titlecont")
         self.titlecont.setMinimumSize(QSize(0, 30))
@@ -56,6 +68,11 @@ class Node(QWidget):
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.titlecont2 = QWidget(self.titlecont)
         self.titlecont2.setObjectName(u"titlecont2")
+        self.titlecont2.setStyleSheet(u"QWidget#titlecont2{\n"
+                                      "	background-color: rgb(56, 60, 72);\n"
+                                      "border-bottom-left-radius: 10px;\n"
+                                      "border-bottom-right-radius: 10px;\n"
+                                      "}")
         self.horizontalLayout_2 = QHBoxLayout(self.titlecont2)
         self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -63,8 +80,8 @@ class Node(QWidget):
         self.title = QLabel(self.titlecont2)
         self.title.setObjectName(u"title")
         font = QFont()
-        font.setFamilies([u"Star Cartoon"])
         self.title.setFont(font)
+        self.title.setStyleSheet(u"color: rgb(255, 255, 255);")
         self.title.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_2.addWidget(self.title)
@@ -85,49 +102,44 @@ class Node(QWidget):
             self.exec_spacepin.setMaximumSize(QSize(16777215, 40))
             self.horizontalLayout_4 = QHBoxLayout(self.exec_spacepin)
             self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-            self.exec_in_pin = Pin(type=PinType.EXEC_FLOW_PIN, valuename="exec_in", parent=self.exec_spacepin)
-            self.exec_in_pin.setObjectName(u"exec_in")
+            self.exec_input = Pin(type=PinType.EXEC_FLOW_PIN, valuename="in", parent=self.exec_spacepin)
+            self.horizontalLayout_4.addWidget(self.exec_input, 0, Qt.AlignLeft)
 
-            self.horizontalLayout_4.addWidget(self.exec_in_pin, 0, Qt.AlignLeft)
-
-            self.exec_out_pin = Pin(type=PinType.EXEC_FLOW_PIN, valuename="exec_out", parent=self.exec_spacepin)
-            self.exec_out_pin.setObjectName(u"exec_out")
-
-            self.horizontalLayout_4.addWidget(self.exec_out_pin, 0, Qt.AlignRight)
+            self.exec_out = Pin(type=PinType.EXEC_FLOW_PIN, valuename="out", parent=self.exec_spacepin)
+            self.horizontalLayout_4.addWidget(self.exec_out, 0, Qt.AlignRight)
 
             self.verticalLayout.addWidget(self.exec_spacepin)
 
         self.customzone = QWidget(self)
         self.customzone.setObjectName(u"customzone")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.customzone.sizePolicy().hasHeightForWidth())
-        self.customzone.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.customzone.sizePolicy().hasHeightForWidth())
+        self.customzone.setSizePolicy(sizePolicy1)
         self.customzone.setMaximumSize(QSize(16777215, 0))
 
         self.verticalLayout.addWidget(self.customzone)
 
         self.signalpincontent = QWidget(self)
         self.signalpincontent.setObjectName(u"signalpincontent")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.signalpincontent.sizePolicy().hasHeightForWidth())
-        self.signalpincontent.setSizePolicy(sizePolicy1)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.signalpincontent.sizePolicy().hasHeightForWidth())
+        self.signalpincontent.setSizePolicy(sizePolicy2)
         self.horizontalLayout_3 = QHBoxLayout(self.signalpincontent)
         self.horizontalLayout_3.setSpacing(0)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(0, 5, 0, 5)
         self.widget_4 = QWidget(self.signalpincontent)
         self.widget_4.setObjectName(u"widget_4")
-        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
-
         self.verticalLayout_2 = QVBoxLayout(self.widget_4)
+        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
 
-        self.horizontalLayout_3.addWidget(self.widget_4)
+        self.horizontalLayout_3.addWidget(self.widget_4, 0, Qt.AlignTop)
 
         self.widget_6 = QWidget(self.signalpincontent)
         self.widget_6.setObjectName(u"widget_6")
@@ -136,12 +148,10 @@ class Node(QWidget):
 
         self.widget_5 = QWidget(self.signalpincontent)
         self.widget_5.setObjectName(u"widget_5")
-
         self.verticalLayout_3 = QVBoxLayout(self.widget_5)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-
-        self.horizontalLayout_3.addWidget(self.widget_5)
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, -1)
+        self.horizontalLayout_3.addWidget(self.widget_5, 0, Qt.AlignTop)
 
         self.verticalLayout.addWidget(self.signalpincontent)
 
@@ -149,26 +159,22 @@ class Node(QWidget):
 
         QMetaObject.connectSlotsByName(self)
 
-        if self.node_type == NodeType.EXECUTION:
-            pass
-
-
-
     # setupUi
 
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate("Node", u"Form", None))
-        self.title.setText(QCoreApplication.translate("Node", self.name, None))
+        self.title.setText(QCoreApplication.translate("Node", self.formal_name, None))
 
     # retranslateUi
 
-    def addInputPin(self, name):
-        self.input_pins.update({name: None})
-        self.verticalLayout_2.addWidget(Pin(valuename=name, parent=self.widget_4))
+    def addInputPin(self, name, type):
+        pin = Pin(valuename=name, datatype=type, parent=self.widget_4)
+        self.input_pins.update({name: pin})
+        self.verticalLayout_2.addWidget(pin)
 
-    def addOutputPin(self, name):
+    def addOutputPin(self, name, type):
         self.output_pins.update({name: None})
-        self.verticalLayout_3.addWidget(Pin(type=PinType.OUTPUT_PIN, valuename=name, parent=self.widget_5))
+        self.verticalLayout_3.addWidget(Pin(type=PinType.OUTPUT_PIN, valuename=name, datatype=type, parent=self.widget_5))
 
     def setFunction(self, func):
         self.function = func
@@ -176,16 +182,16 @@ class Node(QWidget):
     def run(self):
         self.function(self.input_pins, self.output_pins)
 
+    def mousePressEvent(self, event: QMouseEvent):
+        self.moving = True
+        self.offset_point = event.globalPosition()
+        event.accept()
 
-def suma(inp, outp):
-    outp.update({"Result": {inp["Num1"] + inp["Num2"]}})
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        self.moving = False
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    n = Node("Suma", NodeType.OPERATOR)
-    n.addInputPin("Num1")
-    n.addInputPin("Num2")
-    n.addOutputPin("Result")
-    n.setFunction(suma)
-    n.show()
-    sys.exit(app.exec())
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self.moving:
+            #self.move(self.pos()+event.globalPosition().toPoint()-self.offset_point)
+            self.move(QPoint(self.pos().x()+event.globalPosition().x()-self.offset_point.x(), self.pos().y()+event.globalPosition().y()-self.offset_point.y()))
+            event.accept()

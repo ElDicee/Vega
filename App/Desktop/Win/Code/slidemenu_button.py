@@ -3,26 +3,27 @@
 ################################################################################
 ## Form generated from reading UI file 'slidemenu_button.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt ui Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+                            QMetaObject, QObject, QPoint, QRect,
+                            QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+                           QFont, QFontDatabase, QGradient, QIcon,
+                           QImage, QKeySequence, QLinearGradient, QPainter,
+                           QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QSizePolicy,
-    QWidget)
+                               QWidget)
+
 
 class Ui_Button(QWidget):
-    
+
     def __init__(self):
         super(Ui_Button, self).__init__()
-    
+
     def setupUi(self):
         if not self.objectName():
             self.setObjectName(u"Button")
@@ -35,13 +36,13 @@ class Ui_Button(QWidget):
         self.setMinimumSize(QSize(240, 50))
         self.setMaximumSize(QSize(240, 50))
         self.setStyleSheet(u"QWidget{\n"
-"background-color: rgb(56, 60, 72);\n"
-"border-radius: 10px;\n"
-"}\n"
-"\n"
-"QWidget:hover{\n"
-"	background-color: rgb(144, 155, 186);\n"
-"}")
+                           "background-color: rgb(56, 60, 72);\n"
+                           "border-radius: 10px;\n"
+                           "}\n"
+                           "\n"
+                           "QWidget:hover{\n"
+                           "	background-color: rgb(144, 155, 186);\n"
+                           "}")
         self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.itgstatusindicator = QWidget(self)
@@ -51,7 +52,7 @@ class Ui_Button(QWidget):
         self.itgstatusindicator.setMinimumSize(QSize(15, 15))
         self.itgstatusindicator.setMaximumSize(QSize(15, 15))
         self.itgstatusindicator.setStyleSheet(u"border-radius: 5px;\n"
-"background-color: rgb(38, 225, 54);")
+                                              "background-color: rgb(38, 225, 54);")
 
         self.horizontalLayout.addWidget(self.itgstatusindicator)
 
@@ -62,18 +63,17 @@ class Ui_Button(QWidget):
         font.setBold(True)
         self.label.setFont(font)
         self.label.setStyleSheet(u"color: rgb(255, 255, 255);\n"
-"background-color: rgba(255, 255, 255, 0);")
+                                 "background-color: rgba(255, 255, 255, 0);")
 
         self.horizontalLayout.addWidget(self.label)
-
 
         self.retranslateUi()
 
         QMetaObject.connectSlotsByName(self)
+
     # setupUi
 
     def retranslateUi(self):
         self.setWindowTitle(QCoreApplication.translate("Button", u"Form", None))
         self.label.setText(QCoreApplication.translate("Button", u"ITG NAME", None))
     # retranslateUi
-

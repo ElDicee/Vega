@@ -10,6 +10,12 @@
     <height>384</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -71,7 +77,7 @@ border-width: 3px;
        <widget class="QWidget" name="titlecont2" native="true">
         <property name="styleSheet">
          <string notr="true">QWidget#titlecont2{
-	background-color: rgb(216, 220, 230);
+	background-color: rgb(56, 60, 72);
 border-bottom-left-radius: 10px;
 border-bottom-right-radius: 10px;
 }</string>
@@ -96,6 +102,9 @@ border-bottom-right-radius: 10px;
           <widget class="QLabel" name="title">
            <property name="font">
             <font/>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 255, 255);</string>
            </property>
            <property name="text">
             <string>Title</string>
@@ -189,7 +198,7 @@ border-bottom-right-radius: 10px;
       <property name="bottomMargin">
        <number>5</number>
       </property>
-      <item>
+      <item alignment="Qt::AlignTop">
        <widget class="QWidget" name="widget_4" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
@@ -219,7 +228,7 @@ border-bottom-right-radius: 10px;
       <item>
        <widget class="QWidget" name="widget_6" native="true"/>
       </item>
-      <item>
+      <item alignment="Qt::AlignTop">
        <widget class="QWidget" name="widget_5" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="leftMargin">

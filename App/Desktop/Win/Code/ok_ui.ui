@@ -302,6 +302,15 @@ border-top-right-radius: 10px;</string>
           </item>
           <item>
            <widget class="QScrollArea" name="scrollArea">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="autoFillBackground">
+             <bool>true</bool>
+            </property>
             <property name="styleSheet">
              <string notr="true">QScrollArea {
     background-color: rgb(56, 60, 72);
@@ -312,7 +321,18 @@ QScrollBar:vertical {
 	background-color: rgb(56, 60, 72);
 }
 
+QScrollBar:horizontal {
+    width: 12px;
+	background-color: rgb(56, 60, 72);
+}
+
 QScrollBar::handle:vertical {
+    background: #AAAAAA;
+	background-color: rgb(230, 230, 230);
+	border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
     background: #AAAAAA;
 	background-color: rgb(230, 230, 230);
 	border-radius: 5px;
@@ -328,13 +348,30 @@ QScrollBar::add-page:vertical,
 QScrollBar::sub-page:vertical {
     background: none;
 }
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
 </string>
             </property>
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
             </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="lineWidth">
+             <number>0</number>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
             <property name="widgetResizable">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignHCenter|Qt::AlignTop</set>
             </property>
             <widget class="QWidget" name="scrollAreaWidgetContents">
              <property name="geometry">
@@ -345,10 +382,32 @@ QScrollBar::sub-page:vertical {
                <height>537</height>
               </rect>
              </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: rgb(56, 60, 72);</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4"/>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+             </layout>
             </widget>
            </widget>
           </item>

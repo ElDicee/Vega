@@ -3,20 +3,21 @@
 ################################################################################
 ## Form generated from reading UI file 'topbar.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt ui Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
+                            QMetaObject, QObject, QPoint, QRect,
+                            QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
                            QFont, QFontDatabase, QGradient, QIcon,
                            QImage, QKeySequence, QLinearGradient, QPainter,
                            QPalette, QPixmap, QRadialGradient, QTransform, QMouseEvent)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QPushButton,
-    QSizePolicy, QWidget)
+                               QSizePolicy, QWidget)
+
 
 class Topbar_Widget(QWidget):
 
@@ -37,9 +38,9 @@ class Topbar_Widget(QWidget):
         self.setMinimumSize(QSize(947, 43))
         self.setMaximumSize(QSize(16777215, 43))
         self.setStyleSheet(u"QWidget#Topbar{\n"
-"background-color: rgb(34, 37, 44);\n"
-"border-radius: 10px;\n"
-"}")
+                           "background-color: rgb(34, 37, 44);\n"
+                           "border-radius: 10px;\n"
+                           "}")
         self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.widget = QWidget(self)
@@ -54,15 +55,15 @@ class Topbar_Widget(QWidget):
         self.ToggleSlideMenuBtn.setMinimumSize(QSize(25, 25))
         self.ToggleSlideMenuBtn.setMaximumSize(QSize(25, 25))
         self.ToggleSlideMenuBtn.setStyleSheet(u"QPushButton#ToggleSlideMenuBtn{\n"
-"border-radius: 10px;\n"
-"background-color: rgb(34, 37, 44);\n"
-"}\n"
-"\n"
-"\n"
-"QPushButton#ToggleSlideMenuBtn:hover{\n"
-"	\n"
-"	background-color: rgb(102, 111, 132);\n"
-"}")
+                                              "border-radius: 10px;\n"
+                                              "background-color: rgb(34, 37, 44);\n"
+                                              "}\n"
+                                              "\n"
+                                              "\n"
+                                              "QPushButton#ToggleSlideMenuBtn:hover{\n"
+                                              "	\n"
+                                              "	background-color: rgb(102, 111, 132);\n"
+                                              "}")
         icon = QIcon()
         icon.addFile(u"./res/icons/Feather_white/menu.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.ToggleSlideMenuBtn.setIcon(icon)
@@ -82,7 +83,6 @@ class Topbar_Widget(QWidget):
         self.user_name.setStyleSheet(u"color: rgb(0, 170, 255);")
 
         self.horizontalLayout_3.addWidget(self.user_name)
-
 
         self.horizontalLayout.addWidget(self.widget, 0, Qt.AlignLeft)
 
@@ -105,17 +105,17 @@ class Topbar_Widget(QWidget):
         self.expandBtn.setSizePolicy(sizePolicy2)
         self.expandBtn.setMaximumSize(QSize(18, 18))
         self.expandBtn.setStyleSheet(u"QPushButton#expandBtn{\n"
-"background-color: rgb(38, 225, 54);\n"
-"border-radius: 8px;\n"
-"}\n"
-"\n"
-"QPushButton#expandBtn:hover{\n"
-"background-color: rgb(137, 225, 121);\n"
-"}\n"
-"\n"
-"QPushButton#expandBtn:pressed{\n"
-"background-color: rgb(61, 148, 225);\n"
-"}")
+                                     "background-color: rgb(38, 225, 54);\n"
+                                     "border-radius: 8px;\n"
+                                     "}\n"
+                                     "\n"
+                                     "QPushButton#expandBtn:hover{\n"
+                                     "background-color: rgb(137, 225, 121);\n"
+                                     "}\n"
+                                     "\n"
+                                     "QPushButton#expandBtn:pressed{\n"
+                                     "background-color: rgb(61, 148, 225);\n"
+                                     "}")
 
         self.horizontalLayout_2.addWidget(self.expandBtn)
 
@@ -125,17 +125,17 @@ class Topbar_Widget(QWidget):
         self.minBtn.setSizePolicy(sizePolicy2)
         self.minBtn.setMaximumSize(QSize(18, 18))
         self.minBtn.setStyleSheet(u"QPushButton#minBtn{\n"
-"background-color: rgb(255, 157, 44);\n"
-"border-radius: 8px;\n"
-"}\n"
-"\n"
-"QPushButton#minBtn:hover{\n"
-"background-color: rgb(255, 180, 89);\n"
-"}\n"
-"\n"
-"QPushButton#minBtn:pressed{\n"
-"background-color: rgb(61, 148, 225);\n"
-"}")
+                                  "background-color: rgb(255, 157, 44);\n"
+                                  "border-radius: 8px;\n"
+                                  "}\n"
+                                  "\n"
+                                  "QPushButton#minBtn:hover{\n"
+                                  "background-color: rgb(255, 180, 89);\n"
+                                  "}\n"
+                                  "\n"
+                                  "QPushButton#minBtn:pressed{\n"
+                                  "background-color: rgb(61, 148, 225);\n"
+                                  "}")
 
         self.horizontalLayout_2.addWidget(self.minBtn)
 
@@ -145,23 +145,21 @@ class Topbar_Widget(QWidget):
         self.closeBtn.setSizePolicy(sizePolicy2)
         self.closeBtn.setMaximumSize(QSize(18, 18))
         self.closeBtn.setStyleSheet(u"QPushButton#closeBtn{\n"
-"background-color: rgb(255, 53, 53);\n"
-"border-radius: 8px;\n"
-"}\n"
-"\n"
-"QPushButton#closeBtn:hover{\n"
-"background-color: rgb(255, 105, 105);\n"
-"}\n"
-"\n"
-"QPushButton#closeBtn:pressed{\n"
-"background-color: rgb(61, 148, 225);\n"
-"}")
+                                    "background-color: rgb(255, 53, 53);\n"
+                                    "border-radius: 8px;\n"
+                                    "}\n"
+                                    "\n"
+                                    "QPushButton#closeBtn:hover{\n"
+                                    "background-color: rgb(255, 105, 105);\n"
+                                    "}\n"
+                                    "\n"
+                                    "QPushButton#closeBtn:pressed{\n"
+                                    "background-color: rgb(61, 148, 225);\n"
+                                    "}")
 
         self.horizontalLayout_2.addWidget(self.closeBtn)
 
-
         self.horizontalLayout.addWidget(self.widget_2, 0, Qt.AlignRight)
-
 
         self.retranslateUi()
 
@@ -182,6 +180,7 @@ class Topbar_Widget(QWidget):
         self.expandBtn.setText("")
         self.minBtn.setText("")
         self.closeBtn.setText("")
+
     # retranslateUi
 
     def maximization(self):
@@ -210,7 +209,7 @@ class Topbar_Widget(QWidget):
     def mouseMoveEvent(self, event: QMouseEvent):
         if self.dragging:  #
             self.father.move(self.father.pos().x().real + (event.pos().x().real - self.moving_offset.x().real),
-                      self.father.pos().y().real + (event.pos().y().real - self.moving_offset.y().real))
+                             self.father.pos().y().real + (event.pos().y().real - self.moving_offset.y().real))
             event.accept()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
