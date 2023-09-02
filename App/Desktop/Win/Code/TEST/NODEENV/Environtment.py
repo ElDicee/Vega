@@ -20,10 +20,11 @@ class NodeType(enum.Enum):
 class PinType(enum.Enum):
     INPUT_PIN = "in"
     OUTPUT_PIN = "out"
-    EXEC_FLOW_PIN = "exec"
+    EXEC_FLOW_IN = "exec_in"
+    EXEC_FLOW_OUT = "exec_out"
 
     def valueOf(name):
-        return NodeType.EXECUTION if name == "exec" else NodeType.OPERATOR
+        return NodeType.EXECUTION if name == "exec_in" or name == "exec_out" else NodeType.OPERATOR
 
 
 def saveNodes(nodes):
@@ -173,7 +174,7 @@ class Node(QGraphicsItem):
 
     def add_output_pins(self, name, type):
         pin = Pin(self, type=type, valuename=name, pintype=PinType.OUTPUT_PIN)
-        pin.defRelPos(self.size[0] / 2, pin.getRelPos()[1])
+        pin.defRelPos(self.size[0]-CONST_PIN_HEIGHT, pin.getRelPos()[1])
         if len(self.output_pins) > 0:
             pin.defRelPos(pin.getRelPos()[0], [x for x in self.output_pins.values()][-1].getRelPos()[
                 1] + CONST_SPACE_BETWEEN_PINS + CONST_PIN_HEIGHT)
