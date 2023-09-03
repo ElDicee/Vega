@@ -634,11 +634,10 @@ QPushButton:hover{
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: rgb(232, 236, 247);
-border-radius: 10px;</string>
+          <string notr="true">border-radius: 10px;</string>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="HomePage"/>
          <widget class="QWidget" name="Blueprint">

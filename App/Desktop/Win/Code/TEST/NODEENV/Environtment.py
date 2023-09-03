@@ -8,6 +8,8 @@ from PySide6.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QGrap
 import json
 import uuid
 
+from App.Desktop.Win.Code.ui.NodeEditor.Editor import EditorWidget
+
 CONST_PIN_HEIGHT = 12
 CONST_SPACE_BETWEEN_PINS = 10
 
@@ -130,7 +132,7 @@ class Node(QGraphicsItem):
             self.formal_name = kwargs.get("formal_name")
 
         if self.node_type == NodeType.EXECUTION:
-            self.add_output_pins("In Flow", PinType.EXEC_FLOW_PIN)
+            self.add_output_pins("In Flow", None)
 
         self.add_input_pin("jorge", str)
         self.add_input_pin("juan", str)
@@ -194,12 +196,15 @@ class Node(QGraphicsItem):
 
 app = QApplication([])
 
-scene = QGraphicsScene()
+"""scene = QGraphicsScene()
 n1 = Node(scene, "a", NodeType.OPERATOR)
 n2 = Node(scene, "lol", NodeType.EXECUTION)
 create_connection(n1, n2)
 
 view = QGraphicsView(scene)
-view.show()
+view.show()"""
+
+v = EditorWidget()
+v.show()
 
 app.exec()

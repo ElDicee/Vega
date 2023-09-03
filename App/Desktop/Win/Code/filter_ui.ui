@@ -64,7 +64,7 @@ background-color: rgba(232, 236, 247, 100);
        <number>0</number>
       </property>
       <item>
-       <widget class="QLineEdit" name="lineEdit">
+       <widget class="QLineEdit" name="icon">
         <property name="styleSheet">
          <string notr="true">QLineEdit{
 border-radius: 0px;

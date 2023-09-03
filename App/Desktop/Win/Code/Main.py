@@ -45,6 +45,7 @@ class Integration:
             print("loaded", m.name)
         self.display = veg.display
 
+
 class Vega:
     def __init__(self):
         self.main_frame = None
@@ -89,7 +90,6 @@ class ConnectionPortal:
             self.start_connection()
         self.buffer = 1024
         self.command_query = []
-        Node()
 
     def start_connection(self):
         self.socket.bind(("127.0.0.1", self.port))

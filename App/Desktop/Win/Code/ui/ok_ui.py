@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,
 
 from App.Desktop.Win.Code.TEST.a import NodeGraphicsItem
 from App.Desktop.Win.Code.ui.Elements import Node, topbar, Node1
+from App.Desktop.Win.Code.ui.NodeEditor.Editor import BlueprintView, EditorWidget
 
 
 class MainFrame(QMainWindow):
@@ -306,8 +307,7 @@ class MainFrame(QMainWindow):
         sizePolicy.setHeightForWidth(self.canvas.sizePolicy().hasHeightForWidth())
         self.canvas.setSizePolicy(sizePolicy)
         self.canvas.setMinimumSize(QSize(300, 300))
-        self.canvas.setStyleSheet(u"background-color: rgb(232, 236, 247);\n"
-                                  "border-radius: 10px;")
+        self.canvas.setStyleSheet(u"border-radius: 10px;")
         self.HomePage = QWidget()
         self.HomePage.setObjectName(u"HomePage")
         self.canvas.addWidget(self.HomePage)
@@ -317,7 +317,7 @@ class MainFrame(QMainWindow):
         self.horizontalLayout_7.setSpacing(0)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
-        self.graphicsView = BlueprintView(self.vega)
+        self.graphicsView = EditorWidget(self.vega)
 
         self.horizontalLayout_7.addWidget(self.graphicsView)
 
@@ -444,7 +444,7 @@ class BlueprintView(QGraphicsView):
         super(BlueprintView, self).__init__()
         self.setScene(QGraphicsScene())
         self.setObjectName("BP_bg")
-        #self.setStyleSheet("QWidget#BP_bg{background-image: url(./res/images/bpbg.jpg)}")
+        # self.setStyleSheet("QWidget#BP_bg{background-image: url(./res/images/bpbg.jpg)}")
         self.setRenderHint(QPainter.Antialiasing)
         self.setWindowTitle("Node in QGraphicsItem")
         self.filter = Filter(self.vega, self, parent=self)
@@ -485,221 +485,6 @@ class BlueprintView(QGraphicsView):
         n.setFlag(QGraphicsItem.GraphicsItemFlag.ItemAcceptsInputMethod)
         self.scene().addItem(NodeGraphicsItem(node))
         self.filter.do_hide()
-
-
-class Filter(QWidget):
-
-    def __init__(self, vega, view, **kwargs):
-        super(Filter, self).__init__(**kwargs)
-        self.vega = vega
-        self.view = view
-        self.elements = []
-        self.setupUi()
-
-    def setupUi(self):
-        if not self.objectName():
-            self.setObjectName(u"Form")
-        self.resize(341, 412)
-        self.setStyleSheet(u"QWidget{\n"
-                           "background-color: rgba(232, 236, 247, 100);\n"
-                           "border-radius: 10px;\n"
-                           "}\n"
-                           "")
-        blur_effect = QGraphicsBlurEffect()
-        blur_effect.setBlurRadius(10)
-        self.setGraphicsEffect(blur_effect)
-        self.verticalLayout = QVBoxLayout(self)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
-        self.widget = QWidget(self)
-        self.widget.setObjectName(u"widget")
-        self.widget.setMinimumSize(QSize(0, 200))
-        self.widget.setStyleSheet(u"QWidget{\n"
-                                  "background-color: rgba(232, 236, 247, 100);\n"
-                                  "}\n"
-                                  "")
-        self.verticalLayout_4 = QVBoxLayout(self.widget)
-        self.verticalLayout_4.setSpacing(0)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.lineEdit = QLineEdit(self.widget)
-        self.lineEdit.setObjectName(u"lineEdit")
-        self.lineEdit.setStyleSheet(u"QLineEdit{\n"
-                                    "border-radius: 0px;\n"
-                                    "border-top-right-radius: 8px;\n"
-                                    "border-top-left-radius: 8px;\n"
-                                    "background-color: rgb(255, 255, 255);\n"
-                                    "border-bottom: 3px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(140, 0, 255), stop:1 rgb(0, 221, 255));\n"
-                                    "}\n"
-                                    "")
-
-        self.verticalLayout_4.addWidget(self.lineEdit)
-
-        self.scrollArea = QScrollArea(self.widget)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setStyleSheet(u"QScrollBar:vertical {\n"
-                                      "    background-color: rgb(56, 60, 72);\n"
-                                      "    width: 12px;\n"
-                                      "    border: 0.5px solid rgb(56, 60, 72);\n"
-                                      "    border-radius: 5px;\n"
-                                      "}\n"
-                                      "\n"
-                                      "QScrollBar::handle:vertical {\n"
-                                      "    background-color: rgb(56, 60, 72);\n"
-                                      "    border: 2px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgb(255, 0, 221), stop:1 rgb(255, 115, 0));\n"
-                                      "    border-radius: 5px;\n"
-                                      "}\n"
-                                      "\n"
-                                      "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {\n"
-                                      "    background-color: transparent;\n"
-                                      "    border: none;\n"
-                                      "    width: 0;\n"
-                                      "}\n"
-                                      "\n"
-                                      "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
-                                      "    background-color: transparent;\n"
-                                      "}")
-        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 319, 381))
-        self.scrollAreaWidgetContents.setStyleSheet(u"QGroupBox{\n"
-                                                    "	color: rgb(56, 60, 72);\n"
-                                                    "	font-size: 12px;\n"
-                                                    "	font-weight: bold;\n"
-                                                    "	background-color: rgba(239, 243, 254, 150);\n"
-                                                    "	border-radius: 10px;\n"
-                                                    "	box-shadow: 30px 30px 50px rgb(0, 0, 0);\n"
-                                                    "}\n"
-                                                    "\n"
-                                                    "QGroupBox::title {\n"
-                                                    "    subcontrol-origin: margin;\n"
-                                                    "    subcontrol-position: top left;\n"
-                                                    "    padding: 3px 5px;\n"
-                                                    "	color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.5, y2:0, x3:1, y3:0, stop:0 rgb(255, 8, 169), stop:1 rgb(255, 68, 6), stop:2 rgb(255, 213, 1));\n"
-                                                    "    font-size: 16px; \n"
-                                                    "    font-weight: bold; \n"
-                                                    "	border-radius: 3px;\n"
-                                                    "	font-family: Microsoft-YaHei;\n"
-                                                    "	border-radius: 10px;\n"
-                                                    "}\n"
-                                                    "QLabel{\n"
-                                                    "background-color: rgb(239, 243, 254);\n"
-                                                    "border-radius: 8px;\n"
-                                                    "}\n"
-                                                    "QLabel:hover{\n"
-                                                    "	color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 85, 255, 255), stop:1 rgba(1, 204, 187, 255));\n"
-                                                    "	border-width: 5px;\n"
-                                                    "	border-bottom-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 85, 255, 255), stop:1 rgba(0, 85, 255, 0"
-                                                    "));\n"
-                                                    "}")
-        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-
-        # ADD ALL MODULES
-
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        self.verticalLayout_4.addWidget(self.scrollArea)
-
-        self.verticalLayout.addWidget(self.widget)
-
-        self.retranslateUi()
-        for itg in self.vega.integrations.values():
-            self.add_section(itg.name)
-            for m in itg.methods.keys():
-                self.add_element(m, section=itg.name)
-
-        QMetaObject.connectSlotsByName(self)
-        self.lineEdit.textEdited.connect(self.start_filter)
-
-    # setupUi
-
-    def retranslateUi(self):
-        self.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.lineEdit.setPlaceholderText(QCoreApplication.translate("Form", u"Filter", None))
-
-    def add_section(self, name):
-        section = FilterSection(self.scrollAreaWidgetContents, name, self.view)
-        self.verticalLayout_2.addWidget(section.groupBox)
-        self.elements.append(section)
-
-    def add_element(self, element, section=None):
-        if section:
-            sec = self.get_section(section)
-            sec.add_item(element)
-        else:
-            label = QLabel(self.scrollAreaWidgetContents)
-            label.setText(element)
-            self.verticalLayout_2.addWidget(label)
-            self.elements.append(label)
-
-    def do_hide(self):
-        self.hide()
-        self.lineEdit.setText("")
-
-    def get_section(self, name):
-        sec = None
-        for x in self.elements:
-            if isinstance(x, FilterSection) and x.groupBox.title() == name:
-                sec = x
-                break
-        if sec is None: raise "Section not Found"
-        return sec
-
-    def start_filter(self, text):
-        for element in self.elements:
-            if isinstance(element, FilterSection):
-                element.showFiltered(text)
-            else:
-                element.show() if text in element.text() else element.hide()
-
-
-class FilterSection:
-    def __init__(self, parent, name, view):
-        self.parent = parent
-        self.BP_view = view
-        self.name = name
-        self.groupBox = QGroupBox(self.parent)
-        self.groupBox.setObjectName(u"{}".format(name))
-        self.groupBox.setTitle(name)
-        self.verticalLayout = QVBoxLayout(self.groupBox)
-        self.verticalLayout.setSpacing(3)
-        self.verticalLayout.setContentsMargins(-1, 25, -1, -1)
-        self.items = []
-
-    def __str__(self):
-        return self.groupBox.title().title()
-
-    def add_item(self, name):
-        label = QPushButton(self.groupBox)
-        label.setText(name)
-        label.clicked.connect(lambda: self.BP_view.spawn_node(name, self.name))
-        self.verticalLayout.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft)
-        self.items.append(label)
-
-    def hide_elements(self):
-        for item in self.items:
-            item.hide()
-
-    def show_elements(self):
-        for item in self.items:
-            item.show()
-
-    def showFiltered(self, s):
-        b = False
-        for item in self.items:
-            if s in item.text():
-                item.show()
-            else:
-                if not b: b = True
-                item.hide()
-        if not b:  # SI NO HI HA CAP ELEMENT DE LA SECCIÓ QUE NO CUMPLEIXI EL FILTRE
-            self.groupBox.show()
-        else:
-            self.groupBox.hide()
 
 
 class LoadBar(QDialog):
