@@ -1,13 +1,15 @@
 import uuid
 
 from PySide6 import QtWidgets
-from PySide6.QtCore import QPoint, Qt, QTimeLine, QLineF, Signal
-from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, QCursor, QDropEvent
+from PySide6.QtCore import QPoint, Qt, QTimeLine, QLineF, Signal, QRectF, QPointF, QSizeF
+from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, QCursor, QDropEvent, QKeyEvent, \
+    QTransform
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
-from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget
+from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent
 
+from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
-from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
 
 
 class EditorWidget(QWidget):
@@ -21,9 +23,8 @@ class EditorWidget(QWidget):
         self.splitter = QtWidgets.QSplitter()
         self.splitter.setStyleSheet("QSplitter{background-color: rgba(0,0,0,0)}")
 
-
         self.view = BlueprintView(vega)
-        #Filter
+        # Filter
         searchbar = NodeSearchBar(self)
 
         self.splitter.addWidget(searchbar)
@@ -54,6 +55,7 @@ class BlueprintView(QGraphicsView):
         gl_widget = QOpenGLWidget()
         self.setObjectName("BP_bg")
         self.setWindowTitle("Node in QGraphicsItem")
+        self.logic = NodeLogic(self)
 
         self.currentscale = 1
         self.pan = False
@@ -71,6 +73,7 @@ class BlueprintView(QGraphicsView):
         self.setFrameShape(QFrame.Shape.NoFrame)
 
         self.setScene(NodeScene())
+        # self.logic.install(self.scene())
 
     def wheelEvent(self, event: QWheelEvent):
 
@@ -103,7 +106,7 @@ class BlueprintView(QGraphicsView):
         elif method.get("node") == "event":
             node.add_pin("out", True, True)
         for name, type in method.get("inputs").items():
-            node.add_pin(name,False,False, datatype=type)
+            node.add_pin(name, False, False, datatype=type)
         for name, type in method.get("outs").items():
             node.add_pin(name, False, True, datatype=type)
 
@@ -214,23 +217,103 @@ class NodeScene(QGraphicsScene):
     def __init__(self):
         super().__init__()
         self.setSceneRect(0, 0, 9999, 9999)
+        self.event_nodes = []
+        self.last_node:Node = None
+        self.current_conn = None
+        self.alt = False
 
-    def dragEnterEvent(self, e):
-        e.acceptProposedAction()
+    # def dragEnterEvent(self, e):
+    #     e.acceptProposedAction()
 
-    def dropEvent(self, e):
-        # find item at these coordinates
-        item = self.itemAt(e.scenePos())
-        if item.setAcceptDrops:
-            print("dorp")
-            item.dropEvent(e)
+    # def dropEvent(self, e):
+    #     # find item at these coordinates
+    #     item = self.itemAt(e.scenePos())
+    #     if item.setAcceptDrops:
+    #         item.dropEvent(e)
 
     def dragMoveEvent(self, e):
         e.acceptProposedAction()
 
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
+        item = self.itemAt(event.scenePos(), QTransform())
+
+        if isinstance(item, Pin):
+            if self.alt:
+                item.connection.delete()
+            else:
+                self.current_conn = Connection()
+                self.addItem(self.current_conn)
+                self.current_conn.start_pin = item
+                self.current_conn.start_pos = item.scenePos()
+                self.current_conn.end_pos = event.scenePos()
+                self.current_conn.updatePath()
+                return True
+
+        if self.last_node:
+            self.last_node.select_connections(False)
+
+        if isinstance(item, Node):
+            if self.last_node:
+                self.last_node.setSelected(False)
+            item.setSelected(True)
+            item.allowMove = True
+            item.select_connections(True)
+            self.last_node = item
+        else:
+            self.last_node.setSelected(False)
+            self.last_node = None
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key.Key_Delete:
+            for item in self.selectedItems():
+                if isinstance(item, (Connection, Node)):
+                    item.delete()
+            return True
+        elif event.key() == Qt.Key.Key_Alt:
+            self.alt = True
+
+    def keyReleaseEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key.Key_Alt:
+            self.alt = False
+            return True
+
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
+        if self.current_conn:
+            self.current_conn.end_pos = event.scenePos()
+            self.current_conn.updatePath()
+            return True
+        else:
+            if self.last_node and self.last_node.allowMove:
+                self.last_node.moveBy(event.scenePos().x()-self.last_node.scenePos().x(), event.scenePos().y()-self.last_node.scenePos().y())
+
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
+        item = self.itemAt(event.scenePos(), QTransform())
+        if self.current_conn:
+            if isinstance(item, Pin):
+                if self.current_conn.start_pin.can_connect_to(item):
+                    if item.connection:
+                        item.connection.delete()
+                    self.current_conn.start_pin.clear_connection()
+                    item.clear_connection()
+                    self.current_conn.set_end_pin(item)
+                    #self.current_conn.update_start_end_pos()
+                else:
+                    print("cant connect")
+                    self.current_conn.delete()
+                self.current_conn = None
+
+            if self.current_conn:
+                self.current_conn.delete()
+                self.current_conn = None
+                return True
+        else:
+            if isinstance(item, Node):
+                if item.allowMove:
+                    item.allowMove = False
+
+
 if __name__ == "__main__":
     import sys
-
 
     app = QtWidgets.QApplication(sys.argv)
 

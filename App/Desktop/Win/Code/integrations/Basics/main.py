@@ -1,15 +1,15 @@
 import App.Desktop.Win.Code.integrations.VegaAPI as api
 
 
-def addition(*args):
-    return sum(args)
+def addition(a: int, b: int):
+    return a+b
 
 
-def subtraction(*args):
-    return sum(map(lambda x: x * -1, args))
+def subtraction(a: int, b: int):
+    return a-b
 
 
-def multiplication(a: int or float, b: int or float):
+def multiplication(a: int, b: int):
     return a * b
 
 
@@ -25,9 +25,9 @@ def runServer(addr: str):
 
 def vega_main():
     vega = api.Vega_Portal()
-    vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": float}))
-    vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": float}))
-    vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": float}))
+    vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": int}))
+    vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": int}))
+    vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": int}))
     vega.add_method(api.Method(division, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(runServer, api.EXECUTION, outputs={"result": str}, formal_name="Run Server"))
     return vega

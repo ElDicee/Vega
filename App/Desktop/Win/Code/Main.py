@@ -17,22 +17,33 @@ class Integration:
         self.load_class(path)
 
     def method_loader(self, e):
-        print(e.inputs)
         inp = {}
         kw, args = False, False
         for i in e.inputs:
-            i = str(i)
             if i.startswith("**"):
                 kw = True
             elif i.startswith("*"):
                 args = True
             else:
                 if ":" in i:
-                    inp.update({i.split(":")[0]: i.split(":")[1]})
+                    print(i)
+                    inp.update({i.split(":")[0]: self.str_to_type(i.split(":")[1])})
                 else:
-                    inp.update({i: "object"})
+                    inp.update({i: object})
             self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
                                           "outs": e.output_types, "formal_name": e.formal_name}})
+
+    def str_to_type(self, name):
+        name = name.lstrip().rstrip()
+        if name.lower() == "int":
+            return int
+        if name.lower() == "str":
+            return str
+        if name.lower() == "float":
+            return float
+        if name.lower() == "object":
+            return object
+
 
     def load_class(self, path):
         spec = importlib.util.spec_from_file_location(self.name, path)

@@ -5,7 +5,7 @@ OPERATOR = "oper"
 
 
 class Method:
-    def __init__(self, func, type=EXECUTION, outputs=None, **kwargs):
+    def __init__(self, func, type=EXECUTION, outputs=None, event=False, **kwargs):
         if outputs is None:
             outputs = {"Output": object}
         self.name = func.__name__
@@ -15,6 +15,7 @@ class Method:
         self.custom_area = None
         self.output_types = outputs
         self.formal_name = self.name
+        self.event = False
         if kwargs.get("formal_name"):
             self.formal_name = kwargs.get("formal_name")
 

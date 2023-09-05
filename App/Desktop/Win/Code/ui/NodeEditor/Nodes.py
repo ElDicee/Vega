@@ -1,11 +1,26 @@
 from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF
-from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem
+from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphicsSceneMouseEvent, \
+    QGraphicsSceneDragDropEvent
+from enum import Enum
+
+
+def color_from_type(type):
+    if type == int:
+        return QColor(56, 200, 232)
+    elif type == float:
+        return QColor(25, 189, 25)
+    elif type == str:
+        return QColor(186, 43, 35)
+    elif type == object:
+        return QColor(227, 188, 70)
+    else:
+        return QColor(209, 204, 219)
 
 
 class Connection(QGraphicsPathItem):
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsSelectable)
         self.setPen(QPen(QColor(200, 200, 200), 2))
@@ -47,13 +62,13 @@ class Connection(QGraphicsPathItem):
         painter.drawPath(self.path())
 
     def delete(self):
+        self.scene().removeItem(self)
         if self.start_pin:
             self.start_pin.connection = None
             self.start_pin = None
         if self.end_pin:
             self.end_pin.connection = None
             self.end_pin = None
-        self.scene().removeItem(self)
 
     def set_start_pin(self, pin):
         self.start_pin = pin
@@ -88,6 +103,8 @@ class Pin(QGraphicsPathItem):
         self.name = valuename
         self.connection = None
         self.datatype = datatype
+        print(self.datatype)
+        self.sc = scene
 
         path = QPainterPath()
         path.addEllipse(-self.radius, -self.radius, 2 * self.radius, 2 * self.radius)
@@ -134,19 +151,21 @@ class Pin(QGraphicsPathItem):
             return False
         if pin.node == self.node:
             return False
-        return self.output != pin.output and pin.exec != self.exec
+        if pin.exec != self.exec:
+            return False
+        return self.output != pin.output and self.datatype == pin.datatype
 
     def paint(self, painter, option: None, widget=None):
         if self.exec:
             painter.setPen(Qt.GlobalColor.white)
         else:
-            painter.setPen(Qt.GlobalColor.cyan)
+            painter.setPen(color_from_type(self.datatype))
 
         if self.is_connected():
             if self.exec:
                 painter.setBrush(Qt.GlobalColor.white)
             else:
-                painter.setBrush(Qt.GlobalColor.blue)
+                painter.setPen(color_from_type(self.datatype))
         else:
             painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPath(self.path())
@@ -173,6 +192,7 @@ class Node(QGraphicsItem):
         self.title_color = QColor(123, 33, 177)
         self.size = QRectF()
         self.function = None
+        self.allowMove = False
 
         if not additional_widget:
             self.widget = QWidget()
@@ -335,4 +355,4 @@ class Node(QGraphicsItem):
         for pin in self.pins:
             if pin.connection:
                 pin.connection.highlight = value
-                pin.connecion.update_path()
+                pin.connection.updatePath()

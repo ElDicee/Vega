@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>412</height>
+    <width>378</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -120,8 +120,8 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>319</width>
-           <height>381</height>
+           <width>356</width>
+           <height>622</height>
           </rect>
          </property>
          <property name="styleSheet">
