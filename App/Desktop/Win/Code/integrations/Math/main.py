@@ -13,6 +13,8 @@ def subtraction(*args):
 def multiplication(a: int or float, b: int or float):
     return a * b
 
+def test_event():
+    pass
 
 def division(a, b):
     if b == 0:

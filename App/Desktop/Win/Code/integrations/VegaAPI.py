@@ -15,7 +15,7 @@ class Method:
         self.custom_area = None
         self.output_types = outputs
         self.formal_name = self.name
-        self.event = False
+        self.event = event
         if kwargs.get("formal_name"):
             self.formal_name = kwargs.get("formal_name")
 
