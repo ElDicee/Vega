@@ -72,11 +72,13 @@ class Connection(QGraphicsPathItem):
 
     def set_start_pin(self, pin):
         self.start_pin = pin
-        self.start_pin.connection = self
+        self.start_pos = pin.scenePos()
+        pin.connection = self
 
     def set_end_pin(self, pin):
         self.end_pin = pin
-        self.end_pin.connection = self
+        self.end_pos = pin.scenePos()
+        pin.connection = self
 
     def nodes(self):
         return self.start_pin.node(), self.end_pin.node()
@@ -87,7 +89,7 @@ class Connection(QGraphicsPathItem):
         if self.start_pin:
             self.start_pos = self.start_pin.scenePos()
         if self.end_pin:
-            self.end_pin = self.end_pin.scenePos()
+            self.end_pos = self.end_pin.scenePos()
         self.updatePath()
 
 

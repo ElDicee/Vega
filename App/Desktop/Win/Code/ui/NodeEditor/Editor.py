@@ -218,7 +218,7 @@ class NodeScene(QGraphicsScene):
         super().__init__()
         self.setSceneRect(0, 0, 9999, 9999)
         self.event_nodes = []
-        self.last_node:Node = None
+        self.last_node: Node = None
         self.current_conn = None
         self.alt = False
 
@@ -243,8 +243,7 @@ class NodeScene(QGraphicsScene):
             else:
                 self.current_conn = Connection()
                 self.addItem(self.current_conn)
-                self.current_conn.start_pin = item
-                self.current_conn.start_pos = item.scenePos()
+                self.current_conn.set_start_pin(item)
                 self.current_conn.end_pos = event.scenePos()
                 self.current_conn.updatePath()
                 return True
@@ -284,7 +283,12 @@ class NodeScene(QGraphicsScene):
             return True
         else:
             if self.last_node and self.last_node.allowMove:
-                self.last_node.moveBy(event.scenePos().x()-self.last_node.scenePos().x(), event.scenePos().y()-self.last_node.scenePos().y())
+                self.last_node.moveBy(event.scenePos().x() - self.last_node.scenePos().x(),
+                                      event.scenePos().y() - self.last_node.scenePos().y())
+                for pin in self.last_node.pins:
+                    if pin.connection:
+                        pin.connection.update_start_end_pos()
+                        pin.connection.updatePath()
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         item = self.itemAt(event.scenePos(), QTransform())
@@ -293,10 +297,11 @@ class NodeScene(QGraphicsScene):
                 if self.current_conn.start_pin.can_connect_to(item):
                     if item.connection:
                         item.connection.delete()
-                    self.current_conn.start_pin.clear_connection()
-                    item.clear_connection()
+                    print("hi")
+                    # self.current_conn.start_pin.clear_connection()
+                    # item.clear_connection()
                     self.current_conn.set_end_pin(item)
-                    #self.current_conn.update_start_end_pos()
+                    self.current_conn.update_start_end_pos()
                 else:
                     print("cant connect")
                     self.current_conn.delete()
