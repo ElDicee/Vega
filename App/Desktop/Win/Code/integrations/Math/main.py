@@ -4,6 +4,8 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from App.Desktop.Win.Code.integrations.VegaAPI import Event
 
 
+CALCULATE_EVENT = Event("Calculate Event")
+
 def addition(*args):
     return sum(args)
 
@@ -34,7 +36,7 @@ def vega_main():
     vega = api.Vega_Portal()
     vega.set_name("Math")
     vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": float}))
-    vega.add_event(Event("Calculate Event"))
+    vega.add_event(CALCULATE_EVENT)
     vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(division, api.OPERATOR, outputs={"result": float}))
@@ -44,4 +46,6 @@ def vega_main():
 
 
 if __name__ == "__main__":
-    pass
+    while True:
+        if int(input("num: ")) > 5:
+            CALCULATE_EVENT.emit("Hello World!")

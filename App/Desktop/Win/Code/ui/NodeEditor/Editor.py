@@ -265,8 +265,9 @@ class NodeScene(QGraphicsScene):
             item.select_connections(True)
             self.last_node = item
         else:
-            self.last_node.setSelected(False)
-            self.last_node = None
+            if self.last_node:
+                self.last_node.setSelected(False)
+                self.last_node = None
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Delete:

@@ -1,6 +1,7 @@
 from inspect import signature
 import socket
 import os
+import uuid
 
 EXECUTION = "exec"
 OPERATOR = "oper"
@@ -36,8 +37,10 @@ class Event:
                 for line in file.readlines():
                     if "Port:" in line:
                         soc.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
+                        print("Connected")
                         data = {"": {"event": self.name, "data": d}}
                         soc.send(data)
+                        print("Sent")
         except:
             pass
         soc.close()

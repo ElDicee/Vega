@@ -94,6 +94,7 @@ class Vega:
         self.main_frame = None
         self.app = QApplication(sys.argv)
         self.integrations = {}
+        self.event_manager = EventManager()
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
         self.connection_portal = ConnectionPortal(7778)
         self.connection_thread = ConnectionThread(self.connection_portal)
@@ -129,10 +130,11 @@ class Vega:
 
 
 class EventManager:
+
     instance = None
 
     def __init__(self):
-        self.instance = self
+        setattr(EventManager, "instance", self)
         self.event_queue = []
         self.event_nodes = []
 
@@ -164,6 +166,7 @@ class ConnectionPortal:
         client, addr = self.socket.accept()
         data = json.loads(client.recv(self.buffer).decode())
         if data:
+            print(data)
             for node in EventManager.get_instance().event_nodes:
                 if node.name == data.values()[0].get("event"):
                     pass
