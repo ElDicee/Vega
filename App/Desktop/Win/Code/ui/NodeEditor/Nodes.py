@@ -4,6 +4,8 @@ from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphi
     QGraphicsSceneDragDropEvent
 from enum import Enum
 
+from App.Desktop.Win.Code.Main import EventManager
+
 
 def color_from_type(type):
     if type == int:
@@ -204,12 +206,13 @@ class Node(QGraphicsItem):
             self.widget.resize(0, 0)
         else:
             self.widget = additional_widget
-
         self.type_text = section
         self.width = 20
         self.height = 20
         self.pins = []
         self.uuid = None
+        self.computed_data = None
+        self.event = False
 
         self.node_color = QColor(20, 20, 20, 200)
         self.title_path = QPainterPath()
@@ -348,6 +351,8 @@ class Node(QGraphicsItem):
         for connection in [(con for con in pin.connections) for pin in self.pins if pin.is_connected()]:
             connection.delete()
         self.scene().removeItem(self)
+        if self in EventManager.get_instance().event_nodes:
+            EventManager.get_instance().event_nodes.remove(self)
 
     def get_pin(self, name):
         for pin in self.pins:

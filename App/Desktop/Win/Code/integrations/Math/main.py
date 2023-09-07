@@ -1,6 +1,8 @@
 import App.Desktop.Win.Code.integrations.VegaAPI as api
 from PySide6 import QtCore, QtGui, QtWidgets
 
+from App.Desktop.Win.Code.integrations.VegaAPI import Event
+
 
 def addition(*args):
     return sum(args)
@@ -13,8 +15,10 @@ def subtraction(*args):
 def multiplication(a: int or float, b: int or float):
     return a * b
 
+
 def test_event():
     pass
+
 
 def division(a, b):
     if b == 0:
@@ -25,12 +29,19 @@ def division(a, b):
 def runServer(addr: str):
     return "hello"
 
+
 def vega_main():
     vega = api.Vega_Portal()
+    vega.set_name("Math")
     vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": float}))
+    vega.add_event(Event("Calculate Event"))
     vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(division, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(runServer, api.EXECUTION, outputs={"result": str}, formal_name="Run Server"))
     vega.add_display_screen(QtWidgets.QPushButton("CLICK ME!"))
     return vega
+
+
+if __name__ == "__main__":
+    pass

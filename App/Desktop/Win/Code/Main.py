@@ -1,20 +1,23 @@
 import importlib.util
 
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 import sys
 import os
 import socket
 import ui.ok_ui as ui_m
 from random import randint
+import json
 
 
 class Integration:
-    def __init__(self, name, path):
-        self.name = name
+    def __init__(self, path, vega):
+        self.name = None
         self.enabled = True
         self.display = None
         self.methods = {}
         self.load_class(path)
+        self.vega = vega
 
     def method_loader(self, e):
         inp = {}
@@ -44,13 +47,14 @@ class Integration:
         if name.lower() == "object":
             return object
 
-
     def load_class(self, path):
         spec = importlib.util.spec_from_file_location(self.name, path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         veg = mod.vega_main()
+        self.name = veg.name
         methods = veg.methods
+        veg.vega_main_software_class = self
         for m in methods:
             self.method_loader(m)
             print("loaded", m.name)
@@ -58,13 +62,19 @@ class Integration:
 
 
 class Vega:
+    instance = None
+
     def __init__(self):
         self.main_frame = None
         self.app = QApplication(sys.argv)
         self.integrations = {}
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
-        # self.connection_portal = ConnectionPortal(6969)
+        self.connection_portal = ConnectionPortal(7778)
         self.load_bar = ui_m.LoadBar()
+        self.instance = self
+        self.timer = QTimer()
+        self.timer.setInterval(250)
+        self.timer.connect(self.connection_portal.receive_data)
 
     def load_integrations(self):
         self.load_bar.show()
@@ -75,7 +85,7 @@ class Vega:
                     with os.scandir(os.path.abspath(entry)) as foldscan:
                         for file in foldscan:
                             if file.name == "main.py":
-                                itg = Integration(entry.name, f"{os.path.abspath(entry)}\main.py")
+                                itg = Integration(entry.name, f"{os.path.abspath(entry)}\main.py", self)
                                 self.integrations.update({itg.name: itg})
                                 break
         self.load_bar.destroy(True)
@@ -83,9 +93,26 @@ class Vega:
     def add_loading(self):
         pass
 
+    @classmethod
+    def get_instance(cls):
+        return cls.instance
+
     def start_main_ui(self):
         self.main_frame = ui_m.MainFrame(self, show=True)
         sys.exit(self.app.exec())
+
+
+class EventManager:
+    instance = None
+
+    def __init__(self):
+        self.instance = self
+        self.event_queue = []
+        self.event_nodes = []
+
+    @classmethod
+    def get_instance(cls):
+        return cls.instance
 
 
 class ConnectionPortal:
@@ -104,11 +131,21 @@ class ConnectionPortal:
 
     def start_connection(self):
         self.socket.bind(("127.0.0.1", self.port))
+        self.define_port()
         self.socket.listen(1)
 
     def receive_data(self):
         client, addr = self.socket.accept()
-        return client.recv(self.buffer)
+        data = json.loads(client.recv(self.buffer).decode())
+        if data:
+            for node in EventManager.get_instance().event_nodes:
+                if node.name == data.values()[0].get("event"):
+                    pass
+
+    def define_port(self):
+        with open(f"{os.getenv('APPDATA')}\Vega\ports.veg", "w") as file:
+            file.write(f"Port: {str(self.port)}")
+            file.close()
 
     def close_connection(self):
         self.socket.close()

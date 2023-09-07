@@ -7,6 +7,7 @@ from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, Q
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent
 
+from App.Desktop.Win.Code.Main import EventManager
 from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
 from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
@@ -106,7 +107,9 @@ class BlueprintView(QGraphicsView):
             node.add_pin("out", True, True)
         elif method.get("node") == "event":
             node.add_pin("out", True, True)
+            node.event = True
             self.scene().event_nodes.append(node)
+            EventManager.get_instance().event_nodes.append(node)
         for name, type in method.get("inputs").items():
             node.add_pin(name, False, False, datatype=type)
         for name, type in method.get("outs").items():
@@ -219,6 +222,7 @@ class NodeScene(QGraphicsScene):
         super().__init__()
         self.setSceneRect(0, 0, 9999, 9999)
         self.event_nodes = []
+        self.event_queue = []
         self.last_node = None
         self.current_conn = None
         self.alt = False
