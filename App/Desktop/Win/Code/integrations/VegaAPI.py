@@ -1,8 +1,6 @@
 from inspect import signature
 import socket
-from os import getenv
-
-from App.Desktop.Win.Code.integrations.VegaAPI import Event
+import os
 
 EXECUTION = "exec"
 OPERATOR = "oper"
@@ -27,6 +25,24 @@ class Method:
         self.custom_area = w
 
 
+class Event:
+    def __init__(self, name):
+        self.name = name
+
+    def emit(self, d):
+        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "r") as file:
+                for line in file.readlines():
+                    if "Port:" in line:
+                        soc.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
+                        data = {"": {"event": self.name, "data": d}}
+                        soc.send(data)
+        except:
+            pass
+        soc.close()
+
+
 class Vega_Portal:
     def __init__(self):
         self.methods = []
@@ -35,7 +51,7 @@ class Vega_Portal:
         self.vega_main_software_class = None
         self.events = []
 
-    def add_method(self, m:Method):
+    def add_method(self, m: Method):
         self.methods.append(m)
 
     def set_name(self, name):
@@ -44,7 +60,7 @@ class Vega_Portal:
     def add_display_screen(self, w):
         self.display = w
 
-    def add_event(self, e:Event):
+    def add_event(self, e: Event):
         if not e in self.events:
             self.events.append(e)
 
@@ -52,21 +68,3 @@ class Vega_Portal:
 def get_func_params(func):
     sign = signature(func)
     return [str(x) for x in sign.parameters.values()]
-
-
-class Event:
-    def __init__(self, name):
-        self.name = name
-
-    def emit(self, d):
-        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            with open(f"{getenv('APPDATA')}\Vega\ports.veg", "r") as file:
-                for line in file.readlines():
-                    if "Port:" in line:
-                        soc.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
-                        data = {"":{"event": self.name, "data": d}}
-                        soc.send(data)
-        except:
-            pass
-        soc.close()

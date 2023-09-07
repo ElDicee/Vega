@@ -25,6 +25,7 @@ def runServer(addr: str):
 
 def vega_main():
     vega = api.Vega_Portal()
+    vega.set_name("Basics")
     vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": int}))
     vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": int}))
     vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": int}))

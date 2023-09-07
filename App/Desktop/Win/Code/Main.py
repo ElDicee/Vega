@@ -1,6 +1,6 @@
 import importlib.util
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QThread, Signal
 from PySide6.QtWidgets import QApplication
 import sys
 import os
@@ -11,11 +11,12 @@ import json
 
 
 class Integration:
-    def __init__(self, path, vega):
-        self.name = None
+    def __init__(self, name, path, vega):
+        self.name = name
         self.enabled = True
         self.display = None
         self.methods = {}
+        self.events = []
         self.load_class(path)
         self.vega = vega
 
@@ -29,7 +30,6 @@ class Integration:
                 args = True
             else:
                 if ":" in i:
-                    print(i)
                     inp.update({i.split(":")[0]: self.str_to_type(i.split(":")[1])})
                 else:
                     inp.update({i: object})
@@ -57,27 +57,53 @@ class Integration:
         veg.vega_main_software_class = self
         for m in methods:
             self.method_loader(m)
-            print("loaded", m.name)
+            print("Loaded: ", m.name)
+        for e in veg.events:
+            self.events.append(e.name)
         self.display = veg.display
+
+
+def install_needed_files(files: dict): #https://www.pythoncheatsheet.org/cheatsheet/file-directory-path    https://stackoverflow.com/questions/13184414/how-can-i-get-the-path-to-the-appdata-directory-in-python
+    roaming = os.getenv("APPDATA")
+    vega_folder = ".vega"
+    fold_path = os.path.join(roaming, vega_folder)
+    if not vega_folder in os.listdir(roaming):
+        os.mkdir(fold_path)
+        for f, d in files:
+            with open(os.path.join(fold_path, f"{f}.veg"), "w") as file:
+                file.write(d)
+                file.close()
+    else:
+        with os.scandir(fold_path) as scan:
+            for entry in scan:
+                if entry.is_file() and entry.name[:-4] in files.keys():
+                    files.pop(entry.name[:-4])
+        for remaining in files:
+            with open(f"{os.path.join(fold_path, remaining)}.veg", "w") as scan:
+                scan.write(files.get(remaining))
+                scan.close()
 
 
 class Vega:
     instance = None
 
     def __init__(self):
+
+        install_needed_files({"ports": "Ports: 7773"})
+
         self.main_frame = None
         self.app = QApplication(sys.argv)
         self.integrations = {}
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
         self.connection_portal = ConnectionPortal(7778)
-        self.load_bar = ui_m.LoadBar()
+        self.connection_thread = ConnectionThread(self.connection_portal)
+        self.connection_thread.start()
+
+        # self.load_bar = ui_m.LoadBar()
         self.instance = self
-        self.timer = QTimer()
-        self.timer.setInterval(250)
-        self.timer.connect(self.connection_portal.receive_data)
 
     def load_integrations(self):
-        self.load_bar.show()
+        # self.load_bar.show()
         self.integrations.clear()
         with os.scandir(self.itg_folder_path) as scan:
             for entry in scan:
@@ -88,7 +114,7 @@ class Vega:
                                 itg = Integration(entry.name, f"{os.path.abspath(entry)}\main.py", self)
                                 self.integrations.update({itg.name: itg})
                                 break
-        self.load_bar.destroy(True)
+        # self.load_bar.destroy(True)
 
     def add_loading(self):
         pass
@@ -143,7 +169,7 @@ class ConnectionPortal:
                     pass
 
     def define_port(self):
-        with open(f"{os.getenv('APPDATA')}\Vega\ports.veg", "w") as file:
+        with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "w") as file:
             file.write(f"Port: {str(self.port)}")
             file.close()
 
@@ -152,6 +178,19 @@ class ConnectionPortal:
 
     def change_data_buffer(self, buf: int):
         self.buffer = max(buf, 1024)
+
+
+class ConnectionThread(QThread): #https://doc.qt.io/qtforpython-6/PySide6/QtCore/QThread.html
+
+    def __init__(self, connection):
+        super().__init__()
+        self.connection = connection
+
+    def run(self):
+        self.timer = QTimer()
+        self.timer.setInterval(250)
+        self.timer.timeout.connect(self.connection.receive_data)
+        self.timer.start()
 
 
 if __name__ == "__main__":
