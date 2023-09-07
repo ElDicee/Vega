@@ -4,6 +4,8 @@ from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphi
     QGraphicsSceneDragDropEvent
 from enum import Enum
 
+from App.Desktop.Win.Code.Main import EventManager
+
 
 def color_from_type(type):
     if type == int:
@@ -64,21 +66,21 @@ class Connection(QGraphicsPathItem):
     def delete(self):
         self.scene().removeItem(self)
         if self.start_pin:
-            self.start_pin.connection = None
+            self.start_pin.connections.remove(self)
             self.start_pin = None
         if self.end_pin:
-            self.end_pin.connection = None
+            self.end_pin.connections.remove(self)
             self.end_pin = None
 
     def set_start_pin(self, pin):
         self.start_pin = pin
         self.start_pos = pin.scenePos()
-        pin.connection = self
+        pin.connections.append(self)
 
     def set_end_pin(self, pin):
         self.end_pin = pin
         self.end_pos = pin.scenePos()
-        pin.connection = self
+        pin.connections.append(self)
 
     def nodes(self):
         return self.start_pin.node(), self.end_pin.node()
@@ -103,7 +105,7 @@ class Pin(QGraphicsPathItem):
         self.output = output
         self.node = parent
         self.name = valuename
-        self.connection = None
+        self.connections = []
         self.datatype = datatype
         print(self.datatype)
         self.sc = scene
@@ -142,11 +144,12 @@ class Pin(QGraphicsPathItem):
         self.text_path.addText(x, y, self.font, valuename)
 
     def is_connected(self):
-        return bool(self.connection)
+        return len(self.connections) > 0
 
-    def clear_connection(self):
-        if self.connection:
-            self.connection.delete()
+    # def clear_connections(self):
+    #     if self.is_connected():
+    #         for c in self.connections:
+    #             c.delete()
 
     def can_connect_to(self, pin):
         if not pin:
@@ -178,8 +181,10 @@ class Pin(QGraphicsPathItem):
             painter.drawPath(self.text_path)
 
     def itemChange(self, change, value):
-        if change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged and self.connection:
-            self.connection.update_start_end_pos()
+        if change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged and self.is_connected():
+            for x in self.connections:
+                x.update_start_end_pos()
+                x.updatePath()
         return value
 
 
@@ -201,12 +206,13 @@ class Node(QGraphicsItem):
             self.widget.resize(0, 0)
         else:
             self.widget = additional_widget
-
         self.type_text = section
         self.width = 20
         self.height = 20
         self.pins = []
         self.uuid = None
+        self.computed_data = None
+        self.event = False
 
         self.node_color = QColor(20, 20, 20, 200)
         self.title_path = QPainterPath()
@@ -341,9 +347,12 @@ class Node(QGraphicsItem):
         self.widget.move(-self.widget.size().width() / 2, total_height / 2 - self.widget.size().height() + 5)
 
     def delete(self):
-        for connection in [pin.connection for pin in self.pins if pin.connection]:
+        #for connection in [pin.connection for pin in self.pins if pin.is_connected()]:
+        for connection in [(con for con in pin.connections) for pin in self.pins if pin.is_connected()]:
             connection.delete()
         self.scene().removeItem(self)
+        if self in EventManager.get_instance().event_nodes:
+            EventManager.get_instance().event_nodes.remove(self)
 
     def get_pin(self, name):
         for pin in self.pins:
@@ -355,6 +364,7 @@ class Node(QGraphicsItem):
 
     def select_connections(self, value):
         for pin in self.pins:
-            if pin.connection:
-                pin.connection.highlight = value
-                pin.connection.updatePath()
+            if pin.is_connected():
+                for con in pin.connections:
+                    con.highlight = value
+                    con.updatePath()

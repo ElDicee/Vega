@@ -7,6 +7,7 @@ from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, Q
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent
 
+from App.Desktop.Win.Code.Main import EventManager
 from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
 from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
@@ -99,19 +100,22 @@ class BlueprintView(QGraphicsView):
         method = self.vega.integrations.get(section).methods.get(element)
         print(method)
         node = Node(method.get("formal_name"), section)
+        node.uuid = uuid.uuid4()
         node.set_function(method.get("func"))
         if method.get("node") == "exec":
             node.add_pin("in", True, False)
             node.add_pin("out", True, True)
         elif method.get("node") == "event":
             node.add_pin("out", True, True)
+            node.event = True
+            self.scene().event_nodes.append(node)
+            EventManager.get_instance().event_nodes.append(node)
         for name, type in method.get("inputs").items():
             node.add_pin(name, False, False, datatype=type)
         for name, type in method.get("outs").items():
             node.add_pin(name, False, True, datatype=type)
 
         node.build()
-        node.uuid = uuid.uuid4()
         node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
         self.scene().addItem(node)
 
@@ -218,7 +222,8 @@ class NodeScene(QGraphicsScene):
         super().__init__()
         self.setSceneRect(0, 0, 9999, 9999)
         self.event_nodes = []
-        self.last_node: Node = None
+        self.event_queue = []
+        self.last_node = None
         self.current_conn = None
         self.alt = False
 
@@ -239,7 +244,8 @@ class NodeScene(QGraphicsScene):
 
         if isinstance(item, Pin):
             if self.alt:
-                item.connection.delete()
+                for con in item.connections:
+                    con.delete()
             else:
                 self.current_conn = Connection()
                 self.addItem(self.current_conn)
@@ -286,17 +292,18 @@ class NodeScene(QGraphicsScene):
                 self.last_node.moveBy(event.scenePos().x() - self.last_node.scenePos().x(),
                                       event.scenePos().y() - self.last_node.scenePos().y())
                 for pin in self.last_node.pins:
-                    if pin.connection:
-                        pin.connection.update_start_end_pos()
-                        pin.connection.updatePath()
+                    if pin.is_connected():
+                        for con in pin.connections:
+                            con.update_start_end_pos()
+                            con.updatePath()
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         item = self.itemAt(event.scenePos(), QTransform())
         if self.current_conn:
             if isinstance(item, Pin):
                 if self.current_conn.start_pin.can_connect_to(item):
-                    if item.connection:
-                        item.connection.delete()
+                    if item.is_connected() and not item.output:
+                        item.connections[0].delete()
                     print("hi")
                     # self.current_conn.start_pin.clear_connection()
                     # item.clear_connection()
