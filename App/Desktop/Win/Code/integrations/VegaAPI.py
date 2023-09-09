@@ -1,3 +1,4 @@
+import json
 from inspect import signature
 import socket
 import os
@@ -26,9 +27,15 @@ class Method:
         self.custom_area = w
 
 
+class EventManager:
+    events = []
+
+
 class Event:
-    def __init__(self, name):
+    def __init__(self, name, itg_name, outputs=None):
         self.name = name
+        self.itg_name = itg_name
+        self.outputs = outputs
 
     def emit(self, d):
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,12 +44,13 @@ class Event:
                 for line in file.readlines():
                     if "Port:" in line:
                         soc.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
-                        print("Connected")
-                        data = {"": {"event": self.name, "data": d}}
-                        soc.send(data)
+                        print("Connected to port: ", int(line.split("Port:")[1].rstrip().lstrip()))
+                        data = {self.itg_name: {"event": self.name, "data": d}}
+                        print("data created")
+                        soc.send(json.dumps(data).encode())
                         print("Sent")
         except:
-            pass
+            soc.close()
         soc.close()
 
 
@@ -53,6 +61,7 @@ class Vega_Portal:
         self.name = None
         self.vega_main_software_class = None
         self.events = []
+        self.socket = None
 
     def add_method(self, m: Method):
         self.methods.append(m)

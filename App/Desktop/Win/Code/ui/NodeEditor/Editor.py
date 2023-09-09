@@ -97,23 +97,27 @@ class BlueprintView(QGraphicsView):
     def dropEvent(self, event: QDropEvent):
         section = event.mimeData().data("section").toStdString()
         element = event.mimeData().data("element").toStdString()
+        ev = event.mimeData().data("event").toStdString() == "True"
         method = self.vega.integrations.get(section).methods.get(element)
-        print(method)
-        node = Node(method.get("formal_name"), section)
+        print(ev)
+        node = Node(element if ev else method.get("formal_name"), section)
         node.uuid = uuid.uuid4()
-        node.set_function(method.get("func"))
-        if method.get("node") == "exec":
-            node.add_pin("in", True, False)
-            node.add_pin("out", True, True)
-        elif method.get("node") == "event":
+        if not ev:
+            node.set_function(method.get("func"))
+            if method.get("node") == "exec":
+                node.add_pin("in", True, False)
+                node.add_pin("out", True, True)
+            for name, type in method.get("inputs").items():
+                node.add_pin(name, False, False, datatype=type)
+            for name, type in method.get("outs").items():
+                node.add_pin(name, False, True, datatype=type)
+        elif ev:
             node.add_pin("out", True, True)
             node.event = True
-            self.scene().event_nodes.append(node)
-            EventManager.get_instance().event_nodes.append(node)
-        for name, type in method.get("inputs").items():
-            node.add_pin(name, False, False, datatype=type)
-        for name, type in method.get("outs").items():
-            node.add_pin(name, False, True, datatype=type)
+            EventManager.event_nodes.append(node)
+
+
+
 
         node.build()
         node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))

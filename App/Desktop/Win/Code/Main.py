@@ -1,6 +1,7 @@
 import importlib.util
+import time
 
-from PySide6.QtCore import QTimer, QThread, Signal
+from PySide6.QtCore import QTimer, QThread, Signal, QRunnable, Slot, QThreadPool, QObject
 from PySide6.QtWidgets import QApplication
 import sys
 import os
@@ -16,7 +17,7 @@ class Integration:
         self.enabled = True
         self.display = None
         self.methods = {}
-        self.events = []
+        self.events = {}
         self.load_class(path)
         self.vega = vega
 
@@ -59,11 +60,12 @@ class Integration:
             self.method_loader(m)
             print("Loaded: ", m.name)
         for e in veg.events:
-            self.events.append(e.name)
+            self.events.update({e.name: e.outputs})
         self.display = veg.display
 
 
-def install_needed_files(files: dict): #https://www.pythoncheatsheet.org/cheatsheet/file-directory-path    https://stackoverflow.com/questions/13184414/how-can-i-get-the-path-to-the-appdata-directory-in-python
+def install_needed_files(
+        files: dict):  # https://www.pythoncheatsheet.org/cheatsheet/file-directory-path    https://stackoverflow.com/questions/13184414/how-can-i-get-the-path-to-the-appdata-directory-in-python
     roaming = os.getenv("APPDATA")
     vega_folder = ".vega"
     fold_path = os.path.join(roaming, vega_folder)
@@ -85,7 +87,6 @@ def install_needed_files(files: dict): #https://www.pythoncheatsheet.org/cheatsh
 
 
 class Vega:
-    instance = None
 
     def __init__(self):
 
@@ -94,11 +95,11 @@ class Vega:
         self.main_frame = None
         self.app = QApplication(sys.argv)
         self.integrations = {}
-        self.event_manager = EventManager()
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
-        self.connection_portal = ConnectionPortal(7778)
-        self.connection_thread = ConnectionThread(self.connection_portal)
-        self.connection_thread.start()
+        self.thread_pool = QThreadPool()
+        worker = ConnectionWorker()
+        worker.received_data.connect(lambda x: print("Received data:", x))
+        self.thread_pool.start(worker)
 
         # self.load_bar = ui_m.LoadBar()
         self.instance = self
@@ -115,14 +116,6 @@ class Vega:
                                 itg = Integration(entry.name, f"{os.path.abspath(entry)}\main.py", self)
                                 self.integrations.update({itg.name: itg})
                                 break
-        # self.load_bar.destroy(True)
-
-    def add_loading(self):
-        pass
-
-    @classmethod
-    def get_instance(cls):
-        return cls.instance
 
     def start_main_ui(self):
         self.main_frame = ui_m.MainFrame(self, show=True)
@@ -130,70 +123,43 @@ class Vega:
 
 
 class EventManager:
+    event_queue = []
+    event_nodes = []
 
-    instance = None
+
+class ConnectionWorker(QRunnable):
+    received_data = Signal(dict)
 
     def __init__(self):
-        setattr(EventManager, "instance", self)
-        self.event_queue = []
-        self.event_nodes = []
-
-    @classmethod
-    def get_instance(cls):
-        return cls.instance
-
-
-class ConnectionPortal:
-    def __init__(self, port):
-        print("creating socket")
+        super().__init__()
+        self.port = 7778
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.port = port
+        self.connect()
+
+    @Slot()
+    def run(self):
+        while True:
+            client, addr = self.socket.accept()
+            data = client.recv(1024)
+            if data:
+                self.received_data.emit(json.loads(data.decode()))
+
+    def connect(self):
         try:
-            print("starting connection")
-            self.start_connection()
-        except OSError:
+            self.go_bind()
+        except:
             self.port = randint(49152, 65535)
-            self.start_connection()
-        self.buffer = 1024
-        self.command_query = []
-
-    def start_connection(self):
-        self.socket.bind(("127.0.0.1", self.port))
+            self.go_bind()
         self.define_port()
-        self.socket.listen(1)
 
-    def receive_data(self):
-        client, addr = self.socket.accept()
-        data = json.loads(client.recv(self.buffer).decode())
-        if data:
-            print(data)
-            for node in EventManager.get_instance().event_nodes:
-                if node.name == data.values()[0].get("event"):
-                    pass
+    def go_bind(self):
+        self.socket.bind(("127.0.0.1", self.port))
+        self.socket.listen(-1)
 
     def define_port(self):
         with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "w") as file:
             file.write(f"Port: {str(self.port)}")
             file.close()
-
-    def close_connection(self):
-        self.socket.close()
-
-    def change_data_buffer(self, buf: int):
-        self.buffer = max(buf, 1024)
-
-
-class ConnectionThread(QThread): #https://doc.qt.io/qtforpython-6/PySide6/QtCore/QThread.html
-
-    def __init__(self, connection):
-        super().__init__()
-        self.connection = connection
-
-    def run(self):
-        self.timer = QTimer()
-        self.timer.setInterval(250)
-        self.timer.timeout.connect(self.connection.receive_data)
-        self.timer.start()
 
 
 if __name__ == "__main__":

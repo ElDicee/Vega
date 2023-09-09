@@ -1,10 +1,15 @@
+import sys
+
+from PySide6.QtCore import QMetaObject, QCoreApplication
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTextEdit, QPushButton, QApplication
+
 import App.Desktop.Win.Code.integrations.VegaAPI as api
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from App.Desktop.Win.Code.integrations.VegaAPI import Event
 
+CALCULATE_EVENT = Event("Calculate Event", "Math")
 
-CALCULATE_EVENT = Event("Calculate Event")
 
 def addition(*args):
     return sum(args)
@@ -32,6 +37,44 @@ def runServer(addr: str):
     return "hello"
 
 
+class Ui_MainWindow(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.setupUi()
+
+    def setupUi(self):
+        if not self.objectName():
+            self.setObjectName(u"MainWindow")
+        self.resize(395, 238)
+        self.centralwidget = QWidget(self)
+        self.centralwidget.setObjectName(u"centralwidget")
+        self.verticalLayout = QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.textEdit = QTextEdit(self.centralwidget)
+        self.textEdit.setObjectName(u"textEdit")
+
+        self.verticalLayout.addWidget(self.textEdit)
+
+        self.send = QPushButton(self.centralwidget)
+        self.send.setObjectName(u"send")
+        self.send.clicked.connect(lambda: CALCULATE_EVENT.emit(self.textEdit.toPlainText()))
+
+        self.verticalLayout.addWidget(self.send)
+
+        self.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi()
+
+        QMetaObject.connectSlotsByName(self)
+
+    # setupUi
+
+    def retranslateUi(self):
+        self.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        self.send.setText(QCoreApplication.translate("MainWindow", u"Send", None))
+
+
 def vega_main():
     vega = api.Vega_Portal()
     vega.set_name("Math")
@@ -46,6 +89,7 @@ def vega_main():
 
 
 if __name__ == "__main__":
-    while True:
-        if int(input("num: ")) > 5:
-            CALCULATE_EVENT.emit("Hello World!")
+    app = QApplication(sys.argv)
+    w = Ui_MainWindow()
+    w.show()
+    sys.exit(app.exec())

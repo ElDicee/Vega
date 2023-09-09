@@ -127,7 +127,7 @@ class NodeSearchBar(QWidget):
             self.add_section(itg.name)
             for m in itg.methods.keys():
                 self.add_element(m, section=itg.name)
-            for e in itg.events:
+            for e in itg.events.keys():
                 self.add_element(e, section=itg.name)
 
     def add_section(self, name):
@@ -135,12 +135,12 @@ class NodeSearchBar(QWidget):
         self.contentLayout.addWidget(section)
         self.elements.append(section)
 
-    def add_element(self, element, section=None):
+    def add_element(self, element, section=None, event=False):
         if section:
             sec = self.get_section(section)
-            sec.add_item(element)
+            sec.add_item(element, event=event)
         else:
-            label = QLabel(self.scrollArea)
+            label = FilterElement(parent=self.scrollArea, isevent=event)
             label.setText(element)
             self.contentLayout.addWidget(label)
             self.elements.append(label)
@@ -164,9 +164,10 @@ class NodeSearchBar(QWidget):
 
 
 class FilterElement(QPushButton):
-    def __init__(self, section, **kwargs):
+    def __init__(self, section=None, isevent=False, **kwargs):
         super().__init__(**kwargs)
-        self.section:FilterSection = section
+        self.section: FilterSection = section
+        self.isevent = isevent
 
     def mousePressEvent(self, e: QMouseEvent):
         drag = QDrag(self)
@@ -174,6 +175,7 @@ class FilterElement(QPushButton):
         mime_data.setText(self.text())
         mime_data.setData("section", str(self.section.name).encode())
         mime_data.setData("element", self.text().encode())
+        mime_data.setData("event", str(self.isevent).encode())
         mime_data.item = self
         drag.setMimeData(mime_data)
 
@@ -185,8 +187,7 @@ class FilterElement(QPushButton):
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
         pass
-    #SPAWN NODE
-
+    # SPAWN NODE
 
 
 class FilterSection(QGroupBox):
@@ -204,8 +205,8 @@ class FilterSection(QGroupBox):
     def __str__(self):
         return self.title()
 
-    def add_item(self, name):
-        label = FilterElement(self, parent=self)
+    def add_item(self, name, event):
+        label = FilterElement(section=self, parent=self, isevent=event)
         label.setText(name)
         self.verticalLayout.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft)
         self.items.append(label)

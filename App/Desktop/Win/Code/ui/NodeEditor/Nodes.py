@@ -348,11 +348,13 @@ class Node(QGraphicsItem):
 
     def delete(self):
         #for connection in [pin.connection for pin in self.pins if pin.is_connected()]:
-        for connection in [(con for con in pin.connections) for pin in self.pins if pin.is_connected()]:
-            connection.delete()
+        for pin in self.pins:
+            if pin.is_connected():
+                for connection in pin.connections:
+                    connection.delete()
         self.scene().removeItem(self)
-        if self in Vega.get_instance().event_manager.event_nodes:
-            EventManager.get_instance().event_nodes.remove(self)
+        if self in EventManager.event_nodes:
+            EventManager.event_nodes.remove(self)
 
     def get_pin(self, name):
         for pin in self.pins:
