@@ -116,9 +116,6 @@ class BlueprintView(QGraphicsView):
             node.event = True
             EventManager.event_nodes.append(node)
 
-
-
-
         node.build()
         node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
         self.scene().addItem(node)

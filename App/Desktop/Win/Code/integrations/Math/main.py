@@ -53,12 +53,13 @@ class Ui_MainWindow(QMainWindow):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.textEdit = QTextEdit(self.centralwidget)
         self.textEdit.setObjectName(u"textEdit")
+        conn = api.VegaConnection()
 
         self.verticalLayout.addWidget(self.textEdit)
 
         self.send = QPushButton(self.centralwidget)
         self.send.setObjectName(u"send")
-        self.send.clicked.connect(lambda: CALCULATE_EVENT.emit(self.textEdit.toPlainText()))
+        self.send.clicked.connect(lambda: conn.emit(CALCULATE_EVENT, self.textEdit.toPlainText()))
 
         self.verticalLayout.addWidget(self.send)
 

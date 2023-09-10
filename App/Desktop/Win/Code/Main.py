@@ -97,8 +97,7 @@ class Vega:
         self.integrations = {}
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
         self.thread_pool = QThreadPool()
-        worker = ConnectionWorker()
-        worker.received_data.connect(lambda x: print("Received data:", x))
+        worker = ConnectionServerWorker()
         self.thread_pool.start(worker)
 
         # self.load_bar = ui_m.LoadBar()
@@ -127,22 +126,40 @@ class EventManager:
     event_nodes = []
 
 
-class ConnectionWorker(QRunnable):
+class ConnectionSignals(QObject):
     received_data = Signal(dict)
+
+
+class ConnectionWorker(QRunnable):
+
+    def __init__(self, client, addr):
+        super().__init__()
+        self.client = client
+        self.addr = addr
+        self.signals = ConnectionSignals()
+
+    @Slot()
+    def run(self):
+        data = self.client.recv(1024)
+        if data:
+            self.signals.received_data.emit(json.loads(data.decode()))
+
+
+class ConnectionServerWorker(QRunnable):
 
     def __init__(self):
         super().__init__()
         self.port = 7778
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.thread_pool = QThreadPool()
         self.connect()
 
     @Slot()
     def run(self):
         while True:
             client, addr = self.socket.accept()
-            data = client.recv(1024)
-            if data:
-                self.received_data.emit(json.loads(data.decode()))
+            conn = ConnectionWorker(client, addr)
+            self.thread_pool.start(conn)
 
     def connect(self):
         try:

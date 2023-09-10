@@ -2,7 +2,9 @@ import json
 from inspect import signature
 import socket
 import os
-import uuid
+import threading
+
+from PySide6.QtCore import QObject, Signal
 
 EXECUTION = "exec"
 OPERATOR = "oper"
@@ -27,31 +29,54 @@ class Method:
         self.custom_area = w
 
 
-class EventManager:
-    events = []
-
-
 class Event:
     def __init__(self, name, itg_name, outputs=None):
         self.name = name
         self.itg_name = itg_name
         self.outputs = outputs
 
-    def emit(self, d):
-        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+class ConnSignals(QObject):
+    received_data_from_vega = Signal(dict)
+
+
+class VegaConnection(socket.socket):
+
+    def __init__(self):
+        super().__init__(socket.AF_INET, socket.SOCK_STREAM)
+        self.buffer_size = 1024
+        self.try_connection()
+        self.is_closing = False
+        self.signals = ConnSignals()
+
+    def try_connection(self):
         try:
             with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "r") as file:
                 for line in file.readlines():
                     if "Port:" in line:
-                        soc.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
-                        print("Connected to port: ", int(line.split("Port:")[1].rstrip().lstrip()))
-                        data = {self.itg_name: {"event": self.name, "data": d}}
-                        print("data created")
-                        soc.send(json.dumps(data).encode())
-                        print("Sent")
+                        self.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
+                        self.receive()
         except:
-            soc.close()
-        soc.close()
+            self.close()
+            raise "VegaConnectionException"
+
+    def emit(self, e: Event, d):
+        self.sendall(json.dumps({"event": e.name, "itg": e.itg_name, "data": d}).encode())
+
+    def finishConnection(self):
+        self.is_closing = True
+
+    def receive(self):
+        threading.Thread(target=self.handleReceivedData).start()  # https://realpython.com/intro-to-python-threading/
+
+    def handleReceivedData(self):
+        while True:
+            data = self.recv(self.buffer_size).decode()
+            if data == "close_socket" or self.is_closing:
+                self.close()
+                break
+            else:
+                self.signals.emit(json.loads(data))
 
 
 class Vega_Portal:

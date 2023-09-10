@@ -11,6 +11,5 @@ while True:
             resp = s.recv(1024)
             if resp:
                 print(resp.decode())
-        s.close()
     except KeyboardInterrupt:
         s.close()
