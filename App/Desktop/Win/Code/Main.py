@@ -1,5 +1,4 @@
 import importlib.util
-import time
 
 from PySide6.QtCore import QTimer, QThread, Signal, QRunnable, Slot, QThreadPool, QObject
 from PySide6.QtWidgets import QApplication
@@ -142,6 +141,7 @@ class ConnectionWorker(QRunnable):
     def run(self):
         data = self.client.recv(1024)
         if data:
+            print(data)
             self.signals.received_data.emit(json.loads(data.decode()))
 
 

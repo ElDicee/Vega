@@ -45,9 +45,10 @@ class VegaConnection(socket.socket):
     def __init__(self):
         super().__init__(socket.AF_INET, socket.SOCK_STREAM)
         self.buffer_size = 1024
-        self.try_connection()
         self.is_closing = False
         self.signals = ConnSignals()
+        self.try_connection()
+
 
     def try_connection(self):
         try:
@@ -76,7 +77,7 @@ class VegaConnection(socket.socket):
                 self.close()
                 break
             else:
-                self.signals.emit(json.loads(data))
+                self.signals.received_data_from_vega.emit(json.loads(data))
 
 
 class Vega_Portal:
