@@ -88,7 +88,6 @@ def install_needed_files(
 class Vega:
 
     def __init__(self):
-
         install_needed_files({"ports": "Ports: 7773"})
 
         self.main_frame = None
@@ -96,11 +95,10 @@ class Vega:
         self.integrations = {}
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
         self.thread_pool = QThreadPool()
-        worker = ConnectionServerWorker()
-        self.thread_pool.start(worker)
+        self.worker = ConnectionServerWorker()
+        self.thread_pool.start(self.worker)
 
         # self.load_bar = ui_m.LoadBar()
-        self.instance = self
 
     def load_integrations(self):
         # self.load_bar.show()
@@ -124,6 +122,15 @@ class EventManager:
     event_queue = []
     event_nodes = []
 
+    @classmethod
+    def get_event_node_by_name(cls, name):
+        node = None
+        for n in cls.event_nodes:
+            if n.title_text == name:
+                node = n
+                break
+        return node
+
 
 class ConnectionSignals(QObject):
     received_data = Signal(dict)
@@ -131,10 +138,11 @@ class ConnectionSignals(QObject):
 
 class ConnectionWorker(QRunnable):
 
-    def __init__(self, client, addr):
+    def __init__(self, parent, client, addr):
         super().__init__()
         self.client = client
         self.addr = addr
+        self.parent = parent
         self.signals = ConnectionSignals()
 
     @Slot()
@@ -142,7 +150,7 @@ class ConnectionWorker(QRunnable):
         data = self.client.recv(1024)
         if data:
             print(data)
-            self.signals.received_data.emit(json.loads(data.decode()))
+            self.parent.signals.received_data.emit(json.loads(data.decode()))
 
 
 class ConnectionServerWorker(QRunnable):
@@ -151,6 +159,7 @@ class ConnectionServerWorker(QRunnable):
         super().__init__()
         self.port = 7778
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.signals = ConnectionSignals()
         self.thread_pool = QThreadPool()
         self.connect()
 
@@ -158,7 +167,7 @@ class ConnectionServerWorker(QRunnable):
     def run(self):
         while True:
             client, addr = self.socket.accept()
-            conn = ConnectionWorker(client, addr)
+            conn = ConnectionWorker(self, client, addr)
             self.thread_pool.start(conn)
 
     def connect(self):

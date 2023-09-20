@@ -128,7 +128,7 @@ class NodeSearchBar(QWidget):
             for m in itg.methods.keys():
                 self.add_element(m, section=itg.name)
             for e in itg.events.keys():
-                self.add_element(e, section=itg.name)
+                self.add_element(e, section=itg.name, event=True)
 
     def add_section(self, name):
         section = FilterSection(self.scrollArea, name)

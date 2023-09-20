@@ -49,7 +49,6 @@ class VegaConnection(socket.socket):
         self.signals = ConnSignals()
         self.try_connection()
 
-
     def try_connection(self):
         try:
             with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "r") as file:

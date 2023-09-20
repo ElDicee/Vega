@@ -7,7 +7,7 @@ from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, Q
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent
 
-from App.Desktop.Win.Code.Main import EventManager
+from App.Desktop.Win.Code.Main import EventManager, Vega
 from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
 from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
@@ -73,7 +73,7 @@ class BlueprintView(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setFrameShape(QFrame.Shape.NoFrame)
 
-        self.setScene(NodeScene())
+        self.setScene(NodeScene(vega))
         # self.logic.install(self.scene())
 
     def wheelEvent(self, event: QWheelEvent):
@@ -97,12 +97,15 @@ class BlueprintView(QGraphicsView):
     def dropEvent(self, event: QDropEvent):
         section = event.mimeData().data("section").toStdString()
         element = event.mimeData().data("element").toStdString()
-        ev = event.mimeData().data("event").toStdString() == "True"
-        method = self.vega.integrations.get(section).methods.get(element)
+        ev = event.mimeData().data("event").toStdString()
         print(ev)
-        node = Node(element if ev else method.get("formal_name"), section)
-        node.uuid = uuid.uuid4()
+        ev = ev == "True"
+        print(ev)
+
         if not ev:
+            method = self.vega.integrations.get(section).methods.get(element)
+            node = Node(method.get("formal_name"), section)
+            node.uuid = uuid.uuid4()
             node.set_function(method.get("func"))
             if method.get("node") == "exec":
                 node.add_pin("in", True, False)
@@ -112,10 +115,12 @@ class BlueprintView(QGraphicsView):
             for name, type in method.get("outs").items():
                 node.add_pin(name, False, True, datatype=type)
         elif ev:
+            node = Node(element, section)
+            node.uuid = uuid.uuid4()
             node.add_pin("out", True, True)
             node.event = True
             EventManager.event_nodes.append(node)
-
+            print(EventManager.event_nodes)
         node.build()
         node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
         self.scene().addItem(node)
@@ -219,11 +224,11 @@ class BlueprintView(QGraphicsView):
 
 class NodeScene(QGraphicsScene):
 
-    def __init__(self):
+    def __init__(self, vega):
         super().__init__()
         self.setSceneRect(0, 0, 9999, 9999)
         self.event_nodes = []
-        self.event_queue = []
+        vega.worker.signals.received_data.connect(self.process_event)
         self.last_node = None
         self.current_conn = None
         self.alt = False
@@ -236,6 +241,9 @@ class NodeScene(QGraphicsScene):
     #     item = self.itemAt(e.scenePos())
     #     if item.setAcceptDrops:
     #         item.dropEvent(e)
+
+    def process_event(self, data):
+        pass
 
     def dragMoveEvent(self, e):
         e.acceptProposedAction()
