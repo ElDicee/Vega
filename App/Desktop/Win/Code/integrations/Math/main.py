@@ -8,7 +8,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from App.Desktop.Win.Code.integrations.VegaAPI import Event
 
-CALCULATE_EVENT = Event("Calculate Event", "Math")
+CALCULATE_EVENT = Event("Calculate Event", "Math", outputs={"Result": float})
 
 
 def addition(*args):

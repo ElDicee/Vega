@@ -123,12 +123,15 @@ class NodeSearchBar(QWidget):
         for w in self.contentLayout.children():
             self.contentLayout.removeWidget(w)
             del w
+        print(self.parent().vega.events)
         for itg in self.parent().vega.integrations.values():
             self.add_section(itg.name)
             for m in itg.methods.keys():
                 self.add_element(m, section=itg.name)
-            for e in itg.events.keys():
-                self.add_element(e, section=itg.name, event=True)
+            event_route = itg.vega.events.get(itg.name)
+            if event_route:
+                for e in event_route.keys():
+                    self.add_element(e, section=itg.name, event=True)
 
     def add_section(self, name):
         section = FilterSection(self.scrollArea, name)
@@ -155,7 +158,6 @@ class NodeSearchBar(QWidget):
         return sec
 
     def start_filter(self, text):
-        print(text)
         for element in self.elements:
             if isinstance(element, FilterSection):
                 element.showFiltered(text)
