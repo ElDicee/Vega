@@ -69,7 +69,7 @@ class VegaConnection(socket.socket):
     def receive(self):
         threading.Thread(target=self.handleReceivedData).start()  # https://realpython.com/intro-to-python-threading/
 
-    def handleReceivedData(self):
+    def handleReceivedData(self): #per que rebi dades simultàneament a l'execució
         while True:
             data = self.recv(self.buffer_size).decode()
             if data == "close_socket" or self.is_closing:
