@@ -26,7 +26,7 @@ class MainFrame(QMainWindow):
     def setupUi(self):
         if not self.objectName():
             self.setObjectName(u"MainWindow")
-        self.resize(1112, 836)
+        self.resize(1112, 736)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -340,6 +340,7 @@ class MainFrame(QMainWindow):
             if itg.display is not None:
                 s = SlideButton(itg, parent=self.scrollAreaWidgetContents)
                 self.verticalLayout_4.addWidget(s, 0, Qt.AlignmentFlag.AlignTop)
+                self.addCanvasPanel(itg.name, itg.display)
 
     # setupUi
 
@@ -420,7 +421,7 @@ class SlideButton(QWidget):
         QMetaObject.connectSlotsByName(self)
 
     def mousePressEvent(self, event: QMouseEvent):
-        print("hello")
+        self.parent().parent().canvas.setCurrentWidget(self.parent().parent().canvaspanels[self.integration.name])
 
 
 def parse_type_from_str(s):
