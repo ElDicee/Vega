@@ -7,7 +7,6 @@ from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, Q
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent
 
-from App.Desktop.Win.Code.Main import EventManager, Vega
 from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
 from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
@@ -104,7 +103,7 @@ class BlueprintView(QGraphicsView):
 
         if not ev:
             method = self.vega.integrations.get(section).methods.get(element)
-            node = Node(method.get("formal_name"), section)
+            node = Node(method.get("formal_name"), section, self.vega)
             node.uuid = uuid.uuid4()
             node.set_function(method.get("func"))
             if method.get("node") == "exec":
@@ -114,16 +113,31 @@ class BlueprintView(QGraphicsView):
                 node.add_pin(name, False, False, datatype=type)
             for name, type in method.get("outs").items():
                 node.add_pin(name, False, True, datatype=type)
+            node.build()
+            node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
+            self.scene().addItem(node)
         elif ev:
-            node = Node(element, section)
-            node.uuid = uuid.uuid4()
-            node.add_pin("out", True, True)
-            node.event = True
-            EventManager.event_nodes.append(node)
-            print(EventManager.event_nodes)
-        node.build()
-        node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
-        self.scene().addItem(node)
+            n = self.vega.get_event_node_by_name(element)
+            if not n:
+                node = Node(element, section, self.vega)
+                node.uuid = uuid.uuid4()
+                node.add_pin("out", True, True)
+                node.event = True
+                for name, type in self.vega.events.get(section).get(element).items():
+                    node.add_pin(name, False, True, datatype=type)
+                self.vega.event_nodes.append(node)
+                node.build()
+                node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
+                self.scene().addItem(node)
+            else:
+                # self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - (event.x() - self.pan_start_x))
+                #
+                # self.verticalScrollBar().setValue(self.verticalScrollBar().value() - (event.y() - self.pan_start_y))
+                self.horizontalScrollBar().setValue(n.pos().x())
+
+                self.verticalScrollBar().setValue(n.pos().y())
+
+
 
     def scaling_time(self, x):
         f = 1.0 + self.scalings / 300.0

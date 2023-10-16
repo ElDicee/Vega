@@ -13,12 +13,12 @@ import json
 class Integration:
     def __init__(self, name, path, vega):
         self.name = name
+        self.vega = vega
         self.enabled = True
         self.display = None
         self.methods = {}
-        self.events = {}
         self.load_class(path)
-        self.vega = vega
+
 
     def method_loader(self, e):
         inp = {}
@@ -59,7 +59,7 @@ class Integration:
             self.method_loader(m)
             print("Loaded: ", m.name)
         for e in veg.events:
-            self.events.update({e.name: e.outputs})
+            self.vega.events.update({e.itg_name: {e.name: e.outputs}})
         self.display = veg.display
 
 
@@ -93,6 +93,8 @@ class Vega:
         self.main_frame = None
         self.app = QApplication(sys.argv)
         self.integrations = {}
+        self.events = {}
+        self.event_nodes = []
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
         self.thread_pool = QThreadPool()
         self.worker = ConnectionServerWorker()
@@ -117,20 +119,13 @@ class Vega:
         self.main_frame = ui_m.MainFrame(self, show=True)
         sys.exit(self.app.exec())
 
-
-class EventManager:
-    event_queue = []
-    event_nodes = []
-
-    @classmethod
-    def get_event_node_by_name(cls, name):
+    def get_event_node_by_name(self, name):
         node = None
-        for n in cls.event_nodes:
+        for n in self.event_nodes:
             if n.title_text == name:
                 node = n
                 break
         return node
-
 
 class ConnectionSignals(QObject):
     received_data = Signal(dict)

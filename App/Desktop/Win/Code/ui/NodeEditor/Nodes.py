@@ -2,9 +2,6 @@ from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF
 from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphicsSceneMouseEvent, \
     QGraphicsSceneDragDropEvent
-from enum import Enum
-
-from App.Desktop.Win.Code.Main import EventManager, Vega
 
 
 def color_from_type(type):
@@ -189,7 +186,7 @@ class Pin(QGraphicsPathItem):
 
 
 class Node(QGraphicsItem):
-    def __init__(self, name, section, additional_widget=None):
+    def __init__(self, name, section, vega, additional_widget=None):
         super().__init__()
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
@@ -200,6 +197,7 @@ class Node(QGraphicsItem):
         self.size = QRectF()
         self.function = None
         self.allowMove = False
+        self.vega = vega
 
         if not additional_widget:
             self.widget = QWidget()
@@ -353,8 +351,8 @@ class Node(QGraphicsItem):
                 for connection in pin.connections:
                     connection.delete()
         self.scene().removeItem(self)
-        if self in EventManager.event_nodes:
-            EventManager.event_nodes.remove(self)
+        if self in self.vega.event_nodes:
+            self.vega.event_nodes.remove(self)
 
     def get_pin(self, name):
         for pin in self.pins:
