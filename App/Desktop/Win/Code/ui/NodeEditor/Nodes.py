@@ -389,3 +389,4 @@ class Node(QGraphicsItem):
         if inp:
             in
         self.calculate_outputs()
+            
