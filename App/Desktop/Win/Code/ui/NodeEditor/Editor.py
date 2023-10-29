@@ -117,15 +117,20 @@ class BlueprintView(QGraphicsView):
             node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
             self.scene().addItem(node)
         elif ev:
-            n = self.vega.get_event_node_by_name(element)
+            n = self.vega.get_event_node_by_name_and_itg(section, element)
+
+            #CHECK NODES
+
             if not n:
                 node = Node(element, section, self.vega)
                 node.uuid = uuid.uuid4()
                 node.add_pin("out", True, True)
                 node.event = True
+                node.event_name = element
+                node.event_itg = section
                 for name, type in self.vega.events.get(section).get(element).items():
                     node.add_pin(name, False, True, datatype=type)
-                self.vega.event_nodes.append(node)
+                self.vega.event_nodes.update({section: {element: node}})
                 node.build()
                 node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
                 self.scene().addItem(node)

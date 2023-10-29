@@ -19,7 +19,6 @@ class Integration:
         self.methods = {}
         self.load_class(path)
 
-
     def method_loader(self, e):
         inp = {}
         kw, args = False, False
@@ -94,10 +93,10 @@ class Vega:
         self.app = QApplication(sys.argv)
         self.integrations = {}
         self.events = {}
-        self.event_nodes = []
+        self.event_nodes = {}  #{ "ITG": {}  }
         self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
         self.thread_pool = QThreadPool()
-        self.worker = ConnectionServerWorker()
+        self.worker = ConnectionServerWorker(parent=self)
         self.thread_pool.start(self.worker)
 
         # self.load_bar = ui_m.LoadBar()
@@ -119,13 +118,15 @@ class Vega:
         self.main_frame = ui_m.MainFrame(self, show=True)
         sys.exit(self.app.exec())
 
-    def get_event_node_by_name(self, name):
-        node = None
-        for n in self.event_nodes:
-            if n.title_text == name:
-                node = n
-                break
-        return node
+    def get_event_node_by_name_and_itg(self, itg, name):
+        n = None
+        if len(self.event_nodes) > 0:
+            if itg in self.event_nodes.keys():
+                if len(self.event_nodes.get(itg)) > 0:
+                    if name in self.event_nodes.get(itg).keys():
+                        n = self.event_nodes.get(itg).get(name)
+        return n
+
 
 class ConnectionSignals(QObject):
     received_data = Signal(dict)
@@ -133,26 +134,34 @@ class ConnectionSignals(QObject):
 
 class ConnectionWorker(QRunnable):
 
-    def __init__(self, parent, client, addr):
+    def __init__(self, parent, client, addr, vega):
         super().__init__()
         self.client = client
+        self.vega:Vega = vega
         self.addr = addr
         self.parent = parent
         self.signals = ConnectionSignals()
 
     @Slot()
     def run(self):
-        data = self.client.recv(1024)
-        if data:
-            print(data)
-            self.parent.signals.received_data.emit(json.loads(data.decode()))
+        while True:
+            data = self.client.recv(1024)
+            if data:
+                print(data.decode())
+                self.parent.signals.received_data.emit(json.loads(data.decode()))
+                data = json.loads(data)
+                self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
+                # data = json.loads(data)
+                # event_name = data.get("event")
+                # print(self.parent.parent.get_event_node_by_name(event_name))
 
 
 class ConnectionServerWorker(QRunnable):
 
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
         self.port = 7778
+        self.parent = parent
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.signals = ConnectionSignals()
         self.thread_pool = QThreadPool()
@@ -162,7 +171,7 @@ class ConnectionServerWorker(QRunnable):
     def run(self):
         while True:
             client, addr = self.socket.accept()
-            conn = ConnectionWorker(self, client, addr)
+            conn = ConnectionWorker(self, client, addr, self.parent)
             self.thread_pool.start(conn)
 
     def connect(self):

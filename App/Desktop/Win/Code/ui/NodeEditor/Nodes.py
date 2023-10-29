@@ -211,6 +211,8 @@ class Node(QGraphicsItem):
         self.uuid = None
         self.computed_data = None
         self.event = False
+        self.event_itg = None
+        self.event_name = None
 
         self.node_color = QColor(20, 20, 20, 200)
         self.title_path = QPainterPath()
@@ -351,8 +353,8 @@ class Node(QGraphicsItem):
                 for connection in pin.connections:
                     connection.delete()
         self.scene().removeItem(self)
-        if self in self.vega.event_nodes:
-            self.vega.event_nodes.remove(self)
+        if self.event:
+            self.vega.event_nodes.get(self.event_itg).pop(self.event_name)
 
     def get_pin(self, name):
         for pin in self.pins:
@@ -368,3 +370,22 @@ class Node(QGraphicsItem):
                 for con in pin.connections:
                     con.highlight = value
                     con.updatePath()
+
+    def get_input_pins(self):
+        pins = []
+        for p in self.pins:
+            if not p.output and not p.exec:
+                pins.append(p)
+        return pins if len(pins) > 0 else None
+
+    def calculate_outputs(self):
+        pass
+
+    def execute(self):
+        #CHECK NODE INPUTS AND CALCULATE NEEDED DATA
+        #PERFORM ACTION
+        #NEXT NODE
+        inp = self.get_input_pins()
+        if inp:
+            in
+        self.calculate_outputs()
