@@ -53,13 +53,16 @@ class Ui_MainWindow(QMainWindow):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.textEdit = QTextEdit(self.centralwidget)
         self.textEdit.setObjectName(u"textEdit")
-        conn = api.VegaConnection()
+        try:
+            self.conn = api.VegaConnection(False)
+        except:
+            self.conn = None
 
         self.verticalLayout.addWidget(self.textEdit)
 
         self.send = QPushButton(self.centralwidget)
         self.send.setObjectName(u"send")
-        self.send.clicked.connect(lambda: conn.emit(CALCULATE_EVENT, self.textEdit.toPlainText()))
+        self.send.clicked.connect(lambda: self.send_data(CALCULATE_EVENT, self.textEdit.toPlainText()))
 
         self.verticalLayout.addWidget(self.send)
 
@@ -75,6 +78,20 @@ class Ui_MainWindow(QMainWindow):
         self.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.send.setText(QCoreApplication.translate("MainWindow", u"Send", None))
 
+    def send_data(self, event, data):
+        if self.conn:
+            if self.conn.is_closing:
+                try:
+                    self.conn = api.VegaConnection(False)
+                except:
+                    print("Could not connect to Vega Portal.")
+            else:
+                self.conn.emit(event, data)
+        else:
+            try:
+                self.conn = api.VegaConnection(False)
+            except:
+                print("Could not connect to Vega Portal.")
 
 def vega_main():
     vega = api.Vega_Portal()

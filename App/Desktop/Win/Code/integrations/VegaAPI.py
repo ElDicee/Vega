@@ -1,4 +1,5 @@
 import json
+import random
 from inspect import signature
 import socket
 import os
@@ -42,27 +43,43 @@ class ConnSignals(QObject):
 
 class VegaConnection(socket.socket):
 
-    def __init__(self):
+    def __init__(self, try_till_connect:bool):
         super().__init__(socket.AF_INET, socket.SOCK_STREAM)
         self.buffer_size = 1024
         self.is_closing = False
+        self.port = 0
         self.signals = ConnSignals()
-        self.try_connection()
+        self.try_connection(try_till_connect)
+        self.emitting_queue = [] # [EVENT, DATA]
 
-    def try_connection(self):
+    def try_connection(self, till_connect, instant_order:list = None):
+        print(random.randint(1,6))
         try:
             with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "r") as file:
                 for line in file.readlines():
                     if "Port:" in line:
                         self.connect(("127.0.0.1", int(line.split("Port:")[1].rstrip().lstrip())))
+                        self.port = int(line.split("Port:")[1].rstrip().lstrip())
                         self.receive()
+                        # for dat in self.emitting_queue:
+                        #     self.emit(dat[0],dat[1], dat=dat)
+                        #     self.emitting_queue.remove(dat)
         except:
-            self.close()
-            raise "VegaConnectionException"
+            if till_connect:
+                self.try_connection(till_connect)
+            else:
+                self.is_closing = True
+                self.close()
+                raise "VegaConnectionException"
 
-    def emit(self, e: Event, d):
-        self.sendall(json.dumps({"event": e.name, "itg": e.itg_name, "data": d}).encode())
-
+    def emit(self, e: Event, d, dat=None):
+        try:
+            self.sendall(json.dumps({"event": e.name, "itg": e.itg_name, "data": d}).encode())
+            if dat: self.emitting_queue.remove(dat)
+        except ConnectionResetError:
+            self.emitting_queue.append([e, d])
+            print("Connection lost, trying to stablish connection...")
+            self.try_connection(False)
     def finishConnection(self):
         self.is_closing = True
 
@@ -71,12 +88,18 @@ class VegaConnection(socket.socket):
 
     def handleReceivedData(self): #per que rebi dades simultàneament a l'execució
         while True:
-            data = self.recv(self.buffer_size).decode()
-            if data == "close_socket" or self.is_closing:
-                self.close()
-                break
-            else:
-                self.signals.received_data_from_vega.emit(json.loads(data))
+            try:
+                print(f"Current port: {self.port}")
+                data = self.recv(self.buffer_size).decode()
+                if data == "close_socket" or self.is_closing:
+                    self.close()
+                    break
+                else:
+                    self.signals.received_data_from_vega.emit(json.loads(data))
+            except ConnectionResetError:
+                print("Connection lost, trying to stablish connection...")
+                self.try_connection(False)
+
 
 
 class Vega_Portal:
