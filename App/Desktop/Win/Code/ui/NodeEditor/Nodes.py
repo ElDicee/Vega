@@ -79,6 +79,9 @@ class Connection(QGraphicsPathItem):
         self.end_pos = pin.scenePos()
         pin.connections.append(self)
 
+    def get_opposite_pin(self, pin):
+        return self.start_pin if pin == self.start_pin else self.end_pin
+
     def nodes(self):
         return self.start_pin.node(), self.end_pin.node()
 
@@ -213,6 +216,9 @@ class Node(QGraphicsItem):
         self.event = False
         self.event_itg = None
         self.event_name = None
+        self.is_exec = False
+
+        self.output_data = {}
 
         self.node_color = QColor(20, 20, 20, 200)
         self.title_path = QPainterPath()
@@ -347,7 +353,7 @@ class Node(QGraphicsItem):
         self.widget.move(-self.widget.size().width() / 2, total_height / 2 - self.widget.size().height() + 5)
 
     def delete(self):
-        #for connection in [pin.connection for pin in self.pins if pin.is_connected()]:
+        # for connection in [pin.connection for pin in self.pins if pin.is_connected()]:
         for pin in self.pins:
             if pin.is_connected():
                 for connection in pin.connections:
@@ -363,6 +369,7 @@ class Node(QGraphicsItem):
 
     def add_pin(self, name, exec=False, output=False, datatype=object):
         self.pins.append(Pin(self, self.scene(), valuename=name, execution=exec, output=output, datatype=datatype))
+        if exec: self.is_exec = True
 
     def select_connections(self, value):
         for pin in self.pins:
@@ -378,15 +385,46 @@ class Node(QGraphicsItem):
                 pins.append(p)
         return pins if len(pins) > 0 else None
 
-    def calculate_outputs(self):
-        pass
+    def get_output_pins(self):
+        pins = []
+        for p in self.pins:
+            if p.output and not p.exec:
+                pins.append(p)
+        return pins if len(pins) > 0 else None
+
+    def get_next_exec_pin(self):
+        pin = None
+        for p in self.pins:
+            if p.output and p.exec:
+                pin = p
+                break
+        return pin
 
     def execute(self):
-        #CHECK NODE INPUTS AND CALCULATE NEEDED DATA
-        #PERFORM ACTION
-        #NEXT NODE
+        # CHECK NODE INPUTS AND CALCULATE NEEDED DATA
+        # PERFORM ACTION
+        # NEXT NODE
+        needed_data = {}
         inp = self.get_input_pins()
         if inp:
-            in
-        self.calculate_outputs()
-            
+            for i in inp:
+                opp = i.connections[0].get_opposite_pin(i)
+                node = opp.node
+                if node.is_exec:
+                    needed_data.update({opp.valuename:node.output_data.get(opp.valuename)})
+                else:
+                    needed_data.update(node.execute())
+        res = self.function(*needed_data.values())
+        print(res)
+        outp = self.get_output_pins()
+        if outp:
+            if self.is_exec:
+                if res is not None:
+                    for i,o in enumerate(outp):
+                        self.output_data.update({o.valuename:res[i]})
+                    print(self.output_data)
+            else:
+                return {o.valuename:res[i] for i,o in enumerate(outp)}
+        if self.is_exec:
+            flow_pin = self.get_next_exec_pin()
+            flow_pin.execute()
