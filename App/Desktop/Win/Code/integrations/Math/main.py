@@ -8,7 +8,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from App.Desktop.Win.Code.integrations.VegaAPI import Event
 
-CALCULATE_EVENT = Event("Calculate Event", "Math", outputs={"Result": float})
+CHAT_EVENT = Event("Chat Event", "Math", outputs={"Result": float})
 
 
 def addition(*args):
@@ -62,7 +62,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.send = QPushButton(self.centralwidget)
         self.send.setObjectName(u"send")
-        self.send.clicked.connect(lambda: self.send_data(CALCULATE_EVENT, self.textEdit.toPlainText()))
+        self.send.clicked.connect(lambda: self.send_data(CHAT_EVENT, self.textEdit.toPlainText()))
 
         self.verticalLayout.addWidget(self.send)
 
@@ -93,11 +93,12 @@ class Ui_MainWindow(QMainWindow):
             except:
                 print("Could not connect to Vega Portal.")
 
+
 def vega_main():
     vega = api.Vega_Portal()
     vega.set_name("Math")
     vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": float}))
-    vega.add_event(CALCULATE_EVENT)
+    vega.add_event(CHAT_EVENT)
     vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(division, api.OPERATOR, outputs={"result": float}))
