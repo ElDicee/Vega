@@ -196,7 +196,7 @@ class MainFrame(QMainWindow):
                                       "")
         self.scrollArea.setFrameShape(QFrame.NoFrame)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents = QWidget(parent=self)
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 207, 543))
         self.scrollAreaWidgetContents.setStyleSheet(u"background-color: rgb(56, 60, 72);")
@@ -338,7 +338,7 @@ class MainFrame(QMainWindow):
 
         for itg in self.vega.integrations.values():
             if itg.display is not None:
-                s = SlideButton(itg, parent=self.scrollAreaWidgetContents)
+                s = SlideButton(itg, parent=self.scrollAreaWidgetContents, canvas_parent=self)
                 self.verticalLayout_4.addWidget(s, 0, Qt.AlignmentFlag.AlignTop)
                 self.addCanvasPanel(itg.name, itg.display)
 
@@ -369,9 +369,10 @@ class MainFrame(QMainWindow):
 
 class SlideButton(QWidget):
 
-    def __init__(self, integration, **kwargs):
+    def __init__(self, integration, canvas_parent, **kwargs):
         super(SlideButton, self).__init__(**kwargs)
         self.integration = integration
+        self.canvas_parent = canvas_parent
         self.setupUi()
         self.label.setText(self.integration.name.upper())
 
@@ -421,7 +422,7 @@ class SlideButton(QWidget):
         QMetaObject.connectSlotsByName(self)
 
     def mousePressEvent(self, event: QMouseEvent):
-        self.parent().parent().canvas.setCurrentWidget(self.parent().parent().canvaspanels[self.integration.name])
+        self.canvas_parent.canvas.setCurrentWidget(self.canvas_parent.canvaspanels[self.integration.name])
 
 
 def parse_type_from_str(s):

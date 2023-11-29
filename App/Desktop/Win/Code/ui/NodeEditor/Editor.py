@@ -106,6 +106,7 @@ class BlueprintView(QGraphicsView):
             node = Node(method.get("formal_name"), section, self.vega)
             node.uuid = uuid.uuid4()
             node.set_function(method.get("func"))
+            print(method.get("func"))
             if method.get("node") == "exec":
                 node.add_pin("in", True, False)
                 node.add_pin("out", True, True)

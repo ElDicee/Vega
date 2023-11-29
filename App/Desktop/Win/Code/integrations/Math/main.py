@@ -5,10 +5,11 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTextEdit, QPus
 
 import App.Desktop.Win.Code.integrations.VegaAPI as api
 from PySide6 import QtCore, QtGui, QtWidgets
+import datetime
 
 from App.Desktop.Win.Code.integrations.VegaAPI import Event
 
-CHAT_EVENT = Event("Chat Event", "Math", outputs={"Result": float})
+CHAT_EVENT = Event("Chat Event", "Math", outputs={"Text": str})
 
 
 def addition(*args):
@@ -33,8 +34,11 @@ def division(a, b):
     return a / b if b != 0 else None
 
 
-def runServer(addr: str):
-    return "hello"
+def writeLogs(text: str):
+    with open("logs.txt", "r+") as file:
+        file.read()
+        file.write(f"[{datetime.datetime.now()}] {text}\n")
+        file.close()
 
 
 class Ui_MainWindow(QMainWindow):
@@ -86,7 +90,7 @@ class Ui_MainWindow(QMainWindow):
                 except:
                     print("Could not connect to Vega Portal.")
             else:
-                self.conn.emit(event, data)
+                self.conn.emit(event, {"Text": data})
         else:
             try:
                 self.conn = api.VegaConnection(False)
@@ -102,7 +106,7 @@ def vega_main():
     vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": float}))
     vega.add_method(api.Method(division, api.OPERATOR, outputs={"result": float}))
-    vega.add_method(api.Method(runServer, api.EXECUTION, outputs={"result": str}, formal_name="Run Server"))
+    vega.add_method(api.Method(writeLogs, api.EXECUTION, formal_name="Write Log"))
     vega.add_display_screen(QtWidgets.QPushButton("CLICK ME!"))
     return vega
 

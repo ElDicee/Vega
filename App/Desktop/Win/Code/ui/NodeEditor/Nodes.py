@@ -80,7 +80,7 @@ class Connection(QGraphicsPathItem):
         pin.connections.append(self)
 
     def get_opposite_pin(self, pin):
-        return self.start_pin if pin == self.start_pin else self.end_pin
+        return self.start_pin if pin != self.start_pin else self.end_pin
 
     def nodes(self):
         return self.start_pin.node(), self.end_pin.node()
@@ -395,8 +395,11 @@ class Node(QGraphicsItem):
     def get_next_exec_pin(self):
         pin = None
         for p in self.pins:
-            if p.output and p.exec:
-                pin = p
+            if p.exec and p.output:
+                if len(p.connections) > 0:
+                    print(f"Current Node: {self.title_text}, Opering node: {p}")
+                    pin = p.connections[0].get_opposite_pin(p)
+                    print(f"p == opposite?? {p==pin}")
                 break
         return pin
 
@@ -404,27 +407,29 @@ class Node(QGraphicsItem):
         # CHECK NODE INPUTS AND CALCULATE NEEDED DATA
         # PERFORM ACTION
         # NEXT NODE
-        needed_data = {}
-        inp = self.get_input_pins()
-        if inp:
-            for i in inp:
-                opp = i.connections[0].get_opposite_pin(i)
-                node = opp.node
-                if node.is_exec:
-                    needed_data.update({opp.valuename:node.output_data.get(opp.valuename)})
+        if not self.event:
+            needed_data = {}
+            inp = self.get_input_pins()
+            if inp:
+                for i in inp:
+                    opp = i.connections[0].get_opposite_pin(i)
+                    node = opp.node
+                    if node.is_exec:
+                        needed_data.update({opp.name: node.output_data.get(opp.name)})
+                        print(needed_data)
+                    else:
+                        needed_data.update(node.execute())
+            res = self.function(*needed_data.values())
+            print("Function theorically executed xD")
+            outp = self.get_output_pins()
+            if outp:
+                if self.is_exec:
+                    if res is not None:
+                        for i, o in enumerate(outp):
+                            self.output_data.update({o.name: res[i]})
+                        print(self.output_data)
                 else:
-                    needed_data.update(node.execute())
-        res = self.function(*needed_data.values())
-        print(res)
-        outp = self.get_output_pins()
-        if outp:
-            if self.is_exec:
-                if res is not None:
-                    for i,o in enumerate(outp):
-                        self.output_data.update({o.valuename:res[i]})
-                    print(self.output_data)
-            else:
-                return {o.valuename:res[i] for i,o in enumerate(outp)}
+                    return {o.name: res[i] for i, o in enumerate(outp)}
         if self.is_exec:
             flow_pin = self.get_next_exec_pin()
-            flow_pin.execute()
+            if flow_pin: flow_pin.node.execute()

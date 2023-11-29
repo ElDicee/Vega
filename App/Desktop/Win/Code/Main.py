@@ -151,6 +151,7 @@ class ConnectionWorker(QRunnable):
                 self.parent.signals.received_data.emit(json.loads(data.decode()))
                 data = json.loads(data)
                 node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
+                node.output_data.update(data["data"])
                 if node: node.execute()
                 # data = json.loads(data)
                 # event_name = data.get("event")
