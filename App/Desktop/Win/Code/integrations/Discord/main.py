@@ -46,6 +46,7 @@ class VegaDCBot(commands.Bot):
         self.send_data(DISCORD_EVENT, {"Channel": msg.channel.name, "Guild": msg.guild.name, "Author": msg.author.name,
                                        "Text": msg.content})
 
+
 def vega_main():
     form = vega_ui.Ui_Form()
     vega = api.Vega_Portal()
@@ -53,7 +54,7 @@ def vega_main():
     vega.add_display_screen(form)
     vega.add_event(DISCORD_EVENT)
     m = api.Method(form.add_label, api.EXECUTION, formal_name="Add Label To Registry")
-    vega.add_method(m)
+    vega.add_display_method(m)
     print(m.func)
     return vega
 
@@ -76,4 +77,4 @@ def vega_main():
 
 if __name__ == "__main__":
     bot = VegaDCBot()
-    bot.run("MTE2ODU2NTkwMjUwNjIwOTM1Mg.GtN1Vl.ronvy9WGNx5hhcG5zVtotyjjIGqKj_ipPOzAqE")
+    bot.run("MTE2ODU2NTkwMjUwNjIwOTM1Mg.G5daDz.hoic_r0eTrNnLn1VhOSlMEPDkS2Ex7yHuZfbHY")

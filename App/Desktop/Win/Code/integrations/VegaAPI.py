@@ -105,6 +105,7 @@ class VegaConnection(socket.socket):
 class Vega_Portal:
     def __init__(self):
         self.methods = []
+        self.display_method = []
         self.display = None
         self.name = None
         self.vega_main_software_class = None
@@ -113,6 +114,9 @@ class Vega_Portal:
 
     def add_method(self, m: Method):
         self.methods.append(m)
+
+    def add_display_method(self, m:Method):
+        self.display_method.append(m)
 
     def set_name(self, name):
         self.name = name

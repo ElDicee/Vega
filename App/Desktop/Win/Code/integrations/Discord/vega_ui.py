@@ -82,8 +82,8 @@ class Ui_Form(QWidget):
 
         QMetaObject.connectSlotsByName(self)
 
-    def add_label(self, text:str):
-        self.content_zone.addWidget(QLabel(text))
+    def add_label(self, w, text:str):
+        w.content_zone.addWidget(QLabel(text))
 
     # setupUi
 

@@ -19,7 +19,7 @@ class Integration:
         self.methods = {}
         self.load_class(path)
 
-    def method_loader(self, e):
+    def method_loader(self, e, display:bool = False):
         inp = {}
         kw, args = False, False
         for i in e.inputs:
@@ -33,7 +33,7 @@ class Integration:
                 else:
                     inp.update({i: object})
             self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
-                                          "outs": e.output_types, "formal_name": e.formal_name}})
+                                          "outs": e.output_types, "formal_name": e.formal_name, "use_display": display}})
 
     def str_to_type(self, name):
         name = name.lstrip().rstrip()
@@ -52,10 +52,12 @@ class Integration:
         spec.loader.exec_module(mod)
         veg = mod.vega_main()
         self.name = veg.name
-        methods = veg.methods
+        #methods = veg.methods
         veg.vega_main_software_class = self
-        for m in methods:
+        for m in veg.methods:
             self.method_loader(m)
+        for m in veg.display_method:
+            self.method_loader(m, True)
             print("Loaded: ", m.name)
         for e in veg.events:
             self.vega.events.update({e.itg_name: {e.name: e.outputs}})

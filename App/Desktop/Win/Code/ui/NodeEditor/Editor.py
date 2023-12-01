@@ -97,16 +97,14 @@ class BlueprintView(QGraphicsView):
         section = event.mimeData().data("section").toStdString()
         element = event.mimeData().data("element").toStdString()
         ev = event.mimeData().data("event").toStdString()
-        print(ev)
         ev = ev == "True"
-        print(ev)
-
         if not ev:
             method = self.vega.integrations.get(section).methods.get(element)
             node = Node(method.get("formal_name"), section, self.vega)
             node.uuid = uuid.uuid4()
             node.set_function(method.get("func"))
-            print(method.get("func"))
+            node.use_display = self.parentWidget().parent().parentWidget().vega.main_frame.canvaspanels[section] if method.get("use_display") else None
+            print(node.use_display)
             if method.get("node") == "exec":
                 node.add_pin("in", True, False)
                 node.add_pin("out", True, True)

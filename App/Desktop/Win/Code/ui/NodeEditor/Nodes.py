@@ -200,6 +200,7 @@ class Node(QGraphicsItem):
         self.size = QRectF()
         self.function = None
         self.allowMove = False
+        self.use_display = False
         self.vega = vega
 
         if not additional_widget:
@@ -419,7 +420,7 @@ class Node(QGraphicsItem):
                         print(needed_data)
                     else:
                         needed_data.update(node.execute())
-            res = self.function(*needed_data.values())
+            res = self.function(*needed_data.values()) if self.use_display is None else self.function(*needed_data.values())
             print("Function theorically executed xD")
             outp = self.get_output_pins()
             if outp:
