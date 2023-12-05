@@ -417,9 +417,11 @@ class Node(QGraphicsItem):
                     node = opp.node
                     if node.is_exec:
                         needed_data.update({opp.name: node.output_data.get(opp.name)})
-                        print(needed_data)
+                        print("a",needed_data)
                     else:
                         needed_data.update(node.execute())
+            print(*needed_data.values())
+            print(self.use_display)
             res = self.function(*needed_data.values()) if self.use_display is None else self.function(*needed_data.values())
             print("Function theorically executed xD")
             outp = self.get_output_pins()

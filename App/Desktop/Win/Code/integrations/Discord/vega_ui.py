@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import random
 
 ################################################################################
 ## Form generated from reading UI file 'vega_ui.ui'
@@ -16,7 +17,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
                            QImage, QKeySequence, QLinearGradient, QPainter,
                            QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
-                               QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
+                               QScrollArea, QSizePolicy, QVBoxLayout, QWidget, QPushButton)
 
 
 class Ui_Form(QWidget):
@@ -82,8 +83,9 @@ class Ui_Form(QWidget):
 
         QMetaObject.connectSlotsByName(self)
 
-    def add_label(self, w, text:str):
-        w.content_zone.addWidget(QLabel(text))
+    def add_label(self, text:str):
+        self.horizontalLayout.addWidget(self.label)
+        self.label.setText(text)
 
     # setupUi
 

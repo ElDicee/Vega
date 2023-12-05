@@ -103,12 +103,17 @@ class BlueprintView(QGraphicsView):
             node = Node(method.get("formal_name"), section, self.vega)
             node.uuid = uuid.uuid4()
             node.set_function(method.get("func"))
-            node.use_display = self.parentWidget().parent().parentWidget().vega.main_frame.canvaspanels[section] if method.get("use_display") else None
+            node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get("use_display") else None
             print(node.use_display)
             if method.get("node") == "exec":
                 node.add_pin("in", True, False)
                 node.add_pin("out", True, True)
             for name, type in method.get("inputs").items():
+                # if node.use_display is None:
+                #     node.add_pin(name, False, False, datatype=type)
+                # else:
+                #     if name != list(method.get("inputs").keys())[0]:
+                #         node.add_pin(name, False, False, datatype=type)
                 node.add_pin(name, False, False, datatype=type)
             for name, type in method.get("outs").items():
                 node.add_pin(name, False, True, datatype=type)
