@@ -9,6 +9,8 @@ import ui.ok_ui as ui_m
 from random import randint
 import json
 
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node
+
 
 class Integration:
     def __init__(self, name, path, vega):
@@ -128,6 +130,18 @@ class Vega:
                     if name in self.event_nodes.get(itg).keys():
                         n = self.event_nodes.get(itg).get(name)
         return n
+
+    def close_app(self):
+        save_nodes = {}
+        for node in self.main_frame.graphicsView.view.scene().items():
+            if isinstance(node, Node):
+                save_nodes.update({"Nodes": {node.uuid: {
+                    "pos": [node.pos().x().real, node.pos().y().real],
+                    "name": "",
+                    "itg": "",
+                    "out_conn": {}
+                }}})
+
 
 
 class ConnectionSignals(QObject):
