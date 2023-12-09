@@ -366,6 +366,7 @@ class MainFrame(QMainWindow):
     def exitApp(self):
         self.close()
         self.vega.close_app()
+        exit()
 
 
 class SlideButton(QWidget):

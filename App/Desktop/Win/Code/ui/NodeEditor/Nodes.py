@@ -213,11 +213,13 @@ class Node(QGraphicsItem):
         self.height = 20
         self.pins = []
         self.uuid = None
+        self.integration = None
         self.computed_data = None
         self.event = False
         self.event_itg = None
         self.event_name = None
         self.is_exec = False
+        self.id_name = self.title_text
 
         self.output_data = {}
 
@@ -365,6 +367,7 @@ class Node(QGraphicsItem):
 
     def get_pin(self, name):
         for pin in self.pins:
+            print(pin.name)
             if pin.name == name:
                 return pin
 

@@ -1,3 +1,5 @@
+import json
+import os
 import uuid
 
 from PySide6 import QtWidgets
@@ -23,7 +25,7 @@ class EditorWidget(QWidget):
         self.splitter = QtWidgets.QSplitter()
         self.splitter.setStyleSheet("QSplitter{background-color: rgba(0,0,0,0)}")
 
-        self.view = BlueprintView(vega)
+        self.view = BlueprintView(vega, parent=self)
         # Filter
         searchbar = NodeSearchBar(self)
 
@@ -43,8 +45,8 @@ class BlueprintView(QGraphicsView):
 
     mouse_wheel_zoom_rate = 0.0015
 
-    def __init__(self, vega):
-        super().__init__()
+    def __init__(self, vega, **kwargs):
+        super().__init__(**kwargs)
 
         self.setRenderHint(QPainter.Antialiasing)
         self.vega = vega
@@ -73,6 +75,7 @@ class BlueprintView(QGraphicsView):
         self.setFrameShape(QFrame.Shape.NoFrame)
 
         self.setScene(NodeScene(vega))
+        self.load_last_nodes()
         # self.logic.install(self.scene())
 
     def wheelEvent(self, event: QWheelEvent):
@@ -93,6 +96,81 @@ class BlueprintView(QGraphicsView):
         self.anim.finished.connect(self.anim_finished)
         self.anim.start()
 
+    def get_node_by_uuid(self, u):
+        for node in self.scene().items():
+            print(f"Processing {node}")
+            if isinstance(node, Node):
+                print(f"Checking {node.uuid} with {u}")
+                if node.uuid == u:
+                    return node
+
+    def load_last_nodes(self):
+        uuid_eq = {}
+        with open(os.path.join(os.getenv("APPDATA"), ".vega", "nodes.veg"), "r") as file:
+            lines = "".join([line for line in file.readlines()])
+            if len(lines) > 0:
+                content = json.loads(lines)
+                print(content.get("Nodes"))
+                if content is not None and len(content.keys()) > 0:
+                    for node_uuid, prop in content.get("Nodes").items():
+                        uuid_eq.update({node_uuid: uuid.uuid4()})
+                        ev = prop.get("event")
+                        section = prop.get("itg")
+                        element = prop.get("name")
+                        if not ev:
+                            method = self.vega.integrations.get(section).methods.get(element)
+                            node = Node(method.get("formal_name"), section, self.vega)
+                            node.uuid = uuid_eq.get(node_uuid)
+                            node.integration = section
+                            node.id_name = element
+                            node.set_function(method.get("func"))
+                            # node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get(
+                            #     "use_display") else None
+                            print(node.use_display)
+                            if method.get("node") == "exec":
+                                node.add_pin("in", True, False)
+                                node.add_pin("out", True, True)
+                            for name, type in method.get("inputs").items():
+                                # if node.use_display is None:
+                                #     node.add_pin(name, False, False, datatype=type)
+                                # else:
+                                #     if name != list(method.get("inputs").keys())[0]:
+                                #         node.add_pin(name, False, False, datatype=type)
+                                node.add_pin(name, False, False, datatype=type)
+                            for name, type in method.get("outs").items():
+                                node.add_pin(name, False, True, datatype=type)
+                        elif ev:
+
+                            node = Node(element, section, self.vega)
+                            node.uuid = uuid_eq.get(node_uuid)
+                            node.add_pin("out", True, True)
+                            node.event = True
+                            node.integration = section
+                            node.event_name = element
+                            node.id_name = element
+                            node.event_itg = section
+                            for name, type in self.vega.events.get(section).get(element).items():
+                                node.add_pin(name, False, True, datatype=type)
+                            self.vega.event_nodes.update({section: {element: node}})
+                        node.build()
+                        node.setPos(prop.get("pos")[0], prop.get("pos")[1])
+                        self.scene().addItem(node)
+
+                    for node_uuid, prop in content.get("Nodes").items():
+                        for pin_name, complementary in prop.get("out_pins").items():
+                            for conn_uuid, end_pin_name in complementary.items():
+                                conn = Connection()
+                                conn.set_start_pin(self.get_node_by_uuid(uuid_eq.get(node_uuid)).get_pin(pin_name))
+                                print(node_uuid)
+                                ss = self.scene().items()
+                                conn.set_end_pin(self.get_node_by_uuid(uuid_eq.get(conn_uuid)).get_pin(end_pin_name))
+                                self.scene().addItem(conn)
+                                conn.updatePath()
+                else:
+                    del content
+                    del uuid_eq
+                file.close()
+
     def dropEvent(self, event: QDropEvent):
         section = event.mimeData().data("section").toStdString()
         element = event.mimeData().data("element").toStdString()
@@ -102,8 +180,12 @@ class BlueprintView(QGraphicsView):
             method = self.vega.integrations.get(section).methods.get(element)
             node = Node(method.get("formal_name"), section, self.vega)
             node.uuid = uuid.uuid4()
+            uuid.uuid4()
+            node.id_name = element
+            node.integration = section
             node.set_function(method.get("func"))
-            node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get("use_display") else None
+            node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get(
+                "use_display") else None
             print(node.use_display)
             if method.get("node") == "exec":
                 node.add_pin("in", True, False)
@@ -123,14 +205,16 @@ class BlueprintView(QGraphicsView):
         elif ev:
             n = self.vega.get_event_node_by_name_and_itg(section, element)
 
-            #CHECK NODES
+            # CHECK NODES
 
             if not n:
                 node = Node(element, section, self.vega)
                 node.uuid = uuid.uuid4()
                 node.add_pin("out", True, True)
                 node.event = True
+                node.integration = section
                 node.event_name = element
+                node.id_name = element
                 node.event_itg = section
                 for name, type in self.vega.events.get(section).get(element).items():
                     node.add_pin(name, False, True, datatype=type)
@@ -142,11 +226,8 @@ class BlueprintView(QGraphicsView):
                 # self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - (event.x() - self.pan_start_x))
                 #
                 # self.verticalScrollBar().setValue(self.verticalScrollBar().value() - (event.y() - self.pan_start_y))
-                self.horizontalScrollBar().setValue(n.pos().x())
-
-                self.verticalScrollBar().setValue(n.pos().y())
-
-
+                self.horizontalScrollBar().setValue(self.mapFromScene(n.pos().x(), n.pos().y()).x())
+                self.verticalScrollBar().setValue(self.mapFromScene(n.pos().x(), n.pos().y()).y())
 
     def scaling_time(self, x):
         f = 1.0 + self.scalings / 300.0

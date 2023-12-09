@@ -1,13 +1,4 @@
 # -*- coding: utf-8 -*-
-import random
-
-################################################################################
-## Form generated from reading UI file 'vega_ui.ui'
-##
-## Created by: Qt User Interface Compiler version 6.4.2
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
                             QMetaObject, QObject, QPoint, QRect,
@@ -78,6 +69,7 @@ class Ui_Form(QWidget):
         self.horizontalLayout.addWidget(self.scrollArea)
 
         self.verticalLayout.addWidget(self.widget_2)
+        self.verticalLayout_2.addWidget(QLabel(text="t"))
 
         self.retranslateUi()
 
@@ -86,8 +78,10 @@ class Ui_Form(QWidget):
     def add_label(self, t:str):
         self.horizontalLayout.addWidget(QLabel(text=t))
         self.verticalLayout.addWidget(QLabel(text=t))
-        self.verticalLayout_2.addWidget(QLabel(text=t))
+        self.verticalLayout_2.addWidget(QLabel(text="t"))
+
         print(f"Self format: {self}")
+
         #self.label.setText(text)
 
     # setupUi

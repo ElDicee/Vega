@@ -9,7 +9,7 @@ import ui.ok_ui as ui_m
 from random import randint
 import json
 
-from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
 
 
 class Integration:
@@ -21,7 +21,7 @@ class Integration:
         self.methods = {}
         self.load_class(path)
 
-    def method_loader(self, e, display:bool = False):
+    def method_loader(self, e, display: bool = False):
         inp = {}
         kw, args = False, False
         for i in e.inputs:
@@ -35,7 +35,25 @@ class Integration:
                 else:
                     inp.update({i: object})
             self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
-                                          "outs": e.output_types, "formal_name": e.formal_name, "use_display": display}})
+                                          "outs": e.output_types, "formal_name": e.formal_name,
+                                          "use_display": display}})
+
+    def load_class(self, path):
+        spec = importlib.util.spec_from_file_location(self.name, path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        veg = mod.vega_main()
+        self.name = veg.name
+        # methods = veg.methods
+        veg.vega_main_software_class = self
+        for m in veg.methods:
+            self.method_loader(m)
+        for m in veg.display_method:
+            self.method_loader(m, True)
+            print("Loaded: ", m.name)
+        for e in veg.events:
+            self.vega.events.update({e.itg_name: {e.name: e.outputs}})
+        self.display = veg.display
 
     def str_to_type(self, name):
         name = name.lstrip().rstrip()
@@ -47,23 +65,6 @@ class Integration:
             return float
         if name.lower() == "object":
             return object
-
-    def load_class(self, path):
-        spec = importlib.util.spec_from_file_location(self.name, path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        veg = mod.vega_main()
-        self.name = veg.name
-        #methods = veg.methods
-        veg.vega_main_software_class = self
-        for m in veg.methods:
-            self.method_loader(m)
-        for m in veg.display_method:
-            self.method_loader(m, True)
-            print("Loaded: ", m.name)
-        for e in veg.events:
-            self.vega.events.update({e.itg_name: {e.name: e.outputs}})
-        self.display = veg.display
 
 
 def install_needed_files(
@@ -97,8 +98,8 @@ class Vega:
         self.app = QApplication(sys.argv)
         self.integrations = {}
         self.events = {}
-        self.event_nodes = {}  #{ "ITG": {}  }
-        self.itg_folder_path = f"{os.path.abspath(os.path.dirname(__file__))}\integrations"
+        self.event_nodes = {}  # { "ITG": {}  }
+        self.itg_folder_path = f"{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'integrations')}"
         self.thread_pool = QThreadPool()
         self.worker = ConnectionServerWorker(parent=self)
         self.thread_pool.start(self.worker)
@@ -132,17 +133,33 @@ class Vega:
         return n
 
     def close_app(self):
-        save_nodes = {}
+        self.save_nodes()
+        self.main_frame.close()
+        self.worker.disable()
+        self.thread_pool.expiryTimeout()
+        exit()
+
+    def save_nodes(self):
+        save_nodes = {"Nodes": {}}
         for node in self.main_frame.graphicsView.view.scene().items():
             if isinstance(node, Node):
-                save_nodes.update({"Nodes": {node.uuid: {
+                save_nodes.get("Nodes").update({node.uuid.__str__(): {
                     "pos": [node.pos().x().real, node.pos().y().real],
-                    "name": "",
-                    "itg": "",
-                    "out_conn": {}
-                }}})
-
-
+                    "name": node.id_name,
+                    "itg": node.integration,
+                    "event": node.event,
+                    "out_pins": {}
+                }})
+                for out_p in node.pins:
+                    if isinstance(out_p, Pin) and out_p.output:
+                        if len(out_p.connections) > 0: save_nodes.get("Nodes").get(node.uuid.__str__()).get(
+                            "out_pins").update(
+                            {out_p.name: {
+                                conn.get_opposite_pin(out_p).node.uuid.__str__(): conn.get_opposite_pin(out_p).name for
+                                conn in out_p.connections}})
+        with open(os.path.join(os.getenv("APPDATA"), ".vega", "nodes.veg"), "w") as file:
+            file.write(json.dumps(save_nodes))
+            file.close()
 
 class ConnectionSignals(QObject):
     received_data = Signal(dict)
@@ -153,22 +170,25 @@ class ConnectionWorker(QRunnable):
     def __init__(self, parent, client, addr, vega):
         super().__init__()
         self.client = client
-        self.vega:Vega = vega
+        self.vega: Vega = vega
         self.addr = addr
+        self.enable = True
         self.parent = parent
         self.signals = ConnectionSignals()
 
     @Slot()
     def run(self):
-        while True:
+        while self.enable:
             data = self.client.recv(1024)
             if data:
                 print(data.decode())
-                self.parent.signals.received_data.emit(json.loads(data.decode()))
-                data = json.loads(data)
-                node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
-                node.output_data.update(data["data"])
-                if node: node.execute()
+                self.parent.signals.received_data.emit(json.loads(data))
+                # data = json.loads(data)
+                # node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
+                # node.output_data.update(data["data"])
+                # if node: node.execute()
+
+
                 # data = json.loads(data)
                 # event_name = data.get("event")
                 # print(self.parent.parent.get_event_node_by_name(event_name))
@@ -180,17 +200,25 @@ class ConnectionServerWorker(QRunnable):
         super().__init__()
         self.port = 7778
         self.parent = parent
+        self.enable = True
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.signals = ConnectionSignals()
         self.thread_pool = QThreadPool()
         self.connect()
+        self.signals.received_data.connect(self.handleEvents)
 
     @Slot()
     def run(self):
-        while True:
+        while self.enable:
             client, addr = self.socket.accept()
             conn = ConnectionWorker(self, client, addr, self.parent)
             self.thread_pool.start(conn)
+
+    def handleEvents(self, data):
+        #data = json.loads(data)
+        node = self.parent.get_event_node_by_name_and_itg(data["itg"], data["event"])
+        node.output_data.update(data["data"])
+        if node: node.execute()
 
     def connect(self):
         try:
@@ -199,6 +227,9 @@ class ConnectionServerWorker(QRunnable):
             self.port = randint(49152, 65535)
             self.go_bind()
         self.define_port()
+
+    def disable(self):
+        self.enable = False
 
     def go_bind(self):
         self.socket.bind(("127.0.0.1", self.port))
