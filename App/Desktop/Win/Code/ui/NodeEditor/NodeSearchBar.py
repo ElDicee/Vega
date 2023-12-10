@@ -158,11 +158,13 @@ class NodeSearchBar(QWidget):
         return sec
 
     def start_filter(self, text):
+        print(self.elements)
         for element in self.elements:
             if isinstance(element, FilterSection):
                 element.showFiltered(text)
             else:
-                element.show() if text in element.text() else element.hide()
+                element.show() if text.lower() in element.text().lower() else element.hide()
+                print(f"{text} : {element.text()}")
 
 
 class FilterElement(QPushButton):
@@ -222,13 +224,17 @@ class FilterSection(QGroupBox):
             item.show()
 
     def showFiltered(self, s):
-        b = False
+        b = True
         for item in self.items:
-            if s in item.text():
+            if s in item.text().lower():
+                print(f"{s}:{item.text().lower()}")
                 item.show()
+                print("Shown", item.text())
+                b = False
             else:
-                if not b: b = True
+                
                 item.hide()
+                print("Hidden",item.text())
         if not b:  # SI NO HI HA CAP ELEMENT DE LA SECCIÓ QUE NO CUMPLEIXI EL FILTRE
             self.show()
         else:

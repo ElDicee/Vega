@@ -137,7 +137,7 @@ class Vega:
         self.main_frame.close()
         self.worker.disable()
         self.thread_pool.expiryTimeout()
-        exit()
+        self.worker.autoDelete()
 
     def save_nodes(self):
         save_nodes = {"Nodes": {}}
@@ -161,6 +161,7 @@ class Vega:
             file.write(json.dumps(save_nodes))
             file.close()
 
+
 class ConnectionSignals(QObject):
     received_data = Signal(dict)
 
@@ -172,13 +173,12 @@ class ConnectionWorker(QRunnable):
         self.client = client
         self.vega: Vega = vega
         self.addr = addr
-        self.enable = True
         self.parent = parent
         self.signals = ConnectionSignals()
 
     @Slot()
     def run(self):
-        while self.enable:
+        while self.parent.enable:
             data = self.client.recv(1024)
             if data:
                 print(data.decode())
@@ -187,7 +187,6 @@ class ConnectionWorker(QRunnable):
                 # node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
                 # node.output_data.update(data["data"])
                 # if node: node.execute()
-
 
                 # data = json.loads(data)
                 # event_name = data.get("event")
@@ -215,7 +214,7 @@ class ConnectionServerWorker(QRunnable):
             self.thread_pool.start(conn)
 
     def handleEvents(self, data):
-        #data = json.loads(data)
+        # data = json.loads(data)
         node = self.parent.get_event_node_by_name_and_itg(data["itg"], data["event"])
         node.output_data.update(data["data"])
         if node: node.execute()

@@ -106,7 +106,17 @@ class BlueprintView(QGraphicsView):
 
     def load_last_nodes(self):
         uuid_eq = {}
-        with open(os.path.join(os.getenv("APPDATA"), ".vega", "nodes.veg"), "r") as file:
+        nod_path = os.path.join(os.getenv("APPDATA"), ".vega", "nodes.veg")
+        with os.scandir(os.path.join(os.getenv("APPDATA"), ".vega")) as scan:
+            n = False
+            for entry in scan:
+                if entry.is_file() and entry.name.startswith("node"):
+                    n = True
+            if not n:
+                with open(nod_path, "w") as f:
+                    f.write("")
+                    f.close()
+        with open(nod_path, "r") as file:
             lines = "".join([line for line in file.readlines()])
             if len(lines) > 0:
                 content = json.loads(lines)

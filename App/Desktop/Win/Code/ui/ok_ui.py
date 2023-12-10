@@ -364,7 +364,6 @@ class MainFrame(QMainWindow):
         self.canvaspanels.update({name: widget})
 
     def exitApp(self):
-        self.close()
         self.vega.close_app()
         exit()
 
