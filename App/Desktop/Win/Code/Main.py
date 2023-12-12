@@ -36,7 +36,7 @@ class Integration:
                     inp.update({i: object})
             self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
                                           "outs": e.output_types, "formal_name": e.formal_name,
-                                          "use_display": display}})
+                                          "use_display": display, "kwargs": e.kwargs}})
 
     def load_class(self, path):
         spec = importlib.util.spec_from_file_location(self.name, path)
@@ -119,6 +119,7 @@ class Vega:
                                 self.integrations.update({itg.name: itg})
                                 break
 
+
     def start_main_ui(self):
         self.main_frame = ui_m.MainFrame(self, show=True)
         sys.exit(self.app.exec())
@@ -132,12 +133,18 @@ class Vega:
                         n = self.event_nodes.get(itg).get(name)
         return n
 
+    def get_method_by_formal_name_and_itg(self, name, itg, method_name:bool = True):
+        for n, met_dat in self.integrations.get(itg).methods.items():
+            if met_dat.get("formal_name") == name:
+                return n if method_name else met_dat
+
     def close_app(self):
         self.save_nodes()
         self.main_frame.close()
         self.worker.disable()
         self.thread_pool.expiryTimeout()
         self.worker.autoDelete()
+        sys.exit()
 
     def save_nodes(self):
         save_nodes = {"Nodes": {}}

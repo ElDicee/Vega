@@ -54,7 +54,7 @@ def vega_main():
     vega.add_display_screen(form)
     vega.add_event(DISCORD_EVENT)
     m = api.Method(form.add_label, api.EXECUTION, formal_name="Add Label To Registry")
-    vega.add_display_method(m)
+    vega.add_method(m)
     print(m.func)
     return vega
 

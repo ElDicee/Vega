@@ -126,8 +126,8 @@ class NodeSearchBar(QWidget):
         print(self.parent().vega.events)
         for itg in self.parent().vega.integrations.values():
             self.add_section(itg.name)
-            for m in itg.methods.keys():
-                self.add_element(m, section=itg.name)
+            for m in itg.methods.values():
+                self.add_element(m.get("formal_name"), section=itg.name)
             event_route = itg.vega.events.get(itg.name)
             if event_route:
                 for e in event_route.keys():

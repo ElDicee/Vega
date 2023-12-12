@@ -128,7 +128,7 @@ class BlueprintView(QGraphicsView):
                         section = prop.get("itg")
                         element = prop.get("name")
                         if not ev:
-                            method = self.vega.integrations.get(section).methods.get(element)
+                            method = self.vega.get_method_by_formal_name_and_itg(element, section, False)
                             node = Node(method.get("formal_name"), section, self.vega)
                             node.uuid = uuid_eq.get(node_uuid)
                             node.integration = section
@@ -187,7 +187,7 @@ class BlueprintView(QGraphicsView):
         ev = event.mimeData().data("event").toStdString()
         ev = ev == "True"
         if not ev:
-            method = self.vega.integrations.get(section).methods.get(element)
+            method = self.vega.get_method_by_formal_name_and_itg(element, section, False)
             node = Node(method.get("formal_name"), section, self.vega)
             node.uuid = uuid.uuid4()
             uuid.uuid4()
@@ -196,7 +196,6 @@ class BlueprintView(QGraphicsView):
             node.set_function(method.get("func"))
             node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get(
                 "use_display") else None
-            print(node.use_display)
             if method.get("node") == "exec":
                 node.add_pin("in", True, False)
                 node.add_pin("out", True, True)

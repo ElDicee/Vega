@@ -25,6 +25,7 @@ class Method:
         self.event = event
         if kwargs.get("formal_name"):
             self.formal_name = kwargs.get("formal_name")
+        self.kwargs = kwargs
 
     def setCustomArea(self, w):
         self.custom_area = w
@@ -43,17 +44,17 @@ class ConnSignals(QObject):
 
 class VegaConnection(socket.socket):
 
-    def __init__(self, try_till_connect:bool):
+    def __init__(self, try_till_connect: bool):
         super().__init__(socket.AF_INET, socket.SOCK_STREAM)
         self.buffer_size = 1024
         self.is_closing = False
         self.port = 0
         self.signals = ConnSignals()
         self.try_connection(try_till_connect)
-        self.emitting_queue = [] # [EVENT, DATA]
+        self.emitting_queue = []  # [EVENT, DATA]
 
-    def try_connection(self, till_connect, instant_order:list = None):
-        print(random.randint(1,6))
+    def try_connection(self, till_connect, instant_order: list = None):
+        print(random.randint(1, 6))
         try:
             with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "r") as file:
                 for line in file.readlines():
@@ -80,13 +81,14 @@ class VegaConnection(socket.socket):
             self.emitting_queue.append([e, d])
             print("Connection lost, trying to stablish connection...")
             self.try_connection(False)
+
     def finishConnection(self):
         self.is_closing = True
 
     def receive(self):
         threading.Thread(target=self.handleReceivedData).start()  # https://realpython.com/intro-to-python-threading/
 
-    def handleReceivedData(self): #per que rebi dades simultàneament a l'execució
+    def handleReceivedData(self):  # per que rebi dades simultàneament a l'execució
         while True:
             try:
                 print(f"Current port: {self.port}")
@@ -101,7 +103,6 @@ class VegaConnection(socket.socket):
                 self.try_connection(False)
 
 
-
 class Vega_Portal:
     def __init__(self):
         self.methods = []
@@ -114,9 +115,6 @@ class Vega_Portal:
 
     def add_method(self, m: Method):
         self.methods.append(m)
-
-    def add_display_method(self, m:Method):
-        self.display_method.append(m)
 
     def set_name(self, name):
         self.name = name

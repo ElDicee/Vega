@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QBrush, QColor, QPainter
 from PySide6.QtWidgets import QApplication, QGraphicsItem, QGraphicsView, QGraphicsScene
 
+
 class Node(QGraphicsItem):
     def __init__(self):
         super().__init__()
@@ -32,6 +33,7 @@ class Node(QGraphicsItem):
             return newPos
         return super().itemChange(change, value)
 
+
 class GraphicsView(QGraphicsView):
     def __init__(self):
         super().__init__()
@@ -46,10 +48,12 @@ class GraphicsView(QGraphicsView):
         self.setWindowTitle("Node Example")
         self.show()
 
+
 def main():
     app = QApplication(sys.argv)
     view = GraphicsView()
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()

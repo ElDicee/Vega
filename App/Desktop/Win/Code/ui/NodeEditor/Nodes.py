@@ -189,7 +189,7 @@ class Pin(QGraphicsPathItem):
 
 
 class Node(QGraphicsItem):
-    def __init__(self, name, section, vega, additional_widget=None):
+    def __init__(self, name, section, vega, additional_widget=None, **kwargs):
         super().__init__()
 
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
@@ -197,6 +197,8 @@ class Node(QGraphicsItem):
 
         self.title_text = name
         self.title_color = QColor(123, 33, 177)
+        if kwargs.get("node_color"):
+            self.title_color = QColor(kwargs.get("node_color")[0], kwargs.get("node_color")[1],kwargs.get("node_color")[2])
         self.size = QRectF()
         self.function = None
         self.allowMove = False
@@ -401,11 +403,12 @@ class Node(QGraphicsItem):
         for p in self.pins:
             if p.exec and p.output:
                 if len(p.connections) > 0:
-                    print(f"Current Node: {self.title_text}, Opering node: {p}")
                     pin = p.connections[0].get_opposite_pin(p)
-                    print(f"p == opposite?? {p==pin}")
                 break
         return pin
+
+    def compute(self):
+        pass
 
     def execute(self):
         # CHECK NODE INPUTS AND CALCULATE NEEDED DATA
@@ -420,20 +423,15 @@ class Node(QGraphicsItem):
                     node = opp.node
                     if node.is_exec:
                         needed_data.update({opp.name: node.output_data.get(opp.name)})
-                        print("a",needed_data)
                     else:
                         needed_data.update(node.execute())
-            print(*needed_data.values())
-            print(self.use_display)
-            res = self.function(*needed_data.values()) #if self.use_display is None else self.function(*needed_data.values())
-            print("Function theorically executed xD")
+            res = self.function(*needed_data.values())
             outp = self.get_output_pins()
             if outp:
                 if self.is_exec:
                     if res is not None:
                         for i, o in enumerate(outp):
                             self.output_data.update({o.name: res[i]})
-                        print(self.output_data)
                 else:
                     return {o.name: res[i] for i, o in enumerate(outp)}
         if self.is_exec:
