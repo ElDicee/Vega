@@ -407,6 +407,11 @@ class Node(QGraphicsItem):
             if pin.name == name:
                 return pin
 
+    def get_exec_pin(self, name):
+        for pin in self.pins:
+            if pin.exec and pin.name == name:
+                return pin
+
     def add_pin(self, name, exec=False, output=False, datatype=object):
         self.pins.append(Pin(self, self.scene(), valuename=name, execution=exec, output=output, datatype=datatype))
         if exec: self.is_exec = True
@@ -467,7 +472,6 @@ class Node(QGraphicsItem):
                             needed_data.update({node.uuid.__str__: node.output_data.get(node.uuid.__str__)})
                         else:
                             needed_data.update({opp.name: node.output_data.get(opp.name)})
-            print(self.id_name, needed_data)
             res = self.function(*needed_data.values()) if self.function else None
             outp = self.get_output_pins()
             if outp:
@@ -477,21 +481,19 @@ class Node(QGraphicsItem):
                             self.output_data.update({o.name: res[i]})
                 else:
                     self.output_data.update({o.name if self.integration != "Vega" else self.uuid.__str__: res for o in outp})
-
-        print(self.output_data)
-
         if self.is_exec:
             if not self.execution_policy:
                 flow_pin = self.get_next_exec_pin()
                 if flow_pin: flow_pin.node.execute()
             else:
                 self.execution_policy(self.run_policy,
-                                      *needed_data.values()[-len(get_func_params(self.execution_policy)):])
+                                      *list(needed_data.values())[-len(get_func_params(self.execution_policy)):])
 
     def run_policy(self, pin_id, elements=None):
         if elements is None: elements = {}
         self.output_data.update(elements)
-        self.get_pin(pin_id).connections[0].get_opposite_pin().node.execute()
+        ex_pin = self.get_exec_pin(pin_id)
+        if len(ex_pin.connections) > 0: ex_pin.connections[0].get_opposite_pin(ex_pin).node.execute()
 
 
 def get_func_params(func):
@@ -532,4 +534,4 @@ class I_Node(Node):
     def __init__(self, name, section, vega, additional_widget=None, **kwargs):
         super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
 
-        self.function = lambda: random.randint(5,10)
+        self.function = lambda: ","

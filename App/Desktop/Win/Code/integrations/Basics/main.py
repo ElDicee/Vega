@@ -5,6 +5,20 @@ def not_sent(boolean: bool):
     return not boolean
 
 
+def equal(element1, element2):
+    return element1 == element2
+
+
+def not_equal(element1, element2):
+    return not element1 == element2
+
+#LISTS---------------------------------LISTS---------------------------------LISTS---------------------------------LISTS---------------------------------
+
+
+def get_item_by_index(list, index:int):
+    return list[index]
+
+
 # STRING-------------------------------------STRING-------------------------------------STRING-------------------------------------STRING-------------------------------------
 
 def to_str(element):
@@ -74,6 +88,9 @@ def vega_main():
     vega.add_method(api.Method(to_int, api.OPERATOR, outputs={"Integer": int}, formal_name="To Integer"))
     vega.add_method(api.Method(maximum, api.OPERATOR, outputs={"Maximum": int}, formal_name="Max"))
     vega.add_method(api.Method(_split, api.OPERATOR, outputs={"Elements": None}, formal_name="Split"))
+    vega.add_method(api.Method(equal, api.OPERATOR, outputs={"Result": bool}, formal_name="Equals"))
+    vega.add_method(api.Method(not_equal, api.OPERATOR, outputs={"Result": bool}, formal_name="Not Equals"))
+    vega.add_method(api.Method(get_item_by_index, api.OPERATOR, outputs={"Item": None}, formal_name="Get List Item"))
 
     if_sp = api.SpecialMethod(None, api.EXECUTION, formal_name="If Else")
     if_sp.add_execution_output("TRUE")
