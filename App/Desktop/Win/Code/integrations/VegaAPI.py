@@ -13,11 +13,14 @@ OPERATOR = "oper"
 
 class Method:
     def __init__(self, func, type=EXECUTION, outputs=None, event=False, **kwargs):
-        if outputs is None:
-            outputs = {"Output": object}
-        self.name = func.__name__
-        self.func = func
-        self.inputs = get_func_params(self.func)
+        if outputs is None: outputs = {}
+        if func:
+            self.name = func.__name__
+            self.func = func
+        else:
+            self.name = None
+            self.func = None
+        self.inputs = get_func_params(self.func) if func else []
         self.node_type = type
         self.custom_area = None
         self.output_types = outputs
@@ -37,6 +40,23 @@ class Event:
         self.itg_name = itg_name
         self.outputs = outputs
 
+
+class SpecialMethod(Method):
+    def __init__(self, func, type=EXECUTION, outputs=None, event=False, **kwargs):
+        super().__init__(func, type=type, outputs=outputs, event=event, **kwargs)
+        self.execution_outputs = []
+        self.exec_pol = None
+
+    def add_execution_output(self, id:str):
+        self.execution_outputs.append(id)
+
+    def set_execution_policy(self, func):
+        self.exec_pol = func
+
+    # FORMAT
+    # def policy(self, f, *args):
+    #     to return flow
+    #     f("OPT1")
 
 class ConnSignals(QObject):
     received_data_from_vega = Signal(dict)
@@ -114,6 +134,10 @@ class Vega_Portal:
         self.socket = None
 
     def add_method(self, m: Method):
+        if isinstance(m, SpecialMethod):
+            for inp in get_func_params(m.exec_pol)[1:]:
+                m.inputs.append(inp)
+            m.name = m.exec_pol.__name__
         self.methods.append(m)
 
     def set_name(self, name):
@@ -128,5 +152,6 @@ class Vega_Portal:
 
 
 def get_func_params(func):
-    sign = signature(func)
-    return [str(x) for x in sign.parameters.values()]
+    if func:
+        sign = signature(func)
+        return [str(x) for x in sign.parameters.values()]

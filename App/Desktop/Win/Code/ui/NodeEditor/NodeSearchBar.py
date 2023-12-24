@@ -123,7 +123,13 @@ class NodeSearchBar(QWidget):
         for w in self.contentLayout.children():
             self.contentLayout.removeWidget(w)
             del w
-        print(self.parent().vega.events)
+
+        self.add_section("Vega")
+        self.add_element("Int number", section="Vega")
+        self.add_element("Float number", section="Vega")
+        self.add_element("String text", section="Vega")
+        self.add_element("Boolean", section="Vega")
+
         for itg in self.parent().vega.integrations.values():
             self.add_section(itg.name)
             for m in itg.methods.values():
@@ -232,9 +238,9 @@ class FilterSection(QGroupBox):
                 print("Shown", item.text())
                 b = False
             else:
-                
+
                 item.hide()
-                print("Hidden",item.text())
+                print("Hidden", item.text())
         if not b:  # SI NO HI HA CAP ELEMENT DE LA SECCIÓ QUE NO CUMPLEIXI EL FILTRE
             self.show()
         else:

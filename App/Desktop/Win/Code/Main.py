@@ -10,6 +10,7 @@ from random import randint
 import json
 
 from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
+from App.Desktop.Win.Code.integrations.VegaAPI import SpecialMethod
 
 
 class Integration:
@@ -23,6 +24,7 @@ class Integration:
 
     def method_loader(self, e, display: bool = False):
         inp = {}
+        ex_pins, ex_pol = None, None
         kw, args = False, False
         for i in e.inputs:
             if i.startswith("**"):
@@ -33,10 +35,13 @@ class Integration:
                 if ":" in i:
                     inp.update({i.split(":")[0]: self.str_to_type(i.split(":")[1])})
                 else:
-                    inp.update({i: object})
+                    inp.update({i: None})
+            if isinstance(e, SpecialMethod):
+                ex_pins = e.execution_outputs
+                ex_pol = e.exec_pol
             self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
                                           "outs": e.output_types, "formal_name": e.formal_name,
-                                          "use_display": display, "kwargs": e.kwargs}})
+                                          "use_display": display, "exec_pins": ex_pins, "exec_pol": ex_pol, "kwargs": e.kwargs}})
 
     def load_class(self, path):
         spec = importlib.util.spec_from_file_location(self.name, path)
@@ -56,15 +61,18 @@ class Integration:
         self.display = veg.display
 
     def str_to_type(self, name):
-        name = name.lstrip().rstrip()
-        if name.lower() == "int":
-            return int
-        if name.lower() == "str":
-            return str
-        if name.lower() == "float":
-            return float
-        if name.lower() == "object":
-            return object
+        if name:
+            name = name.lstrip().rstrip()
+            if name.lower() == "int":
+                return int
+            if name.lower() == "str":
+                return str
+            if name.lower() == "float":
+                return float
+            if name.lower() == "object":
+                return object
+        else:
+            return None
 
 
 def install_needed_files(
@@ -92,7 +100,7 @@ def install_needed_files(
 class Vega:
 
     def __init__(self):
-        install_needed_files({"ports": "Ports: 7773"})
+        install_needed_files({"ports": "Ports: 7773", "nodes": """{"Nodes": {}}"""})
 
         self.main_frame = None
         self.app = QApplication(sys.argv)
@@ -119,7 +127,6 @@ class Vega:
                                 self.integrations.update({itg.name: itg})
                                 break
 
-
     def start_main_ui(self):
         self.main_frame = ui_m.MainFrame(self, show=True)
         sys.exit(self.app.exec())
@@ -133,7 +140,7 @@ class Vega:
                         n = self.event_nodes.get(itg).get(name)
         return n
 
-    def get_method_by_formal_name_and_itg(self, name, itg, method_name:bool = True):
+    def get_method_by_formal_name_and_itg(self, name, itg, method_name: bool = True):
         for n, met_dat in self.integrations.get(itg).methods.items():
             if met_dat.get("formal_name") == name:
                 return n if method_name else met_dat

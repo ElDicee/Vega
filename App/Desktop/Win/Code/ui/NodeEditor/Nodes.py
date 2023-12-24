@@ -1,7 +1,11 @@
+import random
+from inspect import signature
+
+from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF
 from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphicsSceneMouseEvent, \
-    QGraphicsSceneDragDropEvent
+    QGraphicsSceneDragDropEvent, QLineEdit, QGraphicsProxyWidget, QTextEdit
 
 
 def color_from_type(type):
@@ -107,7 +111,6 @@ class Pin(QGraphicsPathItem):
         self.name = valuename
         self.connections = []
         self.datatype = datatype
-        print(self.datatype)
         self.sc = scene
 
         path = QPainterPath()
@@ -140,7 +143,7 @@ class Pin(QGraphicsPathItem):
             x = -self.radius - self.margin - self.pin_text_width
         else:
             x = self.radius + self.margin
-        y = round(self.radius - self.pin_text_height / 2)
+        y = round(self.radius * 2 - self.pin_text_height / 2)
         self.text_path.addText(x, y, self.font, valuename)
 
     def is_connected(self):
@@ -158,7 +161,7 @@ class Pin(QGraphicsPathItem):
             return False
         if pin.exec != self.exec:
             return False
-        return self.output != pin.output and self.datatype == pin.datatype
+        return self.output != pin.output and (self.datatype == pin.datatype or not self.datatype or not pin.datatype)
 
     def paint(self, painter, option: None, widget=None):
         if self.exec:
@@ -198,9 +201,11 @@ class Node(QGraphicsItem):
         self.title_text = name
         self.title_color = QColor(123, 33, 177)
         if kwargs.get("node_color"):
-            self.title_color = QColor(kwargs.get("node_color")[0], kwargs.get("node_color")[1],kwargs.get("node_color")[2])
+            self.title_color = QColor(kwargs.get("node_color")[0], kwargs.get("node_color")[1],
+                                      kwargs.get("node_color")[2])
         self.size = QRectF()
         self.function = None
+        self.execution_policy = None
         self.allowMove = False
         self.use_display = False
         self.vega = vega
@@ -231,7 +236,7 @@ class Node(QGraphicsItem):
         self.misc_path = QPainterPath()
 
         self.horizontal_margin = 15
-        self.vertical_margin = 15
+        self.vertical_margin = 2
 
     def boundingRect(self):
         return self.size
@@ -276,6 +281,11 @@ class Node(QGraphicsItem):
         self.title_path = QPainterPath()
         self.type_path = QPainterPath()
         self.misc_path = QPainterPath()
+        self.w = QLineEdit()
+
+        inp = [pin for pin in self.pins if not pin.output]
+        outp = [pin for pin in self.pins if pin.output]
+        execp = [pin for pin in self.pins if pin.exec]
 
         bg_height = 35
 
@@ -296,27 +306,39 @@ class Node(QGraphicsItem):
         }
 
         if title_dim["w"] > total_width: total_width = title_dim["w"]
-        if title_type_dim["w"] > total_width: total_width = title_type_font["w"]
+        if title_type_dim["w"] > total_width: total_width = title_type_dim["w"]
 
         total_height = bg_height + self.widget.size().height()
 
         exec_height_added = False
-        pin_dim = {}
-        for pin in self.pins:
-            pin_dim.update(
-                {"w": QFontMetrics(pin_font).horizontalAdvance(pin.name),
+        pin1_dim = {}
+        pin2_dim = {}
+
+        larg = inp if len(inp) > len(outp) else outp
+
+        for j in range(len(larg)):
+            in_p = inp[j].name if len(inp) >= j + 1 else ""
+            out_p = outp[j].name if len(outp) >= j + 1 else ""
+
+            pin1_dim.update(
+                {"w": QFontMetrics(pin_font).horizontalAdvance(in_p),
                  "h": QFontMetrics(pin_font).height()})
 
-            total_width = max(total_width, pin_dim["w"])
+            pin2_dim.update(
+                {"w": QFontMetrics(pin_font).horizontalAdvance(out_p),
+                 "h": QFontMetrics(pin_font).height()})
 
-            if pin.exec and not exec_height_added or not pin.exec:
-                total_height += pin_dim["h"]
-                exec_height_added = True
+            total_width = max(total_width, pin1_dim["w"] + pin2_dim["w"])
 
-        total_width += self.horizontal_margin
+            # if pin.exec and not exec_height_added or not pin.exec:
+            # total_height += pin_dim["h"] + self.vertical_margin
+
+        total_height += max(len(inp), len(outp)) * (pin1_dim["h"] + self.vertical_margin)
+
+        total_width += self.horizontal_margin * 3
 
         self.size = QRectF(-total_width / 2, -total_height / 2, total_width, total_height)
-        self.path.addRoundedRect(-total_width / 2, -total_height / 2, total_width, total_height + 10, 5, 5)
+        self.path.addRoundedRect(-total_width / 2, -total_height / 2, total_width, total_height, 5, 5)
 
         self.title_bg_path = QPainterPath()  # The title background path
         self.title_bg_path.setFillRule(Qt.WindingFill)
@@ -340,19 +362,31 @@ class Node(QGraphicsItem):
             f"{self.type_text}",
         )
 
-        y = bg_height - total_height / 2 - 10 + pin_dim["h"]
-        execpos = None
-        for pin in self.pins:
-            if pin.exec:
-                if not execpos:
-                    execpos = bg_height - total_height / 2 - 10 + pin_dim["h"]
-                pin.setPos(total_width / 2 - 10, execpos) if pin.output else pin.setPos(-total_width / 2 + 10, execpos)
-            else:
-                y += pin_dim["h"]
-                if pin.output:
-                    pin.setPos(total_width / 2 - 10, y)
-                else:
-                    pin.setPos(-total_width / 2 + 10, y)
+        # y = bg_height - total_height / 2 - 10 + pin_dim["h"]
+        # execpos = None
+        # for pin in self.pins:
+        #     if pin.exec:
+        #         if not execpos:
+        #             execpos = bg_height - total_height / 2 - 10 + pin_dim["h"]
+        #         pin.setPos(total_width / 2 - 10, y) if pin.output else pin.setPos(-total_width / 2 + 10, y)
+        #         y += pin_dim["h"]
+        #     else:
+        #         y += pin_dim["h"]
+        #         if pin.output:
+        #             pin.setPos(total_width / 2 - 10, y)
+        #         else:
+        #             pin.setPos(-total_width / 2 + 10, y)
+
+        y = -total_height / 2 + bg_height + pin1_dim["h"]
+        for pin in inp:
+            pin.setPos(-total_width / 2 + 10, y)
+            y += pin1_dim["h"]
+
+        y = -total_height / 2 + bg_height + pin1_dim["h"]
+        for pin in outp:
+            pin.setPos(total_width / 2 - 10, y)
+            y += pin1_dim["h"]
+
         self.width = total_width
         self.height = total_height
         self.widget.move(-self.widget.size().width() / 2, total_height / 2 - self.widget.size().height() + 5)
@@ -391,6 +425,12 @@ class Node(QGraphicsItem):
                 pins.append(p)
         return pins if len(pins) > 0 else None
 
+    def get_exec_pins(self):
+        p = []
+        for pin in self.pins:
+            if pin.exec: p.append(pin)
+        return p
+
     def get_output_pins(self):
         pins = []
         for p in self.pins:
@@ -407,15 +447,13 @@ class Node(QGraphicsItem):
                 break
         return pin
 
-    def compute(self):
-        pass
-
     def execute(self):
         # CHECK NODE INPUTS AND CALCULATE NEEDED DATA
         # PERFORM ACTION
         # NEXT NODE
+
+        needed_data = {}
         if not self.event:
-            needed_data = {}
             inp = self.get_input_pins()
             if inp:
                 for i in inp:
@@ -424,8 +462,13 @@ class Node(QGraphicsItem):
                     if node.is_exec:
                         needed_data.update({opp.name: node.output_data.get(opp.name)})
                     else:
-                        needed_data.update(node.execute())
-            res = self.function(*needed_data.values())
+                        node.execute()
+                        if node.integration == "Vega":
+                            needed_data.update({node.uuid.__str__: node.output_data.get(node.uuid.__str__)})
+                        else:
+                            needed_data.update({opp.name: node.output_data.get(opp.name)})
+            print(self.id_name, needed_data)
+            res = self.function(*needed_data.values()) if self.function else None
             outp = self.get_output_pins()
             if outp:
                 if self.is_exec:
@@ -433,7 +476,60 @@ class Node(QGraphicsItem):
                         for i, o in enumerate(outp):
                             self.output_data.update({o.name: res[i]})
                 else:
-                    return {o.name: res[i] for i, o in enumerate(outp)}
+                    self.output_data.update({o.name if self.integration != "Vega" else self.uuid.__str__: res for o in outp})
+
+        print(self.output_data)
+
         if self.is_exec:
-            flow_pin = self.get_next_exec_pin()
-            if flow_pin: flow_pin.node.execute()
+            if not self.execution_policy:
+                flow_pin = self.get_next_exec_pin()
+                if flow_pin: flow_pin.node.execute()
+            else:
+                self.execution_policy(self.run_policy,
+                                      *needed_data.values()[-len(get_func_params(self.execution_policy)):])
+
+    def run_policy(self, pin_id, elements=None):
+        if elements is None: elements = {}
+        self.output_data.update(elements)
+        self.get_pin(pin_id).connections[0].get_opposite_pin().node.execute()
+
+
+def get_func_params(func):
+    if func:
+        sign = signature(func)
+        return [str(x) for x in sign.parameters.values()]
+
+
+class FloatValidator(QtGui.QDoubleValidator):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def validate(self, input_str, pos):
+        state, num, pos = super().validate(input_str, pos)
+        if state == QtGui.QValidator.Acceptable:
+            return QtGui.QValidator.Acceptable, num, pos
+        if str(num).count('.') > 1:
+            return QtGui.QValidator.Invalid, num, pos
+        if input_str[pos - 1] == '.':
+            return QtGui.QValidator.Acceptable, num, pos
+        return QtGui.QValidator.Invalid, num, pos
+
+
+class FloatLineEdit(QtWidgets.QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setValidator(FloatValidator())
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Space:
+            event.ignore()
+        else:
+            super().keyPressEvent(event)
+
+
+class I_Node(Node):
+
+    def __init__(self, name, section, vega, additional_widget=None, **kwargs):
+        super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
+
+        self.function = lambda: random.randint(5,10)
