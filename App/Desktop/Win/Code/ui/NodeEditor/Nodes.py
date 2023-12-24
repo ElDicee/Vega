@@ -462,16 +462,17 @@ class Node(QGraphicsItem):
             inp = self.get_input_pins()
             if inp:
                 for i in inp:
-                    opp = i.connections[0].get_opposite_pin(i)
-                    node = opp.node
-                    if node.is_exec:
-                        needed_data.update({opp.name: node.output_data.get(opp.name)})
-                    else:
-                        node.execute()
-                        if node.integration == "Vega":
-                            needed_data.update({node.uuid.__str__: node.output_data.get(node.uuid.__str__)})
-                        else:
+                    if len(i.connections) > 0:
+                        opp = i.connections[0].get_opposite_pin(i)
+                        node = opp.node
+                        if node.is_exec:
                             needed_data.update({opp.name: node.output_data.get(opp.name)})
+                        else:
+                            node.execute()
+                            if node.integration == "Vega":
+                                needed_data.update({node.uuid.__str__: node.output_data.get(node.uuid.__str__)})
+                            else:
+                                needed_data.update({opp.name: node.output_data.get(opp.name)})
             res = self.function(*needed_data.values()) if self.function else None
             outp = self.get_output_pins()
             if outp:
