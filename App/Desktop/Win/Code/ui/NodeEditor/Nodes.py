@@ -5,7 +5,7 @@ from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF
 from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphicsSceneMouseEvent, \
-    QGraphicsSceneDragDropEvent, QLineEdit, QGraphicsProxyWidget, QTextEdit
+    QGraphicsSceneDragDropEvent, QLineEdit, QGraphicsProxyWidget, QTextEdit, QGraphicsRectItem, QGraphicsTextItem
 
 
 def color_from_type(type):
@@ -481,7 +481,8 @@ class Node(QGraphicsItem):
                         for i, o in enumerate(outp):
                             self.output_data.update({o.name: res[i]})
                 else:
-                    self.output_data.update({o.name if self.integration != "Vega" else self.uuid.__str__: res for o in outp})
+                    self.output_data.update(
+                        {o.name if self.integration != "Vega" else self.uuid.__str__: res for o in outp})
         if self.is_exec:
             if not self.execution_policy:
                 flow_pin = self.get_next_exec_pin()
@@ -536,3 +537,9 @@ class I_Node(Node):
         super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
 
         self.function = lambda: ","
+
+        self.linedit = QLineEdit("Hello, World!")
+        
+        self.linedit.move(self.pos())
+
+

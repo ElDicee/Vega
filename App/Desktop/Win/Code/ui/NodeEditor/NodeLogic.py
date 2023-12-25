@@ -116,7 +116,6 @@ class NodeLogic(QObject):
 
         elif event.type() == QEvent.GraphicsSceneMouseMove:
             if self.connection:
-                print(random.randint(1, 1000))
                 self.connection.end_pos = event.scenePos()
                 self.connection.updatePath()
                 return True
