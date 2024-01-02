@@ -2,10 +2,11 @@ import random
 from inspect import signature
 
 from PySide6 import QtWidgets, QtGui
-from PySide6.QtCore import Qt, QRectF, QPointF
-from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF
+from PySide6.QtCore import Qt, QRectF, QPointF, QPoint
+from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF, QPainter
 from PySide6.QtWidgets import QGraphicsItem, QWidget, QGraphicsPathItem, QGraphicsSceneMouseEvent, \
-    QGraphicsSceneDragDropEvent, QLineEdit, QGraphicsProxyWidget, QTextEdit, QGraphicsRectItem, QGraphicsTextItem
+    QGraphicsSceneDragDropEvent, QLineEdit, QGraphicsProxyWidget, QTextEdit, QGraphicsRectItem, QGraphicsTextItem, \
+    QPushButton, QCheckBox
 
 
 def color_from_type(type):
@@ -178,7 +179,7 @@ class Pin(QGraphicsPathItem):
             painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawPath(self.path())
 
-        if not self.exec:
+        if not self.exec or (self.exec and (str(self.name).lower() != "out" and str(self.name).lower() != "in")):
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(Qt.GlobalColor.white)
             painter.drawPath(self.text_path)
@@ -189,6 +190,21 @@ class Pin(QGraphicsPathItem):
                 x.update_start_end_pos()
                 x.updatePath()
         return value
+
+
+class LineEdit(QGraphicsProxyWidget):
+    def __init__(self, parent):
+        super().__init__(parent=parent)
+        btn = QPushButton("Hello, World!")
+        btn.clicked.connect(lambda: print("Hello World!"))
+        self.setWidget(btn)
+        self.focusItem()
+
+    def mousePressEvent(self, event):
+        self.widget().setFocus()
+
+    def boundingRect(self):
+        return self.rect()
 
 
 class Node(QGraphicsItem):
@@ -249,6 +265,7 @@ class Node(QGraphicsItem):
         self.node_color = QColor(bg[0], bg[1], bg[2])
 
     def paint(self, painter, option=None, widget=None):
+
         painter.setPen(self.node_color.lighter())
         painter.setBrush(self.node_color)
         painter.drawPath(self.path)
@@ -281,11 +298,9 @@ class Node(QGraphicsItem):
         self.title_path = QPainterPath()
         self.type_path = QPainterPath()
         self.misc_path = QPainterPath()
-        self.w = QLineEdit()
 
         inp = [pin for pin in self.pins if not pin.output]
         outp = [pin for pin in self.pins if pin.output]
-        execp = [pin for pin in self.pins if pin.exec]
 
         bg_height = 35
 
@@ -310,7 +325,6 @@ class Node(QGraphicsItem):
 
         total_height = bg_height + self.widget.size().height()
 
-        exec_height_added = False
         pin1_dim = {}
         pin2_dim = {}
 
@@ -416,6 +430,9 @@ class Node(QGraphicsItem):
         self.pins.append(Pin(self, self.scene(), valuename=name, execution=exec, output=output, datatype=datatype))
         if exec: self.is_exec = True
 
+    def add_widget(self):
+        self.vega_widget = LineEdit(parent=self)
+
     def select_connections(self, value):
         for pin in self.pins:
             if pin.is_connected():
@@ -504,6 +521,48 @@ def get_func_params(func):
         return [str(x) for x in sign.parameters.values()]
 
 
+class EditableTextItem(QGraphicsTextItem):
+    def __init__(self, text="", parent=None):
+        super(EditableTextItem, self).__init__(text, parent=parent)
+        self.setFlags(QGraphicsTextItem.ItemIsSelectable | QGraphicsTextItem.ItemIsFocusable)
+
+    def focusInEvent(self, event):
+        super(EditableTextItem, self).focusInEvent(event)
+        self.setTextInteractionFlags(Qt.TextEditorInteraction)
+
+    def focusOutEvent(self, event):
+        super(EditableTextItem, self).focusOutEvent(event)
+        self.setTextInteractionFlags(Qt.NoTextInteraction)
+
+
+class BooleanField(QGraphicsPathItem):
+    pass
+
+
+class I_Node(Node):
+
+    def __init__(self, name, section, vega, additional_widget=None, **kwargs):
+        super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
+        self.sc = None
+        self.function = lambda: ","
+        self.func_widget = EditableTextItem("Hello, World!", self)
+
+    def build(self):
+        super().build()
+
+
+class FloatLineEdit(QtWidgets.QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setValidator(FloatValidator())
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Space:
+            event.ignore()
+        else:
+            super().keyPressEvent(event)
+
+
 class FloatValidator(QtGui.QDoubleValidator):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -519,27 +578,36 @@ class FloatValidator(QtGui.QDoubleValidator):
         return QtGui.QValidator.Invalid, num, pos
 
 
-class FloatLineEdit(QtWidgets.QLineEdit):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setValidator(FloatValidator())
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Space:
-            event.ignore()
-        else:
-            super().keyPressEvent(event)
+class QLineProxy(QGraphicsProxyWidget):
+    def __init__(self):
+        super().__init__()
+        self.line = FloatLineEdit()
+        self.setWidget(self.line)
 
 
-class I_Node(Node):
-
+class Scaler_Node(Node):
     def __init__(self, name, section, vega, additional_widget=None, **kwargs):
         super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
+        if kwargs.get("sc"): self.sc = kwargs.get("sc")
+        self.title_text = "Scaler"
+        self.type_text = "Constants"
 
-        self.function = lambda: ","
+    def build(self):
+        super().build()
+        self.init_widget()
 
-        self.linedit = QLineEdit("Hello, World!")
-        
-        self.linedit.move(self.pos())
+    def init_widget(self):
+        self.widget = QtWidgets.QWidget()
+        self.widget.setFixedWidth(100)
+        layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.scaler_line = FloatLineEdit()
+        layout.addWidget(self.scaler_line)
+        self.widget.setLayout(layout)
 
-
+        proxy = QtWidgets.QGraphicsProxyWidget()
+        proxy.setWidget(self.widget)
+        proxy.setParentItem(self)
+        proxy.setEnabled(True)
+        # proxy.setPos(self.pos())
+        # self.sc.addItem(proxy)

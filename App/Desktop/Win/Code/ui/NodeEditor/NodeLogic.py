@@ -111,7 +111,6 @@ class NodeLogic(QObject):
                 for item in self.scene.selectedItems():
                     if isinstance(item, (Connection, Node)):
                         item.delete()
-
                 return True
 
         elif event.type() == QEvent.GraphicsSceneMouseMove:

@@ -7,11 +7,12 @@ from PySide6.QtCore import QPoint, Qt, QTimeLine, QLineF, Signal, QRectF, QPoint
 from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, QCursor, QDropEvent, QKeyEvent, \
     QTransform
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
-from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent
+from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent, \
+    QGraphicsProxyWidget, QLineEdit
 
 from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
-from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node, Scaler_Node
 
 
 class EditorWidget(QWidget):
@@ -57,7 +58,7 @@ class BlueprintView(QGraphicsView):
         gl_widget = QOpenGLWidget()
         self.setObjectName("BP_bg")
         self.setWindowTitle("Node in QGraphicsItem")
-        self.logic = NodeLogic(self)
+        #self.logic = NodeLogic(self)
 
         self.currentscale = 1
         self.pan = False
@@ -273,17 +274,21 @@ class BlueprintView(QGraphicsView):
             node = None
             print(element, section)
             if element == "Int number":
-                node = I_Node("Int number", section, self.vega, node_color=[0, 122, 204])
+                node = Scaler_Node("Int number", section, self.vega, node_color=[0, 122, 204], sc=self.scene())
                 node.add_pin("Value", False, True, datatype=int)
+                node.sc = self.scene()
             elif element == "Float number":
                 node = I_Node("Float number", section, self.vega, node_color=[0, 204, 0])
                 node.add_pin("Value", False, True, datatype=float)
+                node.sc = self.scene()
             elif element == "String text":
                 node = I_Node("String text", section, self.vega, node_color=[255, 26, 26])
                 node.add_pin("Value", False, True, datatype=str)
+                node.sc = self.scene()
             elif element == "Boolean":
                 node = I_Node("Boolean", section, self.vega, node_color=[255, 153, 51])
                 node.add_pin("Value", False, True, datatype=bool)
+                node.sc = self.scene()
             node.uuid = uuid.uuid4()
             node.integration = "Vega"
             node.build()
