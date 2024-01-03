@@ -77,4 +77,4 @@ def vega_main():
 
 if __name__ == "__main__":
     bot = VegaDCBot()
-    bot.run("")
+    bot.run("MTE2ODU2NTkwMjUwNjIwOTM1Mg.GOvXuL.H7Zf-6P7eWnFv9_sSPj6XiScEaBux_bVhMdX4s")

@@ -8,11 +8,29 @@ from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, Q
     QTransform
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent, \
-    QGraphicsProxyWidget, QLineEdit
+    QGraphicsProxyWidget, QLineEdit, QScrollArea
 
 from App.Desktop.Win.Code.ui.NodeEditor.NodeLogic import NodeLogic
 from App.Desktop.Win.Code.ui.NodeEditor.NodeSearchBar import NodeSearchBar
-from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node, Scaler_Node
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node
+
+
+class NodeWidget(QtWidgets.QWidget):
+    def __init__(self, vega, parent):
+        super().__init__(parent)
+
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(main_layout)
+
+        self.node_editor = NodeLogic(self)
+        self.scene = NodeScene(vega)
+        self.scene.setSceneRect(0, 0, 9999, 9999)
+        self.view = BlueprintView(vega, parent=self)
+        self.view.setScene(self.scene)
+        self.view.load_last_nodes()
+
+        main_layout.addWidget(self.view)
 
 
 class EditorWidget(QWidget):
@@ -25,16 +43,13 @@ class EditorWidget(QWidget):
         self.setLayout(lay)
         self.splitter = QtWidgets.QSplitter()
         self.splitter.setStyleSheet("QSplitter{background-color: rgba(0,0,0,0)}")
+        self.editor_w = NodeWidget(vega, self)
 
-        self.view = BlueprintView(vega, parent=self)
         # Filter
         searchbar = NodeSearchBar(self)
-
         self.splitter.addWidget(searchbar)
-        self.splitter.addWidget(self.view)
-
+        self.splitter.addWidget(self.editor_w)
         lay.addWidget(self.splitter)
-
 
 class BlueprintView(QGraphicsView):
     bg_color = QColor(38, 38, 38)
@@ -58,7 +73,7 @@ class BlueprintView(QGraphicsView):
         gl_widget = QOpenGLWidget()
         self.setObjectName("BP_bg")
         self.setWindowTitle("Node in QGraphicsItem")
-        #self.logic = NodeLogic(self)
+        # self.logic = NodeLogic(self)
 
         self.currentscale = 1
         self.pan = False
@@ -74,9 +89,6 @@ class BlueprintView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setFrameShape(QFrame.Shape.NoFrame)
-
-        self.setScene(NodeScene(vega))
-        self.load_last_nodes()
         # self.logic.install(self.scene())
 
     def wheelEvent(self, event: QWheelEvent):
@@ -120,7 +132,6 @@ class BlueprintView(QGraphicsView):
             lines = "".join([line for line in file.readlines()])
             if len(lines) > 0:
                 content = json.loads(lines)
-                print(content.get("Nodes"))
                 if content is not None and len(content.keys()) > 0:
                     for node_uuid, prop in content.get("Nodes").items():
                         uuid_eq.update({node_uuid: uuid.uuid4()})
@@ -177,17 +188,21 @@ class BlueprintView(QGraphicsView):
                         else:
                             node = None
                             if element == "Int number":
-                                node = I_Node("Int number", section, self.vega, node_color=[0, 122, 204])
+                                node = I_Node("Int number", section, self.vega, data_type=int, node_color=[0, 122, 204])
                                 node.add_pin("Value", False, True, datatype=int)
+                                node.element.setText(str(prop.get("stablished_value")))
                             elif element == "Float number":
-                                node = I_Node("Float number", section, self.vega, node_color=[0, 204, 0])
+                                node = I_Node("Float number", section, self.vega, data_type=float, node_color=[0, 204, 0])
                                 node.add_pin("Value", False, True, datatype=float)
+                                node.element.setText(str(prop.get("stablished_value")))
                             elif element == "String text":
-                                node = I_Node("String text", section, self.vega, node_color=[255, 26, 26])
+                                node = I_Node("String text", section, self.vega, data_type=str, node_color=[255, 26, 26])
                                 node.add_pin("Value", False, True, datatype=str)
+                                node.element.setText(prop.get("stablished_value"))
                             elif element == "Boolean":
-                                node = I_Node("Boolean", section, self.vega, node_color=[255, 153, 51])
+                                node = I_Node("Boolean", section, self.vega, data_type=bool, node_color=[255, 153, 51])
                                 node.add_pin("Value", False, True, datatype=bool)
+                                node.element.setChecked(prop.get("stablished_value"))
                             node.uuid = uuid_eq.get(node_uuid)
                             node.integration = "Vega"
                             node.build()
@@ -272,21 +287,20 @@ class BlueprintView(QGraphicsView):
                     self.verticalScrollBar().setValue(self.mapFromScene(n.pos().x(), n.pos().y()).y())
         else:
             node = None
-            print(element, section)
             if element == "Int number":
-                node = Scaler_Node("Int number", section, self.vega, node_color=[0, 122, 204], sc=self.scene())
+                node = I_Node("Int number", section, self.vega, data_type=int, node_color=[0, 122, 204], sc=self.scene())
                 node.add_pin("Value", False, True, datatype=int)
                 node.sc = self.scene()
             elif element == "Float number":
-                node = I_Node("Float number", section, self.vega, node_color=[0, 204, 0])
+                node = I_Node("Float number", section, self.vega, data_type=float, node_color=[0, 204, 0])
                 node.add_pin("Value", False, True, datatype=float)
                 node.sc = self.scene()
             elif element == "String text":
-                node = I_Node("String text", section, self.vega, node_color=[255, 26, 26])
+                node = I_Node("String text", section, self.vega, data_type=str, node_color=[255, 26, 26])
                 node.add_pin("Value", False, True, datatype=str)
                 node.sc = self.scene()
             elif element == "Boolean":
-                node = I_Node("Boolean", section, self.vega, node_color=[255, 153, 51])
+                node = I_Node("Boolean", section, self.vega, data_type=bool, node_color=[255, 153, 51])
                 node.add_pin("Value", False, True, datatype=bool)
                 node.sc = self.scene()
             node.uuid = uuid.uuid4()
@@ -294,6 +308,7 @@ class BlueprintView(QGraphicsView):
             node.build()
             node.setPos(self.mapToScene(self.mapFromGlobal(QCursor.pos())))
             self.scene().addItem(node)
+        super().dropEvent(event)
 
     def scaling_time(self, x):
         f = 1.0 + self.scalings / 300.0
@@ -398,7 +413,7 @@ class NodeScene(QGraphicsScene):
         super().__init__()
         self.setSceneRect(0, 0, 9999, 9999)
         self.event_nodes = []
-        vega.worker.signals.received_data.connect(self.process_event)
+        # vega.worker.signals.received_data.connect(self.process_event)
         self.last_node = None
         self.current_conn = None
         self.alt = False
@@ -411,9 +426,6 @@ class NodeScene(QGraphicsScene):
     #     item = self.itemAt(e.scenePos())
     #     if item.setAcceptDrops:
     #         item.dropEvent(e)
-
-    def process_event(self, data):
-        pass
 
     def dragMoveEvent(self, e):
         e.acceptProposedAction()
@@ -435,8 +447,10 @@ class NodeScene(QGraphicsScene):
 
         if self.last_node:
             self.last_node.select_connections(False)
+            super().mousePressEvent(event)
 
         if isinstance(item, Node):
+            super().mousePressEvent(event)
             if self.last_node:
                 self.last_node.setSelected(False)
             item.setSelected(True)
@@ -449,6 +463,7 @@ class NodeScene(QGraphicsScene):
                 self.last_node = None
 
     def keyPressEvent(self, event: QKeyEvent):
+        super().keyPressEvent(event)
         if event.key() == Qt.Key.Key_Delete:
             for item in self.selectedItems():
                 if isinstance(item, (Connection, Node)):
@@ -456,13 +471,16 @@ class NodeScene(QGraphicsScene):
             return True
         elif event.key() == Qt.Key.Key_Alt:
             self.alt = True
+            return True
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Alt:
             self.alt = False
             return True
+        super().keyReleaseEvent(event)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
+        super().mouseMoveEvent(event)
         if self.current_conn:
             self.current_conn.end_pos = event.scenePos()
             self.current_conn.updatePath()
@@ -478,13 +496,13 @@ class NodeScene(QGraphicsScene):
                             con.updatePath()
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
+        super().mouseReleaseEvent(event)
         item = self.itemAt(event.scenePos(), QTransform())
         if self.current_conn:
             if isinstance(item, Pin):
                 if self.current_conn.start_pin.can_connect_to(item):
                     if item.is_connected() and not item.output:
                         item.connections[0].delete()
-                    print("hi")
                     # self.current_conn.start_pin.clear_connection()
                     # item.clear_connection()
                     self.current_conn.set_end_pin(item)
@@ -503,13 +521,5 @@ class NodeScene(QGraphicsScene):
                 if item.allowMove:
                     item.allowMove = False
 
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-
-    launcher = EditorWidget()
-    launcher.show()
-    app.exec()
-    sys.exit()
+    def dropEvent(self, event):
+        print("hello")

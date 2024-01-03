@@ -9,7 +9,7 @@ import ui.ok_ui as ui_m
 from random import randint
 import json
 
-from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node
 from App.Desktop.Win.Code.integrations.VegaAPI import SpecialMethod
 
 
@@ -39,7 +39,7 @@ class Integration:
             if isinstance(e, SpecialMethod):
                 ex_pins = e.execution_outputs
                 ex_pol = e.exec_pol
-            self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
+        self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
                                           "outs": e.output_types, "formal_name": e.formal_name,
                                           "use_display": display, "exec_pins": ex_pins, "exec_pol": ex_pol, "kwargs": e.kwargs}})
 
@@ -155,15 +155,18 @@ class Vega:
 
     def save_nodes(self):
         save_nodes = {"Nodes": {}}
-        for node in self.main_frame.graphicsView.view.scene().items():
+        for node in self.main_frame.graphicsView.editor_w.view.scene().items():
             if isinstance(node, Node):
-                save_nodes.get("Nodes").update({node.uuid.__str__(): {
+                d = {
                     "pos": [node.pos().x().real, node.pos().y().real],
                     "name": node.id_name,
                     "itg": node.integration,
                     "event": node.event,
                     "out_pins": {}
-                }})
+                }
+                if isinstance(node, I_Node):
+                    d.update({"stablished_value": node.function()})
+                save_nodes.get("Nodes").update({node.uuid.__str__(): d})
                 for out_p in node.pins:
                     if isinstance(out_p, Pin) and out_p.output:
                         if len(out_p.connections) > 0: save_nodes.get("Nodes").get(node.uuid.__str__()).get(

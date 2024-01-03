@@ -77,6 +77,7 @@ def loga(num: float, base: float):
 
 def vega_main():
     vega = api.Vega_Portal()
+    vega.set_name("Maths")
     vega.add_method(api.Method(suma, api.OPERATOR, outputs={"Result": float}, formal_name="Number Addition"))
     vega.add_method(api.Method(resta, api.OPERATOR, outputs={"Result": float}, formal_name="Number Subtraction"))
     vega.add_method(api.Method(multi, api.OPERATOR, outputs={"Result": float}, formal_name="Number Multiplication"))

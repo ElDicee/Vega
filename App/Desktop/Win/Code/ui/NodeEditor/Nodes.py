@@ -1,6 +1,7 @@
 import random
 from inspect import signature
 
+import PySide6
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt, QRectF, QPointF, QPoint
 from PySide6.QtGui import QColor, QPainterPath, QBrush, QLinearGradient, QPen, QFont, QFontMetrics, QPolygonF, QPainter
@@ -92,7 +93,7 @@ class Connection(QGraphicsPathItem):
 
     def update_start_end_pos(self):
         if self.start_pin and not self.start_pin.output:
-            self.end_pin, self.start_pin = self.start_pos, self.end_pin
+            self.end_pin, self.start_pin = self.start_pin, self.end_pin
         if self.start_pin:
             self.start_pos = self.start_pin.scenePos()
         if self.end_pin:
@@ -347,7 +348,9 @@ class Node(QGraphicsItem):
             # if pin.exec and not exec_height_added or not pin.exec:
             # total_height += pin_dim["h"] + self.vertical_margin
 
-        total_height += max(len(inp), len(outp)) * (pin1_dim["h"] + self.vertical_margin)
+        total_height += max(len(inp), len(outp)) * (pin1_dim["h"] + self.vertical_margin) + 5
+        if isinstance(self, I_Node):
+            total_height += self.proxy.size().height() + 5
 
         total_width += self.horizontal_margin * 3
 
@@ -403,6 +406,7 @@ class Node(QGraphicsItem):
 
         self.width = total_width
         self.height = total_height
+        self.larg = larg
         self.widget.move(-self.widget.size().width() / 2, total_height / 2 - self.widget.size().height() + 5)
 
     def delete(self):
@@ -495,8 +499,12 @@ class Node(QGraphicsItem):
             if outp:
                 if self.is_exec:
                     if res is not None:
-                        for i, o in enumerate(outp):
-                            self.output_data.update({o.name: res[i]})
+                        if isinstance(res, dict):
+                            for i, o in enumerate(outp):
+                                self.output_data.update({o.name:
+                                                             res[i]})
+                        else:
+                            self.output_data.update({outp[0].name: res})
                 else:
                     self.output_data.update(
                         {o.name if self.integration != "Vega" else self.uuid.__str__: res for o in outp})
@@ -521,93 +529,73 @@ def get_func_params(func):
         return [str(x) for x in sign.parameters.values()]
 
 
-class EditableTextItem(QGraphicsTextItem):
-    def __init__(self, text="", parent=None):
-        super(EditableTextItem, self).__init__(text, parent=parent)
-        self.setFlags(QGraphicsTextItem.ItemIsSelectable | QGraphicsTextItem.ItemIsFocusable)
-
-    def focusInEvent(self, event):
-        super(EditableTextItem, self).focusInEvent(event)
-        self.setTextInteractionFlags(Qt.TextEditorInteraction)
-
-    def focusOutEvent(self, event):
-        super(EditableTextItem, self).focusOutEvent(event)
-        self.setTextInteractionFlags(Qt.NoTextInteraction)
-
-
-class BooleanField(QGraphicsPathItem):
-    pass
-
-
 class I_Node(Node):
 
-    def __init__(self, name, section, vega, additional_widget=None, **kwargs):
+    def __init__(self, name, section, vega, data_type, additional_widget=None, **kwargs):
         super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
         self.sc = None
-        self.function = lambda: ","
-        self.func_widget = EditableTextItem("Hello, World!", self)
+        self.data_type = data_type
+        self.element = None
+
+        if self.data_type == str:
+            self.element = QLineEdit()
+            self.element.setStyleSheet(u"""color: rgb(255, 255, 255);
+border-top-left-radius: 10px;
+border-top-right-radius: 10px;
+border-bottom: 3px solid qlineargradient(spread:pad, x1:0.0397727, y1:0.528, x2:1, y2:0.596591, stop:0 rgba(68, 228, 227, 255), stop:0.517045 rgba(104, 57, 255, 227), stop:0.9375 rgba(221, 39, 255, 255));""")
+            self.element.setPlaceholderText("Write a text...")
+            self.function = lambda: str(self.element.text())
+        elif self.data_type == int:
+            self.element = IntLineEdit()
+            self.element.setStyleSheet(u"""color: rgb(255, 255, 255);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border-bottom: 3px solid qlineargradient(spread:pad, x1:0.0397727, y1:0.528, x2:1, y2:0.596591, stop:0 rgba(68, 228, 227, 255), stop:0.517045 rgba(104, 57, 255, 227), stop:0.9375 rgba(221, 39, 255, 255));""")
+            self.function = lambda: int(self.element.text())
+            self.element.setText("0")
+        elif self.data_type == float:
+            self.element = FloatLineEdit()
+            self.element.setStyleSheet(u"""color: rgb(255, 255, 255);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border-bottom: 3px solid qlineargradient(spread:pad, x1:0.0397727, y1:0.528, x2:1, y2:0.596591, stop:0 rgba(68, 228, 227, 255), stop:0.517045 rgba(104, 57, 255, 227), stop:0.9375 rgba(221, 39, 255, 255));""")
+            self.function = lambda: float(self.element.text())
+            self.element.setText("0.0")
+        elif self.data_type == bool:
+            self.element = QCheckBox()
+            self.function = lambda: bool(self.element.isChecked())
 
     def build(self):
-        super().build()
-
-
-class FloatLineEdit(QtWidgets.QLineEdit):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setValidator(FloatValidator())
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Space:
-            event.ignore()
-        else:
-            super().keyPressEvent(event)
-
-
-class FloatValidator(QtGui.QDoubleValidator):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-    def validate(self, input_str, pos):
-        state, num, pos = super().validate(input_str, pos)
-        if state == QtGui.QValidator.Acceptable:
-            return QtGui.QValidator.Acceptable, num, pos
-        if str(num).count('.') > 1:
-            return QtGui.QValidator.Invalid, num, pos
-        if input_str[pos - 1] == '.':
-            return QtGui.QValidator.Acceptable, num, pos
-        return QtGui.QValidator.Invalid, num, pos
-
-
-class QLineProxy(QGraphicsProxyWidget):
-    def __init__(self):
-        super().__init__()
-        self.line = FloatLineEdit()
-        self.setWidget(self.line)
-
-
-class Scaler_Node(Node):
-    def __init__(self, name, section, vega, additional_widget=None, **kwargs):
-        super().__init__(name, section, vega, additional_widget=additional_widget, **kwargs)
-        if kwargs.get("sc"): self.sc = kwargs.get("sc")
-        self.title_text = "Scaler"
-        self.type_text = "Constants"
-
-    def build(self):
-        super().build()
         self.init_widget()
+        super().build()
+        self.proxy.setPos(-self.widget.size().width() / 2, self.larg[-1].pos().y() + 5)
 
     def init_widget(self):
         self.widget = QtWidgets.QWidget()
         self.widget.setFixedWidth(100)
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        self.scaler_line = FloatLineEdit()
-        layout.addWidget(self.scaler_line)
+        layout.addWidget(self.element)
         self.widget.setLayout(layout)
+        self.proxy = QtWidgets.QGraphicsProxyWidget()
+        self.proxy.setWidget(self.widget)
+        self.proxy.setParentItem(self)
 
-        proxy = QtWidgets.QGraphicsProxyWidget()
-        proxy.setWidget(self.widget)
-        proxy.setParentItem(self)
-        proxy.setEnabled(True)
-        # proxy.setPos(self.pos())
-        # self.sc.addItem(proxy)
+
+class FloatLineEdit(QtWidgets.QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def keyPressEvent(self, event: PySide6.QtGui.QKeyEvent):
+        if str(event.text()).isnumeric() or (
+                not "." in self.text() and event.text() == ".") or event.key() == Qt.Key.Key_Backspace:
+            super().keyPressEvent(event)
+
+
+class IntLineEdit(QtWidgets.QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def keyPressEvent(self, event: PySide6.QtGui.QKeyEvent):
+        if str(event.text()).isnumeric() or event.key() == Qt.Key.Key_Backspace:
+            super().keyPressEvent(event)

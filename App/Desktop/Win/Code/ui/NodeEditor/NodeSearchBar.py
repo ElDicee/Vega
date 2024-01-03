@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
                                QWidget, QPushButton, QGroupBox)
 
 
-class NodeSearchBar(QWidget):
+class NodeSearchBar(QScrollArea):
 
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -24,14 +24,15 @@ class NodeSearchBar(QWidget):
             self.setObjectName(u"ContentPane")
         self.resize(266, 642)
         self.setStyleSheet(
-            u"background-color: rgba(64, 72, 108, 255);\nQWidget#ContentPane{background-color: rgba(64, 72, 108, 255);}")
+            u"background-color: rgba(64, 72, 108, 255);\nQWidget#ContentPane{background-color: rgb(34, 37, 44);}")
         self.verticalLayout = QVBoxLayout(self)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.widget = QWidget(self)
+        self.setWidget(self.widget)
         self.widget.setObjectName(u"filter_content_widget")
-        self.widget.setStyleSheet("QWidget#filter_content_widget{background-color: rgba(64, 72, 108, 255);}")
+        self.widget.setStyleSheet("QWidget#filter_content_widget{background-color: rgb(34, 37, 44);}")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -45,7 +46,7 @@ class NodeSearchBar(QWidget):
         self.horizontalLayout.setContentsMargins(6, 0, 6, 0)
         self.search_icon = QLabel(self.widget)
         self.search_icon.setObjectName(u"search_icon")
-        self.search_icon.setStyleSheet("QLabel#search_icon{background-color: rgba(64, 72, 108, 255);}")
+        self.search_icon.setStyleSheet("QLabel#search_icon{background-color: rgb(34, 37, 44);}")
         sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
@@ -60,11 +61,13 @@ class NodeSearchBar(QWidget):
         self.lineEdit = QLineEdit(self.widget)
         self.lineEdit.setObjectName(u"lineEdit")
         self.lineEdit.setStyleSheet(
-            u"background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(58, 64, 98), stop:1 rgb(56, 60, 72));\n"
-            "border-top-left-radius: 8px;\n"
-            "border-top-right-radius: 8px;\n"
-            "border-bottom: 3px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(140, 0, 255), stop:1 rgb(0, 221, 255));\n"
-            "color: rgb(255, 255, 255);")
+            u"""background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(58, 64, 98), stop:1 rgb(56, 60, 72));
+border-top-left-radius: 8px;
+border-top-right-radius: 8px;
+border-bottom-left-radius: 0px;
+border-bottom-right-radius: 0px;
+border-bottom: 3px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgb(140, 0, 255), stop:1 rgb(0, 221, 255));
+color: rgb(255, 255, 255);""")
 
         self.lineEdit.setPlaceholderText("Filter")
 
@@ -74,7 +77,40 @@ class NodeSearchBar(QWidget):
 
         self.scrollArea = QScrollArea(self)
         self.scrollArea.setObjectName(u"scrollArea")
-        self.setStyleSheet(u"QScrollArea{background-color: rgba(64, 72, 108, 255);}"
+        self.scrollArea.setStyleSheet(u"""QScrollBar{
+	background-color: rgb(56, 60, 72);
+}
+
+QScrollBar:vertical{
+width: 12px;
+background-color: rgb(56, 60, 74);
+}
+
+QScrollBar::handle:vertical{
+border-radius:  6px;
+background: rgb(113, 121, 145);
+background-color: rgb(34, 37, 44);
+border: 2px solid rgb(0, 170, 255);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical{
+height: 12px;
+background: none;
+}
+
+QScrollBar::handle:horizontal{
+border-radius:  6px;
+background: rgb(113, 121, 145);
+background-color: rgb(34, 37, 44);
+border: 2px solid rgb(0, 170, 255);
+}
+
+QScrollBar:horizontal{
+width: 12px;
+background-color: rgb(56, 60, 74);
+}""")
+        self.setStyleSheet(u"QScrollArea{background-color: rgb(34, 37, 44);}"
                            "QGroupBox{\n"
                            "	color: rgb(56, 60, 72);\n"
                            "	font-size: 12px;\n"
@@ -109,7 +145,9 @@ class NodeSearchBar(QWidget):
         self.scrollArea.setFrameShadow(QFrame.Plain)
         self.scrollArea.setWidgetResizable(True)
 
-        self.contentLayout = QVBoxLayout(self.scrollArea)
+        self.content = QWidget()
+        self.scrollArea.setWidget(self.content)
+        self.contentLayout = QVBoxLayout(self.content)
 
         self.verticalLayout.addWidget(self.scrollArea)
         self.lineEdit.textEdited.connect(self.start_filter)
@@ -129,6 +167,7 @@ class NodeSearchBar(QWidget):
         self.add_element("Float number", section="Vega")
         self.add_element("String text", section="Vega")
         self.add_element("Boolean", section="Vega")
+        self.add_element("On Start", section="Vega", event=True)
 
         for itg in self.parent().vega.integrations.values():
             self.add_section(itg.name)
@@ -138,10 +177,15 @@ class NodeSearchBar(QWidget):
             if event_route:
                 for e in event_route.keys():
                     self.add_element(e, section=itg.name, event=True)
+            sec = self.get_section(itg.name)
+            sec.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+            sec.setMinimumSize(sec.size().width(), 50+20*len(sec.items))
+            sec.setMaximumSize(sec.size().width(), 50+20*len(sec.items))
+            sec.setFixedSize(sec.size().width(), 50+20*len(sec.items))
 
     def add_section(self, name):
         section = FilterSection(self.scrollArea, name)
-        self.contentLayout.addWidget(section)
+        self.contentLayout.addWidget(section, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         self.elements.append(section)
 
     def add_element(self, element, section=None, event=False):
@@ -151,7 +195,7 @@ class NodeSearchBar(QWidget):
         else:
             label = FilterElement(parent=self.scrollArea, isevent=event)
             label.setText(element)
-            self.contentLayout.addWidget(label)
+            self.contentLayout.addWidget(label, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
             self.elements.append(label)
 
     def get_section(self, name):
@@ -178,6 +222,9 @@ class FilterElement(QPushButton):
         super().__init__(**kwargs)
         self.section: FilterSection = section
         self.isevent = isevent
+        self.setMaximumSize(16777215, 30)
+        self.setMinimumSize(0, 0)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
     def mousePressEvent(self, e: QMouseEvent):
         drag = QDrag(self)
@@ -194,9 +241,6 @@ class FilterElement(QPushButton):
         pixmap.fill(QColor("darkgray"))
         drag.setPixmap(pixmap)
         drag.exec_()
-
-    def mouseDoubleClickEvent(self, event: QMouseEvent):
-        pass
     # SPAWN NODE
 
 
@@ -207,9 +251,12 @@ class FilterSection(QGroupBox):
         self.name = name
         self.setObjectName(u"{}".format(name))
         self.setTitle(name)
+        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+        self.setMinimumSize(250, 150)
+        self.setMaximumSize(250, 16777215)
         self.verticalLayout = QVBoxLayout(self)
-        self.verticalLayout.setContentsMargins(-1, 2, -1, -1)
-        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setContentsMargins(-1, 20, -1, -1)
+        self.verticalLayout.setSpacing(4)
         self.items = []
 
     def __str__(self):
