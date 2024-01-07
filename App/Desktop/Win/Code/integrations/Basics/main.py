@@ -12,10 +12,15 @@ def equal(element1, element2):
 def not_equal(element1, element2):
     return not element1 == element2
 
-#LISTS---------------------------------LISTS---------------------------------LISTS---------------------------------LISTS---------------------------------
+
+def is_in(element, group):
+    return element in group
 
 
-def get_item_by_index(list, index:int):
+# LISTS---------------------------------LISTS---------------------------------LISTS---------------------------------LISTS---------------------------------
+
+
+def get_item_by_index(list, index: int):
     return list[index]
 
 
@@ -35,26 +40,44 @@ def to_int(element):
     return int(element)
 
 
-def addition(a: int, b: int):
-    return a + b
+# LIST AND DICT OPERATIONS
 
 
-def subtraction(a: int, b: int):
-    return a - b
+def create_empty_list():
+    return []
 
 
-def multiplication(a: int, b: int):
-    return a * b
+def get_list_item(list, index: int):
+    return list[index]
 
 
-def division(a, b):
-    if b == 0:
-        b += 1 * (10 ** -10)
-    return a / b if b != 0 else None
+def add_list_item(list, item):
+    list.append(item)
 
 
-def maximum(a: int, b: int):
-    return max(a, b)
+def lenght(element):
+    return len(element)
+
+
+def create_empty_dictionary():
+    return {}
+
+
+def get_dict_value(dict, key):
+    return dict.get(key)
+
+
+def get_dict_keys(dict):
+    return list(dict.keys())
+
+
+def get_dict_values(dict):
+    return list(dict.values())
+
+
+def update_dict(dict, key, value):
+    dict.update({key, value})
+    return dict
 
 
 def if_pol(f, condition: bool):
@@ -72,7 +95,7 @@ def elseif_pol(f, condition1: bool, condition2: bool):
 
 def for_each_pol(f, list):
     for e in list:
-        f("ELEMENT", {"Element": e})
+        f("ITERATION", {"Element": e})
     f("FINISHED")
 
 
@@ -80,17 +103,23 @@ def vega_main():
     vega = api.Vega_Portal()
     vega.set_name("Basics")
     vega.add_method(api.Method(not_sent, api.OPERATOR, outputs={"result": bool}, formal_name="NOT"))
-    vega.add_method(api.Method(addition, api.OPERATOR, outputs={"result": int}, formal_name="Addition"))
-    vega.add_method(api.Method(subtraction, api.OPERATOR, outputs={"result": int}, formal_name="Subtraction"))
-    vega.add_method(api.Method(multiplication, api.OPERATOR, outputs={"result": int}, formal_name="Product"))
-    vega.add_method(api.Method(division, api.OPERATOR, outputs={"result": float}, formal_name="Quotient"))
+    vega.add_method(
+        api.Method(create_empty_list, api.EXECUTION, outputs={"List": None}, formal_name="Create Empty List"))
+    vega.add_method(api.Method(get_list_item, api.OPERATOR, outputs={"Item": None}, formal_name="Get List Item"))
+    vega.add_method(api.Method(add_list_item, api.EXECUTION, formal_name="Add List Item"))
+    vega.add_method(api.Method(lenght, api.OPERATOR, outputs={"Lenght": int}, formal_name="Lenght"))
     vega.add_method(api.Method(to_str, api.OPERATOR, outputs={"String": str}, formal_name="To String"))
     vega.add_method(api.Method(to_int, api.OPERATOR, outputs={"Integer": int}, formal_name="To Integer"))
-    vega.add_method(api.Method(maximum, api.OPERATOR, outputs={"Maximum": int}, formal_name="Max"))
+    vega.add_method(api.Method(is_in, api.OPERATOR, outputs={"Is Inside": bool}, formal_name="Is Inside"))
     vega.add_method(api.Method(_split, api.OPERATOR, outputs={"Elements": None}, formal_name="Split"))
     vega.add_method(api.Method(equal, api.OPERATOR, outputs={"Result": bool}, formal_name="Equals"))
     vega.add_method(api.Method(not_equal, api.OPERATOR, outputs={"Result": bool}, formal_name="Not Equals"))
-    vega.add_method(api.Method(get_item_by_index, api.OPERATOR, outputs={"Item": None}, formal_name="Get List Item"))
+    vega.add_method(api.Method(create_empty_dictionary, api.EXECUTION, outputs={"Dict": None},
+                               formal_name="Create Empty Dictionary"))
+    vega.add_method(api.Method(get_dict_value, api.OPERATOR, outputs={"Value": None}, formal_name="Get Dict Value"))
+    vega.add_method(api.Method(get_dict_keys, api.OPERATOR, outputs={"Keys List": None}, formal_name="Get Dict Keys"))
+    vega.add_method(api.Method(not_equal, api.OPERATOR, outputs={"Values List": None}, formal_name="Get Dict Values"))
+    vega.add_method(api.Method(update_dict, api.EXECUTION, outputs={"Dict": None}, formal_name="Update Dict Value"))
 
     if_sp = api.SpecialMethod(None, api.EXECUTION, formal_name="If Else")
     if_sp.add_execution_output("TRUE")
@@ -106,7 +135,7 @@ def vega_main():
     vega.add_method(elif_sp)
 
     foreach_sp = api.SpecialMethod(None, api.EXECUTION, outputs={"Element": None}, formal_name="For Each Loop")
-    foreach_sp.add_execution_output("ELEMENT")
+    foreach_sp.add_execution_output("ITERATION")
     foreach_sp.add_execution_output("FINISHED")
     foreach_sp.set_execution_policy(for_each_pol)
     vega.add_method(foreach_sp)

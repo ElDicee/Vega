@@ -34,6 +34,7 @@ class Method:
         self.custom_area = w
 
 
+
 class Event:
     def __init__(self, name, itg_name, outputs=None):
         self.name = name
@@ -47,7 +48,7 @@ class SpecialMethod(Method):
         self.execution_outputs = []
         self.exec_pol = None
 
-    def add_execution_output(self, id:str):
+    def add_execution_output(self, id: str):
         self.execution_outputs.append(id)
 
     def set_execution_policy(self, func):
@@ -57,6 +58,7 @@ class SpecialMethod(Method):
     # def policy(self, f, *args):
     #     to return flow
     #     f("OPT1")
+
 
 class ConnSignals(QObject):
     received_data_from_vega = Signal(dict)

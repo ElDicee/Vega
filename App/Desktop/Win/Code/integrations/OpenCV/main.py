@@ -34,7 +34,7 @@ class VideoThread(QThread):
 class App(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Qt live label demo")
+        # self.setWindowTitle("Qt live label demo")
         self.disply_width = 640
         self.display_height = 480
         # create the label that holds the image
@@ -70,6 +70,7 @@ class App(QWidget):
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        rgb_image = cv2.flip(rgb_image, 1)
         h, w, ch = rgb_image.shape
         bytes_per_line = ch * w
         convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
@@ -85,6 +86,8 @@ if __name__ == "__main__":
 
 
 def vega_main():
+    w = App()
     vega = api.Vega_Portal()
     vega.set_name("OpenCV ITG")
+    vega.add_display_screen(w)
     return vega

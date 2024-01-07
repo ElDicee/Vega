@@ -1,6 +1,6 @@
 import importlib.util
 
-from PySide6.QtCore import QTimer, QThread, Signal, QRunnable, Slot, QThreadPool, QObject
+from PySide6.QtCore import Signal, QRunnable, Slot, QThreadPool, QObject
 from PySide6.QtWidgets import QApplication
 import sys
 import os
@@ -9,7 +9,7 @@ import ui.ok_ui as ui_m
 from random import randint
 import json
 
-from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node
+from App.Desktop.Win.Code.ui.NodeEditor.Nodes import Node, Pin, I_Node
 from App.Desktop.Win.Code.integrations.VegaAPI import SpecialMethod
 
 
@@ -40,8 +40,9 @@ class Integration:
                 ex_pins = e.execution_outputs
                 ex_pol = e.exec_pol
         self.methods.update({e.name: {"func": e.func, "inputs": inp, "extend": [kw, args], "node": e.node_type,
-                                          "outs": e.output_types, "formal_name": e.formal_name,
-                                          "use_display": display, "exec_pins": ex_pins, "exec_pol": ex_pol, "kwargs": e.kwargs}})
+                                      "outs": e.output_types, "formal_name": e.formal_name,
+                                      "use_display": display, "exec_pins": ex_pins, "exec_pol": ex_pol,
+                                      "kwargs": e.kwargs}})
 
     def load_class(self, path):
         spec = importlib.util.spec_from_file_location(self.name, path)
@@ -111,6 +112,7 @@ class Vega:
         self.thread_pool = QThreadPool()
         self.worker = ConnectionServerWorker(parent=self)
         self.thread_pool.start(self.worker)
+        self.working_connections = {} #ITG: CONN
 
         # self.load_bar = ui_m.LoadBar()
 
@@ -198,16 +200,21 @@ class ConnectionWorker(QRunnable):
         while self.parent.enable:
             data = self.client.recv(1024)
             if data:
-                print(data.decode())
+                print(self, data.decode())
                 self.parent.signals.received_data.emit(json.loads(data))
-                # data = json.loads(data)
-                # node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
-                # node.output_data.update(data["data"])
-                # if node: node.execute()
+        self.autoDelete()
+        del self
 
-                # data = json.loads(data)
-                # event_name = data.get("event")
-                # print(self.parent.parent.get_event_node_by_name(event_name))
+    def send_(self, data):
+        self.client.sendall(str(data).encode())
+        # data = json.loads(data)
+        # node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
+        # node.output_data.update(data["data"])
+        # if node: node.execute()
+
+        # data = json.loads(data)
+        # event_name = data.get("event")
+        # print(self.parent.parent.get_event_node_by_name(event_name))
 
 
 class ConnectionServerWorker(QRunnable):
