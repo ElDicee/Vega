@@ -92,6 +92,11 @@ def elseif_pol(f, condition1: bool, condition2: bool):
     else:
         f("ELSE")
 
+def while_pol(f, condition):
+    while condition:
+        f("WHILE")
+    f("FINISHED")
+
 
 def for_each_pol(f, list):
     for e in list:
@@ -139,5 +144,11 @@ def vega_main():
     foreach_sp.add_execution_output("FINISHED")
     foreach_sp.set_execution_policy(for_each_pol)
     vega.add_method(foreach_sp)
+
+    while_sp = api.SpecialMethod(None, api.EXECUTION, formal_name="While")
+    while_sp.add_execution_output("WHILE")
+    while_sp.add_execution_output("FINISHED")
+    while_sp.set_execution_policy(while_pol)
+    vega.add_method(while_sp)
 
     return vega

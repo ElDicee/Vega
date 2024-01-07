@@ -254,7 +254,7 @@ class MainFrame(QMainWindow):
                                         "	background-color: rgb(126, 135, 162);\n"
                                         "}")
         icon1 = QIcon()
-        icon1.addFile(u"./res/icons/Feather_white/gitlab.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u"./res/icons/Feather_white/link.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QSize(32, 32))
 
