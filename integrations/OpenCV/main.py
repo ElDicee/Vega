@@ -73,11 +73,11 @@ class App(QWidget):
         self.setLayout(vbox)
 
         # create the video capture thread
-        self.thread = VideoThread()
-        # connect its signal to the update_image slot
-        self.thread.change_pixmap_signal.connect(self.update_image)
-        # start the thread
-        self.thread.start()
+        # self.thread = VideoThread()
+        # # connect its signal to the update_image slot
+        # self.thread.change_pixmap_signal.connect(self.update_image)
+        # # start the thread
+        # self.thread.start()
 
     def closeEvent(self, event):
         self.thread.stop()

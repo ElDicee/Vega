@@ -236,8 +236,11 @@ class ConnectionServerWorker(QRunnable):
         # data = json.loads(data)
         node = self.parent.get_event_node_by_name_and_itg(data["itg"], data["event"])
         if node:
+            print(f"Executing event: {data['itg']}, {data['event']}")
             node.output_data.update(data["data"])
             node.execute()
+        else:
+            print("Node not found")
 
     def connect(self):
         try:

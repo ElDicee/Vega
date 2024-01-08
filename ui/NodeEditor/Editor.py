@@ -113,7 +113,6 @@ class BlueprintView(QGraphicsView):
     def get_node_by_uuid(self, u):
         for node in self.scene().items():
             if isinstance(node, Node):
-                print(f"Checking {node.uuid} with {u}")
                 if node.uuid == u:
                     return node
 
@@ -205,8 +204,9 @@ class BlueprintView(QGraphicsView):
                                 node.add_pin("Value", False, True, datatype=bool)
                                 node.element.setChecked(prop.get("stablished_value"))
                             elif element == "On Start":
-                                node = node = Node(element, section, self.vega)
+                                node = Node(element, section, self.vega)
                                 node.add_pin("Out", True, True)
+                                self.vega.event_nodes.update({section: {element: node}})
                             node.uuid = uuid_eq.get(node_uuid)
                             node.integration = "Vega"
                             node.build()
@@ -304,8 +304,9 @@ class BlueprintView(QGraphicsView):
                 node = I_Node("Boolean", section, self.vega, data_type=bool, node_color=[255, 153, 51])
                 node.add_pin("Value", False, True, datatype=bool)
             elif element == "On Start":
-                node = node = Node(element, section, self.vega)
+                node = Node(element, section, self.vega)
                 node.add_pin("Out", True, True)
+                self.vega.event_nodes.update({section: {element: node}})
             node.uuid = uuid.uuid4()
             node.sc = self.scene()
             node.integration = "Vega"
