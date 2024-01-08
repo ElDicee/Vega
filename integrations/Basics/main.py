@@ -34,6 +34,14 @@ def _split(string: str, char: str):
     return string.split(char)
 
 
+def join_(string1: str, string2: str):
+    return f"{string1}{string2}"
+
+
+def space_join(string1: str, string2: str):
+    return f"{string1} {string2}"
+
+
 # MATH--------------------------------------MATH--------------------------------------MATH--------------------------------------MATH--------------------------------------
 
 def to_int(element):
@@ -92,6 +100,7 @@ def elseif_pol(f, condition1: bool, condition2: bool):
     else:
         f("ELSE")
 
+
 def while_pol(f, condition):
     while condition:
         f("WHILE")
@@ -125,6 +134,8 @@ def vega_main():
     vega.add_method(api.Method(get_dict_keys, api.OPERATOR, outputs={"Keys List": None}, formal_name="Get Dict Keys"))
     vega.add_method(api.Method(not_equal, api.OPERATOR, outputs={"Values List": None}, formal_name="Get Dict Values"))
     vega.add_method(api.Method(update_dict, api.EXECUTION, outputs={"Dict": None}, formal_name="Update Dict Value"))
+    vega.add_method(api.Method(join_, api.OPERATOR, outputs={"String": str}, formal_name="Join Strings"))
+    vega.add_method(api.Method(space_join, api.OPERATOR, outputs={"String": str}, formal_name="Join Str with Space"))
 
     if_sp = api.SpecialMethod(None, api.EXECUTION, formal_name="If Else")
     if_sp.add_execution_output("TRUE")

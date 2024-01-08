@@ -76,7 +76,6 @@ class VegaConnection(socket.socket):
         self.emitting_queue = []  # [EVENT, DATA]
 
     def try_connection(self, till_connect, instant_order: list = None):
-        print(random.randint(1, 6))
         try:
             with open(os.path.join(os.getenv("APPDATA"), ".vega", "ports.veg"), "r") as file:
                 for line in file.readlines():

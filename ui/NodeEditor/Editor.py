@@ -8,7 +8,7 @@ from PySide6.QtGui import QColor, QPen, QPainter, QSurfaceFormat, QWheelEvent, Q
     QTransform
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QGraphicsView, QFrame, QMenu, QGraphicsScene, QWidget, QGraphicsSceneMouseEvent, \
-    QGraphicsProxyWidget, QLineEdit, QScrollArea
+    QGraphicsProxyWidget, QLineEdit, QScrollArea, QDialog
 
 from ui.NodeEditor.NodeLogic import NodeLogic
 from ui.NodeEditor.NodeSearchBar import NodeSearchBar
