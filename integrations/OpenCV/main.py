@@ -9,7 +9,10 @@ import numpy as np
 
 
 def init_video_capture(cam_num: int):
-    return cv2.VideoCapture(cam_num)
+    cap = cv2.VideoCapture(cam_num)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('Y', '1', '6', ' '))
+    cap.set(cv2.CAP_PROP_CONVERT_RGB, False)
+    return cap
 
 
 def read_from_capture(cap):
@@ -29,6 +32,7 @@ def convert_cv_qt(image_width, image_height, cv_img):
 
 def shutdown_video_capture(capture):
     capture.release()
+
 
 class VideoThread(QThread):
     change_pixmap_signal = Signal(np.ndarray)
@@ -101,10 +105,14 @@ def vega_main():
     vega = api.Vega_Portal()
     vega.set_name("OpenCV ITG")
     vega.add_display_screen(w)
-    vega.add_method(api.Method(init_video_capture, api.EXECUTION, outputs={"Capture": None}, formal_name="WebcapCapture Instance"))
-    vega.add_method(api.Method(read_from_capture, api.OPERATOR, outputs={"Result": bool, "Image": None}, formal_name="Read Image from Capture"))
-    vega.add_method(api.Method(read_from_capture, api.OPERATOR, outputs={"Result": bool, "Image": None}, formal_name="Read Capture Image"))
+    vega.add_method(
+        api.Method(init_video_capture, api.EXECUTION, outputs={"Capture": None}, formal_name="WebcapCapture Instance"))
+    vega.add_method(api.Method(read_from_capture, api.OPERATOR, outputs={"Result": bool, "Image": None},
+                               formal_name="Read Image from Capture"))
+    vega.add_method(api.Method(read_from_capture, api.OPERATOR, outputs={"Result": bool, "Image": None},
+                               formal_name="Read Capture Image"))
     vega.add_method(api.Method(shutdown_video_capture, api.EXECUTION, formal_name="Shutdown Video Capture"))
-    vega.add_method(api.Method(convert_cv_qt, api.OPERATOR, outputs={"Qt Pixmap": None}, formal_name="CV2 Img to Qt Pixmap"))
+    vega.add_method(
+        api.Method(convert_cv_qt, api.OPERATOR, outputs={"Qt Pixmap": None}, formal_name="CV2 Img to Qt Pixmap"))
     vega.add_method(api.Method(w.update_image, api.EXECUTION, formal_name="Update Display Image"))
     return vega

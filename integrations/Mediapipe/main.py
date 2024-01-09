@@ -1,3 +1,5 @@
+import os.path
+
 import integrations.VegaAPI as api
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
@@ -5,10 +7,11 @@ import mediapipe as mp
 from mediapipe.tasks.python import vision
 from mediapipe.tasks import python
 import numpy as np
+import cv2
 
 
 def get_face_landmark_model(output_face_blendshapes: bool, output_facial_transmormation_matrixes: bool, num_faces: int):
-    base_options = python.BaseOptions(model_asset_path='face_landmarker_v2_with_blendshapes.task')
+    base_options = python.BaseOptions(model_asset_path=os.path.join("integrations", "Mediapipe", "face_landmarker_v2_with_blendshapes.task"))
     options = vision.FaceLandmarkerOptions(base_options=base_options,
                                            output_face_blendshapes=output_face_blendshapes,
                                            output_facial_transformation_matrixes=output_facial_transmormation_matrixes,
@@ -57,7 +60,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
 
 def detect(model, image):
-    return model.detect(image)
+    return model.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.convertScaleAbs(image)))
 
 
 def vega_main():
@@ -67,3 +70,11 @@ def vega_main():
     vega.add_method(api.Method(draw_landmarks_on_image, api.EXECUTION, outputs={"Image": None}, formal_name="Draw Landmarks"))
     vega.add_method(api.Method(detect, api.EXECUTION, outputs={"Detection": None}, formal_name="Detect"))
     return vega
+
+
+if __name__ == "__main__":
+    model = get_face_landmark_model(True, True, 1)
+    cap = cv2.VideoCapture(0)
+    while True:
+        res, img = cap.read()
+        d = model.detect(img)

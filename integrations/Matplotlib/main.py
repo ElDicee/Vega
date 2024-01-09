@@ -14,6 +14,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationTool
 from matplotlib.figure import Figure
 
 
+#https://www.geeksforgeeks.org/dynamically-updating-plot-in-matplotlib/
+
 class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -27,6 +29,7 @@ class PlotGraph(FigureCanvasQTAgg):
         self.fig = Figure(figsize=(7, 5), dpi=100)
         self.axes = self.fig.add_subplot(111)
         self.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
+
         super(PlotGraph, self).__init__(self.fig)
 
 
@@ -140,11 +143,9 @@ class DisplayWidget(QtWidgets.QWidget):
         self.plots.pop(name)
 
     def update_plot(self):
-        pass
-        # self.plot.plot.axes.plot([random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50)],
-        #                          [random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50)])
-        # self.plot.plot.draw()
-        # self.plot.update()
+        self.plot.plot.axes.plot([random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50)],
+                                 [random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50)])
+        self.plot.update()
 
 
 if __name__ == "__main__":
