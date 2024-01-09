@@ -12,32 +12,32 @@ matplotlib.use('Qt5Agg')
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 
-#https://www.geeksforgeeks.org/dynamically-updating-plot-in-matplotlib/
-
-class MplCanvas(FigureCanvasQTAgg):
-
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        super(MplCanvas, self).__init__(fig)
+# https://www.geeksforgeeks.org/dynamically-updating-plot-in-matplotlib/
 
 
 class PlotGraph(FigureCanvasQTAgg):
-    def __init__(self, parent=None):
+    def __init__(self, x, y, parent=None):
+        plt.ion()
         self.fig = Figure(figsize=(7, 5), dpi=100)
         self.axes = self.fig.add_subplot(111)
-        self.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
-
+        self.axes.plot(x, y)[0]
         super(PlotGraph, self).__init__(self.fig)
+
+    def update(self):
+        self.fig = Figure(figsize=(7, 5), dpi=100, facecolor="g")
+        self.axes.plot(self.x, self.y)
+        plt.xlim(self.x[0], self.x[-1])
 
 
 class DisplayPlot(QWidget):
     def __init__(self):
         super().__init__()
-
-        self.plot = PlotGraph()
+        self.x = [1, 2, 4]
+        self.y = [1, 2, 3]
+        self.plot = PlotGraph(self.x, self.y)
         toolbar = NavigationToolbar(self.plot, self)
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(toolbar)
@@ -45,28 +45,14 @@ class DisplayPlot(QWidget):
 
         self.setLayout(layout)
 
+    def update_graph(self):
+        self.update_Val()
+        self.plot = PlotGraph(self.x, self.y)
+        self.update()
 
-class MainWindow(QtWidgets.QMainWindow):
-
-    def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
-
-        sc = MplCanvas(self, width=5, height=4, dpi=100)
-        sc.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
-
-        # Create toolbar, passing canvas as first parament, parent (self, the MainWindow) as second.
-        toolbar = NavigationToolbar(sc, self)
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(toolbar)
-        layout.addWidget(sc)
-
-        # Create a placeholder widget to hold our toolbar and canvas.
-        widget = QtWidgets.QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-
-        self.show()
+    def update_Val(self):
+        self.y.append(random.randint(1, 10))
+        self.x.append(self.x[-1] + 1)
 
 
 class DisplayWidget(QtWidgets.QWidget):
@@ -143,15 +129,10 @@ class DisplayWidget(QtWidgets.QWidget):
         self.plots.pop(name)
 
     def update_plot(self):
-        self.plot.plot.axes.plot([random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50)],
-                                 [random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50), random.randint(1,50)])
-        self.plot.update()
+        self.plot.update_graph()
 
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    w = MainWindow()
-    app.exec_()
+    def add_x(self, d):
+        self.plot.x.append(d)
 
 
 def vega_main():
@@ -160,4 +141,5 @@ def vega_main():
     vega.set_name("MatPlotLib")
     vega.add_display_screen(wid)
     vega.add_method(api.Method(wid.update_plot, api.EXECUTION, formal_name="Update Plot Test"))
+    vega.add_method(api.Method(wid.add_x, api.EXECUTION, formal_name="Add X"))
     return vega
