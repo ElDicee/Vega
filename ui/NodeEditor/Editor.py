@@ -28,7 +28,10 @@ class NodeWidget(QtWidgets.QWidget):
         self.scene.setSceneRect(0, 0, 9999, 9999)
         self.view = BlueprintView(vega, parent=self)
         self.view.setScene(self.scene)
-        self.view.load_last_nodes()
+        try:
+            self.view.load_last_nodes()
+        except:
+            print("Failed loading some node")
 
         main_layout.addWidget(self.view)
         vega.worker.signals.received_data.emit({"event": "On Start", "itg": "Vega", "data": {}})
@@ -134,94 +137,101 @@ class BlueprintView(QGraphicsView):
                 content = json.loads(lines)
                 if content is not None and len(content.keys()) > 0:
                     for node_uuid, prop in content.get("Nodes").items():
-                        uuid_eq.update({node_uuid: uuid.uuid4()})
+                        try:
 
-                        ev = prop.get("event")
-                        section = prop.get("itg")
-                        element = prop.get("name")
+                            uuid_eq.update({node_uuid: uuid.uuid4()})
 
-                        if not section == "Vega":
-                            if not ev:
-                                method = self.vega.get_method_by_formal_name_and_itg(element, section, False)
-                                node = Node(method.get("formal_name"), section, self.vega)
+                            ev = prop.get("event")
+                            section = prop.get("itg")
+                            element = prop.get("name")
+
+                            if not section == "Vega":
+                                if not ev:
+                                    method = self.vega.get_method_by_formal_name_and_itg(element, section, False)
+                                    node = Node(method.get("formal_name"), section, self.vega)
+                                    node.uuid = uuid_eq.get(node_uuid)
+                                    node.integration = section
+                                    node.id_name = element
+                                    node.set_function(method.get("func"))
+                                    # node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get(
+                                    #     "use_display") else None
+                                    print(node.use_display)
+                                    node.execution_policy = method.get("exec_pol")
+                                    if method.get("node") == "exec":
+                                        node.add_pin("in", True, False)
+                                        if method.get("exec_pins"):
+                                            for s_pìn in method.get("exec_pins"):
+                                                node.add_pin(s_pìn, True, True)
+                                        else:
+                                            node.add_pin("out", True, True)
+                                    for name, type in method.get("inputs").items():
+                                        # if node.use_display is None:
+                                        #     node.add_pin(name, False, False, datatype=type)
+                                        # else:
+                                        #     if name != list(method.get("inputs").keys())[0]:
+                                        #         node.add_pin(name, False, False, datatype=type)
+                                        node.add_pin(name, False, False, datatype=type)
+                                    for name, type in method.get("outs").items():
+                                        node.add_pin(name, False, True, datatype=type)
+                                elif ev:
+
+                                    node = Node(element, section, self.vega)
+                                    node.uuid = uuid_eq.get(node_uuid)
+                                    node.add_pin("out", True, True)
+                                    node.event = True
+                                    node.integration = section
+                                    node.event_name = element
+                                    node.id_name = element
+                                    node.event_itg = section
+                                    for name, type in self.vega.events.get(section).get(element).items():
+                                        node.add_pin(name, False, True, datatype=type)
+                                    self.vega.event_nodes.update({section: {element: node}})
+                                node.build()
+                                node.setPos(prop.get("pos")[0], prop.get("pos")[1])
+                                self.scene().addItem(node)
+
+                            else:
+                                node = None
+                                if element == "Int number":
+                                    node = I_Node("Int number", section, self.vega, data_type=int, node_color=[0, 122, 204])
+                                    node.add_pin("Value", False, True, datatype=int)
+                                    node.element.setText(str(prop.get("stablished_value")))
+                                elif element == "Float number":
+                                    node = I_Node("Float number", section, self.vega, data_type=float, node_color=[0, 204, 0])
+                                    node.add_pin("Value", False, True, datatype=float)
+                                    node.element.setText(str(prop.get("stablished_value")))
+                                elif element == "String text":
+                                    node = I_Node("String text", section, self.vega, data_type=str, node_color=[255, 26, 26])
+                                    node.add_pin("Value", False, True, datatype=str)
+                                    node.element.setText(prop.get("stablished_value"))
+                                elif element == "Boolean":
+                                    node = I_Node("Boolean", section, self.vega, data_type=bool, node_color=[255, 153, 51])
+                                    node.add_pin("Value", False, True, datatype=bool)
+                                    node.element.setChecked(prop.get("stablished_value"))
+                                elif element == "On Start":
+                                    node = Node(element, section, self.vega)
+                                    node.add_pin("Out", True, True)
+                                    self.vega.event_nodes.update({section: {element: node}})
                                 node.uuid = uuid_eq.get(node_uuid)
-                                node.integration = section
-                                node.id_name = element
-                                node.set_function(method.get("func"))
-                                # node.use_display = self.parentWidget().parent().vega.main_frame.canvaspanels[section] if method.get(
-                                #     "use_display") else None
-                                print(node.use_display)
-                                node.execution_policy = method.get("exec_pol")
-                                if method.get("node") == "exec":
-                                    node.add_pin("in", True, False)
-                                    if method.get("exec_pins"):
-                                        for s_pìn in method.get("exec_pins"):
-                                            node.add_pin(s_pìn, True, True)
-                                    else:
-                                        node.add_pin("out", True, True)
-                                for name, type in method.get("inputs").items():
-                                    # if node.use_display is None:
-                                    #     node.add_pin(name, False, False, datatype=type)
-                                    # else:
-                                    #     if name != list(method.get("inputs").keys())[0]:
-                                    #         node.add_pin(name, False, False, datatype=type)
-                                    node.add_pin(name, False, False, datatype=type)
-                                for name, type in method.get("outs").items():
-                                    node.add_pin(name, False, True, datatype=type)
-                            elif ev:
-
-                                node = Node(element, section, self.vega)
-                                node.uuid = uuid_eq.get(node_uuid)
-                                node.add_pin("out", True, True)
-                                node.event = True
-                                node.integration = section
-                                node.event_name = element
-                                node.id_name = element
-                                node.event_itg = section
-                                for name, type in self.vega.events.get(section).get(element).items():
-                                    node.add_pin(name, False, True, datatype=type)
-                                self.vega.event_nodes.update({section: {element: node}})
-                            node.build()
-                            node.setPos(prop.get("pos")[0], prop.get("pos")[1])
-                            self.scene().addItem(node)
-
-                        else:
-                            node = None
-                            if element == "Int number":
-                                node = I_Node("Int number", section, self.vega, data_type=int, node_color=[0, 122, 204])
-                                node.add_pin("Value", False, True, datatype=int)
-                                node.element.setText(str(prop.get("stablished_value")))
-                            elif element == "Float number":
-                                node = I_Node("Float number", section, self.vega, data_type=float, node_color=[0, 204, 0])
-                                node.add_pin("Value", False, True, datatype=float)
-                                node.element.setText(str(prop.get("stablished_value")))
-                            elif element == "String text":
-                                node = I_Node("String text", section, self.vega, data_type=str, node_color=[255, 26, 26])
-                                node.add_pin("Value", False, True, datatype=str)
-                                node.element.setText(prop.get("stablished_value"))
-                            elif element == "Boolean":
-                                node = I_Node("Boolean", section, self.vega, data_type=bool, node_color=[255, 153, 51])
-                                node.add_pin("Value", False, True, datatype=bool)
-                                node.element.setChecked(prop.get("stablished_value"))
-                            elif element == "On Start":
-                                node = Node(element, section, self.vega)
-                                node.add_pin("Out", True, True)
-                                self.vega.event_nodes.update({section: {element: node}})
-                            node.uuid = uuid_eq.get(node_uuid)
-                            node.integration = "Vega"
-                            node.build()
-                            node.setPos(prop.get("pos")[0], prop.get("pos")[1])
-                            self.scene().addItem(node)
-
+                                node.integration = "Vega"
+                                node.build()
+                                node.setPos(prop.get("pos")[0], prop.get("pos")[1])
+                                self.scene().addItem(node)
+                        except:
+                            print("Failed to load some nodes")
                     for node_uuid, prop in content.get("Nodes").items():
                         for pin_name, complementary in prop.get("out_pins").items():
                             for conn_uuid, end_pin_name in complementary.items():
-                                conn = Connection()
-                                conn.set_start_pin(self.get_node_by_uuid(uuid_eq.get(node_uuid)).get_pin(pin_name))
-                                print(node_uuid)
-                                conn.set_end_pin(self.get_node_by_uuid(uuid_eq.get(conn_uuid)).get_pin(end_pin_name))
-                                self.scene().addItem(conn)
-                                conn.updatePath()
+                                try:
+                                    conn = Connection()
+                                    conn.set_start_pin(self.get_node_by_uuid(uuid_eq.get(node_uuid)).get_pin(pin_name))
+                                    print(node_uuid)
+                                    conn.set_end_pin(
+                                        self.get_node_by_uuid(uuid_eq.get(conn_uuid)).get_pin(end_pin_name))
+                                    self.scene().addItem(conn)
+                                    conn.updatePath()
+                                except:
+                                    print("Failed loading some connections")
                 else:
                     del content
                     del uuid_eq
@@ -513,7 +523,6 @@ class NodeScene(QGraphicsScene):
                     self.current_conn.set_end_pin(item)
                     self.current_conn.update_start_end_pos()
                 else:
-                    print("cant connect")
                     self.current_conn.delete()
                 self.current_conn = None
 

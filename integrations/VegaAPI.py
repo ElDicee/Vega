@@ -1,5 +1,4 @@
 import json
-import random
 from inspect import signature
 import socket
 import os
@@ -35,9 +34,9 @@ class Method:
 
 
 class Event:
-    def __init__(self, name, outputs=None):
+    def __init__(self, name, itg_name, outputs=None):
         self.name = name
-        self.itg_name = ""
+        self.itg_name = itg_name
         self.outputs = outputs
 
 
@@ -106,7 +105,7 @@ class VegaConnection(socket.socket):
         self.is_closing = True
 
     def receive(self):
-        threading.Thread(target=self.handleReceivedData).start()  # https://realpython.com/intro-to-python-threading/
+        threading.Thread(target=self.handleReceivedData).start()
 
     def handleReceivedData(self):  # per que rebi dades simultàneament a l'execució
         while True:
@@ -148,7 +147,6 @@ class Vega_Portal:
 
     def add_event(self, e: Event):
         if not e in self.events:
-            e.itg_name = self.name
             self.events.append(e)
 
 

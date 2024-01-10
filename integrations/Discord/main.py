@@ -1,14 +1,11 @@
-from typing import Any
-
 import discord
-from PySide6.QtCore import Slot
 from discord.ext import commands
 
 import integrations.VegaAPI as api
 from integrations.Discord import vega_ui
 
 ITG_NAME = "DiscordBot"
-DISCORD_EVENT = api.Event("DC_Data", outputs={"Text": str, "Guild": str, "Channel": str, "Author": str})
+DISCORD_EVENT = api.Event("DC_Data", itg_name=ITG_NAME, outputs={"Text": str, "Guild": str, "Channel": str, "Author": str})
 
 
 class VegaDCBot(commands.Bot):

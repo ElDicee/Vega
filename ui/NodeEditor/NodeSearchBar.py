@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-                            QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt, QMimeData)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-                           QFont, QFontDatabase, QGradient, QIcon,
-                           QImage, QKeySequence, QLinearGradient, QPainter,
-                           QPalette, QPixmap, QRadialGradient, QTransform, QMouseEvent, QDrag)
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLabel,
+from PySide6.QtCore import (QMetaObject, QSize, Qt, QMimeData)
+from PySide6.QtGui import (QColor, QPixmap, QMouseEvent, QDrag)
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,
                                QLineEdit, QScrollArea, QSizePolicy, QVBoxLayout,
                                QWidget, QPushButton, QGroupBox)
 
@@ -179,9 +174,9 @@ background-color: rgb(56, 60, 74);
                     self.add_element(e, section=itg.name, event=True)
             sec = self.get_section(itg.name)
             sec.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-            sec.setMinimumSize(sec.size().width(), 50+20*len(sec.items))
-            sec.setMaximumSize(sec.size().width(), 50+20*len(sec.items))
-            sec.setFixedSize(sec.size().width(), 50+20*len(sec.items))
+            sec.setMinimumSize(sec.size().width(), 50 + 20 * len(sec.items))
+            sec.setMaximumSize(sec.size().width(), 50 + 20 * len(sec.items))
+            sec.setFixedSize(sec.size().width(), 50 + 20 * len(sec.items))
 
     def add_section(self, name):
         section = FilterSection(self.scrollArea, name)

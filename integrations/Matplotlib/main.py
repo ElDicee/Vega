@@ -1,5 +1,3 @@
-import random
-
 from PySide6 import QtWidgets
 from PySide6.QtCore import QSize, QRect, QMetaObject, QCoreApplication
 from PySide6.QtGui import QFont, Qt
@@ -14,10 +12,6 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-
-
-# https://www.pythonguis.com/tutorials/plotting-matplotlib/
-
 
 class PlotGraph(FigureCanvasQTAgg):
     def __init__(self, x, y, parent=None):
@@ -47,7 +41,7 @@ class DisplayPlot(QWidget):
 
     def update_graph(self):
         self.plot.axes.cla()
-        for dat in self.datasets:
+        for dat in self.datasets.values():
             self.plot.axes.plot(dat.x, dat.y)
         self.plot.draw()
 
@@ -183,8 +177,8 @@ class BaseWidget(QWidget):
 
     def add_dataset(self, plot_name, dataset_name, x_vals, y_vals):
         d = Dataset()
-        d.x = x_vals if isinstance(x_vals, list) else list(x_vals)
-        d.y = y_vals if isinstance(y_vals, list) else list(y_vals)
+        d.x = x_vals if isinstance(x_vals, list) else [x_vals]
+        d.y = y_vals if isinstance(y_vals, list) else [y_vals]
         self.plots.get(plot_name).datasets.update({dataset_name: d})
 
     def get_plots_name(self):
@@ -221,6 +215,5 @@ def vega_main():
     vega.add_method(api.Method(wid.get_plots_name, api.OPERATOR, outputs={"List": None}, formal_name="Get Plots Name"))
     vega.add_method(api.Method(wid.update_variable, api.EXECUTION, formal_name="Update Variable Value"))
     vega.add_method(api.Method(wid.add_variable, api.EXECUTION, formal_name="Add Variable"))
-    vega.add_method(api.Method(wid.get_plot_datasets_name, api.OPERATOR, outputs={"List": None},
-                               formal_name="Get Plot Datasets Name"))
+    vega.add_method(api.Method(wid.get_plot_datasets_name, api.OPERATOR, outputs={"List": None},formal_name="Get Plot Datasets Name"))
     return vega

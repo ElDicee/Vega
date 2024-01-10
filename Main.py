@@ -1,6 +1,6 @@
 import importlib.util
 
-from PySide6.QtCore import QTimer, QThread, Signal, QRunnable, Slot, QThreadPool, QObject
+from PySide6.QtCore import Signal, QRunnable, Slot, QThreadPool, QObject
 from PySide6.QtWidgets import QApplication
 import sys
 import os
@@ -9,7 +9,7 @@ import ui.ok_ui as ui_m
 from random import randint
 import json
 
-from ui.NodeEditor.Nodes import Node, Pin, Connection, I_Node
+from ui.NodeEditor.Nodes import Node, Pin, I_Node
 from integrations.VegaAPI import SpecialMethod
 
 
@@ -76,7 +76,7 @@ class Integration:
 
 
 def install_needed_files(
-        files: dict):  # https://www.pythoncheatsheet.org/cheatsheet/file-directory-path    https://stackoverflow.com/questions/13184414/how-can-i-get-the-path-to-the-appdata-directory-in-python
+        files: dict):
     roaming = os.getenv("APPDATA")
     vega_folder = ".vega"
     fold_path = os.path.join(roaming, vega_folder)
@@ -133,6 +133,7 @@ class Vega:
 
     def get_event_node_by_name_and_itg(self, itg, name):
         n = None
+        print(self.event_nodes)
         if len(self.event_nodes) > 0:
             if itg in self.event_nodes.keys():
                 if len(self.event_nodes.get(itg)) > 0:
@@ -202,14 +203,6 @@ class ConnectionWorker(QRunnable):
                     self.parent.signals.received_data.emit(json.loads(data))
                 except:
                     pass
-                # data = json.loads(data)
-                # node = self.vega.get_event_node_by_name_and_itg(data["itg"], data["event"])
-                # node.output_data.update(data["data"])
-                # if node: node.execute()
-
-                # data = json.loads(data)
-                # event_name = data.get("event")
-                # print(self.parent.parent.get_event_node_by_name(event_name))
 
 
 class ConnectionServerWorker(QRunnable):
@@ -235,6 +228,8 @@ class ConnectionServerWorker(QRunnable):
     def handleEvents(self, data):
         # data = json.loads(data)
         node = self.parent.get_event_node_by_name_and_itg(data["itg"], data["event"])
+        print(data["itg"], data["event"])
+        print(node)
         if node:
             print(f"Executing event: {data['itg']}, {data['event']}")
             node.output_data.update(data["data"])

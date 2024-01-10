@@ -1,19 +1,13 @@
-import sys
-
 from PySide6.QtMultimedia import QSoundEffect
 
 import integrations.VegaAPI as api
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-                            QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-                           QFont, QFontDatabase, QGradient, QIcon,
-                           QImage, QKeySequence, QLinearGradient, QPainter,
-                           QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QFrame, QHBoxLayout,
+from PySide6.QtCore import (QCoreApplication,QMetaObject, QRect,QSize, QUrl, Qt)
+from PySide6.QtGui import (QFont)
+from PySide6.QtWidgets import (QDialog, QFrame, QHBoxLayout,
                                QLabel, QPushButton, QScrollArea, QSizePolicy,
-                               QVBoxLayout, QWidget, QMainWindow)
+                               QVBoxLayout, QWidget)
+
 
 class Dialog(QDialog):
 
@@ -175,7 +169,7 @@ class disp(QWidget):
         self.n.setFocus()
 
 
-#PLING SOUND EFFECT: https://youtu.be/GVAF07-2Xic?si=6SvsMRh9HQEW3XUv
+# PLING SOUND EFFECT: https://youtu.be/GVAF07-2Xic?si=6SvsMRh9HQEW3XUv
 
 
 def vega_main():

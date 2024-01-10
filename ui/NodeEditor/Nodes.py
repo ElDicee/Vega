@@ -483,8 +483,11 @@ class Node(QGraphicsItem):
             inp = self.get_input_pins()
             if inp:
                 for i in inp:
+                    print(i.name, i.connections)
                     if len(i.connections) > 0:
+                        print(i)
                         opp = i.connections[0].get_opposite_pin(i)
+                        print(opp.name)
                         node = opp.node
                         if node.is_exec:
                             needed_data.update({opp.name: node.output_data.get(opp.name)})
@@ -494,6 +497,7 @@ class Node(QGraphicsItem):
                                 needed_data.update({node.uuid.__str__: node.output_data.get(node.uuid.__str__)})
                             else:
                                 needed_data.update({opp.name: node.output_data.get(opp.name)})
+            print(f"Vals: {needed_data.values()}")
             res = self.function(*needed_data.values()) if self.function else None
             outp = self.get_output_pins()
             if outp:
@@ -501,8 +505,7 @@ class Node(QGraphicsItem):
                     if res is not None:
                         if isinstance(res, dict):
                             for i, o in enumerate(outp):
-                                self.output_data.update({o.name:
-                                                             res[i]})
+                                self.output_data.update({o.name: res[i]})
                         else:
                             self.output_data.update({outp[0].name: res})
                 else:

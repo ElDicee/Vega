@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,
-                            QSize, Qt)
-from PySide6.QtGui import (QFont, QIcon,
-                           QMouseEvent, QPainter)
-from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,
-                               QMainWindow, QPushButton, QScrollArea, QSizePolicy,
-                               QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QStackedWidget, QGroupBox,
-                               QLineEdit, QGraphicsBlurEffect, QDialog, QProgressBar, QGraphicsWidget, QGraphicsItem,
-                               QGraphicsProxyWidget)
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect,QSize, Qt)
+from PySide6.QtGui import (QFont, QIcon,QMouseEvent)
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel,QMainWindow, QPushButton, QScrollArea, QSizePolicy,QVBoxLayout, QWidget, QStackedWidget, QGraphicsBlurEffect)
 import ui.Elements.topbar as topbar
-from ui.NodeEditor.Editor import BlueprintView, EditorWidget
+from ui.NodeEditor.Editor import EditorWidget
 
 
 class MainFrame(QMainWindow):
