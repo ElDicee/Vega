@@ -8,7 +8,7 @@ import integrations.VegaAPI as api
 from integrations.Discord import vega_ui
 
 ITG_NAME = "DiscordBot"
-DISCORD_EVENT = api.Event("DC_Data", ITG_NAME, outputs={"Text": str, "Guild": str, "Channel": str, "Author": str})
+DISCORD_EVENT = api.Event("DC_Data", outputs={"Text": str, "Guild": str, "Channel": str, "Author": str})
 
 
 class VegaDCBot(commands.Bot):
@@ -43,10 +43,6 @@ class VegaDCBot(commands.Bot):
             print("Could not connect to Vega!!")
         print("Bot is ready!")
 
-    @Slot(dict)
-    async def create_channel(self, d:dict):
-        await self.get_guild(d.get(""))
-
     async def on_message(self, msg):
         self.send_data(DISCORD_EVENT, {"Channel": msg.channel.name, "Guild": msg.guild.name, "Author": msg.author.name,
                                        "Text": msg.content})
@@ -63,22 +59,6 @@ def vega_main():
     return vega
 
 
-# @bot.event
-# async def on_ready():
-#     try:
-#         pass
-#     except:
-#         connection = None
-#         print("Could not connect to Vega!!")
-#     print("Bot is ready!")
-
-
-# @bot.command(name="test")
-# async def test_com(ctx, *args):
-#     text = " ".join(args)
-#     await ctx.send(text)
-
-
 if __name__ == "__main__":
     bot = VegaDCBot()
-    bot.run("MTE2ODU2NTkwMjUwNjIwOTM1Mg.GQp7WA.Do43UUZ40aCgpJyqADBChtoVdrX2SsoDbl76Jo")
+    bot.run("MTE2ODU2NTkwMjUwNjIwOTM1Mg.GpjpO0.lsRxzTxcVOJkYV-foAGehTJ3x2RvolwxQOvt6c")

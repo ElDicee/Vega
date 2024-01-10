@@ -2,10 +2,11 @@ import random
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import QSize, QRect, QMetaObject, QCoreApplication
-from PySide6.QtWidgets import QHBoxLayout, QScrollArea, QWidget, QVBoxLayout, QStackedWidget
+from PySide6.QtGui import QFont, Qt
+from PySide6.QtWidgets import QHBoxLayout, QScrollArea, QWidget, QVBoxLayout, QStackedWidget, QGroupBox, QPushButton, \
+    QFrame, QLabel
 
 import integrations.VegaAPI as api
-import sys
 import matplotlib
 
 matplotlib.use('Qt5Agg')
@@ -15,7 +16,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
-# https://www.geeksforgeeks.org/dynamically-updating-plot-in-matplotlib/
+# https://www.pythonguis.com/tutorials/plotting-matplotlib/
 
 
 class PlotGraph(FigureCanvasQTAgg):
@@ -23,20 +24,19 @@ class PlotGraph(FigureCanvasQTAgg):
         plt.ion()
         self.fig = Figure(figsize=(7, 5), dpi=100)
         self.axes = self.fig.add_subplot(111)
-        self.axes.plot(x, y)[0]
         super(PlotGraph, self).__init__(self.fig)
 
-    def update(self):
-        self.fig = Figure(figsize=(7, 5), dpi=100, facecolor="g")
-        self.axes.plot(self.x, self.y)
-        plt.xlim(self.x[0], self.x[-1])
+
+class Dataset:
+    def __init__(self):
+        self.x = []
+        self.y = []
 
 
 class DisplayPlot(QWidget):
     def __init__(self):
         super().__init__()
-        self.x = [1, 2, 4]
-        self.y = [1, 2, 3]
+        self.datasets = {}
         self.plot = PlotGraph(self.x, self.y)
         toolbar = NavigationToolbar(self.plot, self)
         layout = QtWidgets.QVBoxLayout()
@@ -46,72 +46,107 @@ class DisplayPlot(QWidget):
         self.setLayout(layout)
 
     def update_graph(self):
-        self.update_Val()
-        self.plot = PlotGraph(self.x, self.y)
-        self.update()
-
-    def update_Val(self):
-        self.y.append(random.randint(1, 10))
-        self.x.append(self.x[-1] + 1)
+        self.plot.axes.cla()
+        for dat in self.datasets:
+            self.plot.axes.plot(dat.x, dat.y)
+        self.plot.draw()
 
 
-class DisplayWidget(QtWidgets.QWidget):
+class BaseWidget(QWidget):
 
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
+    def __init__(self):
+        super().__init__()
         self.plots = {}
+        self.vars = {}  # name:val
         self.setupUi(self)
 
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(919, 716)
-        self.horizontalLayout = QHBoxLayout(Form)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.scrollArea = QScrollArea(Form)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setMaximumSize(QSize(200, 16777215))
-        self.scrollArea.setStyleSheet(u"QScrollArea{\n"
-                                      "border-top-right-radius:  8px;\n"
-                                      "border-bottom-right-radius:  8px;\n"
-                                      "}")
-        self.scrollArea.setWidgetResizable(True)
-        self.plots_container = QWidget()
-        self.plots_container.setObjectName(u"plots_container")
-        self.plots_container.setGeometry(QRect(0, 0, 200, 716))
-        self.verticalLayout = QVBoxLayout(self.plots_container)
+        Form.resize(720, 624)
+        self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.scrollArea.setWidget(self.plots_container)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.groupBox = QGroupBox(Form)
+        self.groupBox.setObjectName(u"groupBox")
+        self.groupBox.setMinimumSize(QSize(0, 100))
+        self.groupBox.setMaximumSize(QSize(16777215, 100))
+        font = QFont()
+        font.setFamilies([u"Yu Gothic UI Semibold"])
+        font.setPointSize(12)
+        font.setBold(True)
+        self.groupBox.setFont(font)
+        self.horizontalLayout_2 = QHBoxLayout(self.groupBox)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.PlotScrollArea = QScrollArea(self.groupBox)
+        self.PlotScrollArea.setObjectName(u"PlotScrollArea")
+        self.PlotScrollArea.setMaximumSize(QSize(16777215, 100))
+        self.PlotScrollArea.setStyleSheet(u"border-radius: 10px;\n"
+                                          "\n"
+                                          "QPushButton{\n"
+                                          "border: 2px solid rgb(0, 170, 255);\n"
+                                          "}")
+        self.PlotScrollArea.setFrameShape(QFrame.NoFrame)
+        self.PlotScrollArea.setFrameShadow(QFrame.Plain)
+        self.PlotScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.PlotScrollArea.setWidgetResizable(True)
+        self.PlotScrollAreaContent = QWidget()
+        self.PlotScrollAreaContent.setObjectName(u"PlotScrollAreaContent")
+        self.PlotScrollAreaContent.setGeometry(QRect(0, 0, 718, 77))
+        self.horizontalLayout_3 = QHBoxLayout(self.PlotScrollAreaContent)
+        self.horizontalLayout_3.setSpacing(3)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
 
-        self.horizontalLayout.addWidget(self.scrollArea)
+        self.PlotScrollArea.setWidget(self.PlotScrollAreaContent)
+
+        self.horizontalLayout_2.addWidget(self.PlotScrollArea)
+
+        self.verticalLayout.addWidget(self.groupBox)
 
         self.widget = QWidget(Form)
         self.widget.setObjectName(u"widget")
-        self.verticalLayout_2 = QVBoxLayout(self.widget)
+        self.horizontalLayout = QHBoxLayout(self.widget)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.groupBox_2 = QGroupBox(self.widget)
+        self.groupBox_2.setObjectName(u"groupBox_2")
+        self.groupBox_2.setMinimumSize(QSize(100, 0))
+        self.groupBox_2.setMaximumSize(QSize(100, 16777215))
+        font1 = QFont()
+        font1.setFamilies([u"Yu Gothic UI Semibold"])
+        font1.setPointSize(8)
+        font1.setBold(True)
+        self.groupBox_2.setFont(font1)
+        self.verticalLayout_2 = QVBoxLayout(self.groupBox_2)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.ToolBar_Widget = QWidget(self.widget)
-        self.ToolBar_Widget.setObjectName(u"ToolBar_Widget")
-        self.ToolBar_Widget.setMaximumSize(QSize(16777215, 100))
-        self.ToolBar_Widget.setMinimumSize(QSize(0, 100))
-        self.ToolBar_Widget.setStyleSheet(u"QWidget#ToolBar_Widget{\n"
-                                          "	background-color: rgb(42, 45, 54);\n"
-                                          "border-bottom-left-radius: 20px;\n"
-                                          "border-bottom-right-radius: 20px;\n"
-                                          "}")
+        self.VariableScrollArea = QScrollArea(self.groupBox_2)
+        self.VariableScrollArea.setObjectName(u"VariableScrollArea")
+        self.VariableScrollArea.setMaximumSize(QSize(9999, 16777215))
+        self.VariableScrollArea.setFrameShape(QFrame.NoFrame)
+        self.VariableScrollArea.setFrameShadow(QFrame.Plain)
+        self.VariableScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.VariableScrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents_2 = QWidget()
+        self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 98, 501))
+        self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents_2)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.VariableScrollArea.setWidget(self.scrollAreaWidgetContents_2)
 
-        self.verticalLayout_2.addWidget(self.ToolBar_Widget)
+        self.verticalLayout_2.addWidget(self.VariableScrollArea)
 
-        self.plot = DisplayPlot()
+        self.horizontalLayout.addWidget(self.groupBox_2)
 
-        self.PlotWidget = QStackedWidget(self.widget)
-        self.PlotWidget.setObjectName(u"PlotWidget")
-        self.PlotWidget.addWidget(self.plot)
+        self.PlotStackedWidget = QStackedWidget(self.widget)
+        self.PlotStackedWidget.setObjectName(u"PlotStackedWidget")
 
-        self.verticalLayout_2.addWidget(self.PlotWidget)
+        self.horizontalLayout.addWidget(self.PlotStackedWidget)
 
-        self.horizontalLayout.addWidget(self.widget)
+        self.verticalLayout.addWidget(self.widget)
 
         self.retranslateUi(Form)
 
@@ -121,25 +156,71 @@ class DisplayWidget(QtWidgets.QWidget):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
+        self.groupBox.setTitle(QCoreApplication.translate("Form", u"Gr\u00e0fics", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Panell de Dades", None))
 
-    def add_plot(self, name):
-        pass
+    def update_plot(self, plot_name):
+        self.plots.get(plot_name).update_graph()
 
-    def remove_plot(self, name):
-        self.plots.pop(name)
+    def create_plot(self, name):
+        self.plots.update({name: DisplayPlot()})
+        self.PlotStackedWidget.addWidget(self.plots.get(name))
+        self.PlotStackedWidget.setCurrentWidget(self.plots.get(name))
+        b = QPushButton(name)
+        b.setStyleSheet("""
+        border: 2px solid rgb(20, 140, 200);
+        color: rgb(255,255,255);
+        background-color: rgb(74,74,74);
+        """)
+        b.setFont(QFont("Yu Gothic UI", 12))
+        b.clicked.connect(lambda: self.PlotStackedWidget.setCurrentWidget(self.plots.get(name)))
+        b.setMaximumSize(100, 9999)
+        self.horizontalLayout_3.addWidget(b)
 
-    def update_plot(self):
-        self.plot.update_graph()
+    def add_data(self, plot_name, dataset_name, x_val, y_val):
+        self.plots.get(plot_name).datasets.get(dataset_name).x.append(x_val)
+        self.plots.get(plot_name).datasets.get(dataset_name).y.append(y_val)
 
-    def add_x(self, d):
-        self.plot.x.append(d)
+    def add_dataset(self, plot_name, dataset_name, x_vals, y_vals):
+        d = Dataset()
+        d.x = x_vals if isinstance(x_vals, list) else list(x_vals)
+        d.y = y_vals if isinstance(y_vals, list) else list(y_vals)
+        self.plots.get(plot_name).datasets.update({dataset_name: d})
+
+    def get_plots_name(self):
+        return [name for name in self.plots.keys()]
+
+    def get_plot_datasets_name(self, plot):
+        return [name for name in self.plots.get(plot).datasets.keys()]
+
+    def add_variable(self, name):
+        self.vars.update({name: 0})
+        g = QGroupBox(title=name)
+        vlay = QVBoxLayout(g)
+        g.setLayout(g)
+        lab = QLabel()
+        vlay.addWidget(lab)
+
+    def update_variable(self, name, val):
+        self.vars.update({name: val})
+        for g in self.scrollAreaWidgetContents_2.layout().children():
+            if g.title == name:
+                g.children()[0].setText(str(val))
+                break
 
 
 def vega_main():
-    wid = DisplayWidget()
+    wid = BaseWidget()
     vega = api.Vega_Portal()
     vega.set_name("MatPlotLib")
     vega.add_display_screen(wid)
-    vega.add_method(api.Method(wid.update_plot, api.EXECUTION, formal_name="Update Plot Test"))
-    vega.add_method(api.Method(wid.add_x, api.EXECUTION, formal_name="Add X"))
+    vega.add_method(api.Method(wid.create_plot, api.EXECUTION, formal_name="Create Plot"))
+    vega.add_method(api.Method(wid.update_plot, api.EXECUTION, formal_name="Update Plot"))
+    vega.add_method(api.Method(wid.add_data, api.EXECUTION, formal_name="Add Plot Dataset Value"))
+    vega.add_method(api.Method(wid.add_dataset, api.EXECUTION, formal_name="Add Line to Plot"))
+    vega.add_method(api.Method(wid.get_plots_name, api.OPERATOR, outputs={"List": None}, formal_name="Get Plots Name"))
+    vega.add_method(api.Method(wid.update_variable, api.EXECUTION, formal_name="Update Variable Value"))
+    vega.add_method(api.Method(wid.add_variable, api.EXECUTION, formal_name="Add Variable"))
+    vega.add_method(api.Method(wid.get_plot_datasets_name, api.OPERATOR, outputs={"List": None},
+                               formal_name="Get Plot Datasets Name"))
     return vega

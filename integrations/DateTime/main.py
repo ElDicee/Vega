@@ -8,7 +8,7 @@ from time import sleep
 
 ITG_NAME = "DateTime"
 
-event = api.Event("Clock Tick", ITG_NAME, outputs={"Clock ID": str})
+event = api.Event("Clock Tick", outputs={"Clock ID": str})
 
 
 def now_date():

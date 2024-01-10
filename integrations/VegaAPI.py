@@ -34,11 +34,10 @@ class Method:
         self.custom_area = w
 
 
-
 class Event:
-    def __init__(self, name, itg_name, outputs=None):
+    def __init__(self, name, outputs=None):
         self.name = name
-        self.itg_name = itg_name
+        self.itg_name = ""
         self.outputs = outputs
 
 
@@ -149,6 +148,7 @@ class Vega_Portal:
 
     def add_event(self, e: Event):
         if not e in self.events:
+            e.itg_name = self.name
             self.events.append(e)
 
 

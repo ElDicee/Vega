@@ -47,6 +47,12 @@ def space_join(string1: str, string2: str):
 def to_int(element):
     return int(element)
 
+def grater(num1, num2):
+    return num1 > num2
+
+def lower(num1, num2):
+    return num1 < num2
+
 
 # LIST AND DICT OPERATIONS
 
@@ -136,6 +142,8 @@ def vega_main():
     vega.add_method(api.Method(update_dict, api.EXECUTION, outputs={"Dict": None}, formal_name="Update Dict Value"))
     vega.add_method(api.Method(join_, api.OPERATOR, outputs={"String": str}, formal_name="Join Strings"))
     vega.add_method(api.Method(space_join, api.OPERATOR, outputs={"String": str}, formal_name="Join Str with Space"))
+    vega.add_method(api.Method(lower, api.OPERATOR, outputs={"Bool": bool}, formal_name="Lower Than"))
+    vega.add_method(api.Method(grater, api.OPERATOR, outputs={"Bool": bool}, formal_name="Greater Than"))
 
     if_sp = api.SpecialMethod(None, api.EXECUTION, formal_name="If Else")
     if_sp.add_execution_output("TRUE")
